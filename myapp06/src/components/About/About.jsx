@@ -1,29 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-const teachers = [
-  {
-    name: "Mr. Anil Sharma",
-    designation: "Principal",
-    image: "https://via.placeholder.com/200x250",
-  },
-  {
-    name: "Ms. Neha Verma",
-    designation: "Vice Principal",
-    image: "https://via.placeholder.com/200x250",
-  },
-  {
-    name: "Mr. Rajesh Kumar",
-    designation: "Mathematics Teacher",
-    image: "https://via.placeholder.com/200x250",
-  },
-  {
-    name: "Ms. Pooja Singh",
-    designation: "Science Teacher",
-    image: "https://via.placeholder.com/200x250",
-  },
-];
 
 const About = () => {
+
+  const [aboutUs, setAboutUs] = useState({});
+
+  const [teachers, setTeachers] = useState([]);
+
+  const retrieveAboutUsData = async () => {
+    try {
+      const receivedData = await axios.get('/api/user/about');
+      setAboutUs(receivedData.data);
+      console.log(receivedData.data);
+    } catch (error) {
+      console.log(`Error: ${error}`)
+    }
+  };
+
+  const getAllTeachers = async () => {
+    try {
+      const allTeacher = await axios.get('/api/user/teachers');
+      setTeachers(allTeacher.data.allTeachers);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    retrieveAboutUsData();
+    getAllTeachers();
+  }, []);
+
   return (
     <section className="bg-gray-100 py-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -47,13 +55,10 @@ const About = () => {
           {/* Right: School Description */}
           <div className="sm:w-2/3 sm:pl-16 text-center sm:text-left">
             <h2 className="text-2xl sm:text-4xl font-bold text-blue-900 mb-6 sm:mb-8">
-              Welcome to Greenwood International School
+              {aboutUs?.aboutUs?.title || "Loading..."}
             </h2>
             <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
-              At <strong>Greenwood International School</strong>, we nurture young
-              minds, foster creativity, and build future leaders. With a team
-              of dedicated educators, we provide a well-rounded learning
-              experience that blends academics, sports, and values.
+              {aboutUs?.aboutUs?.description || "Loading..."}
             </p>
           </div>
         </div>
@@ -70,7 +75,7 @@ const About = () => {
               className="bg-white shadow-2xl rounded-lg p-6 text-center transform transition-transform hover:scale-105"
             >
               <img
-                src={teacher.image}
+                src={teacher.profileImage}
                 alt={teacher.name}
                 className="mx-auto w-full h-64 object-cover rounded-md shadow-2xl"
               />

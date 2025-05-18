@@ -1,46 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-const initialTeachers = [
-  {
-    name: "Mr. Anil Sharma",
-    designation: "Principal",
-    image: "https://via.placeholder.com/200x250",
-  },
-  {
-    name: "Ms. Neha Verma",
-    designation: "Vice Principal",
-    image: "https://via.placeholder.com/200x250",
-  },
-  {
-    name: "Mr. Rajesh Kumar",
-    designation: "Mathematics Teacher",
-    image: "https://via.placeholder.com/200x250",
-  },
-  {
-    name: "Ms. Pooja Singh",
-    designation: "Science Teacher",
-    image: "https://via.placeholder.com/200x250",
-  },
-];
 
 const AdminAbout = () => {
-  const [teachers, setTeachers] = useState(initialTeachers);
+  const [teachers, setTeachers] = useState([]);
   const [newTeacher, setNewTeacher] = useState({
     name: "",
-    designation: "",
-    image: "",
+    designation: ""
   });
+
   const [isEditing, setIsEditing] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
 
-  const [schoolInfo, setSchoolInfo] = useState({
-    name: "Greenwood International School",
-    description:
-      "At Greenwood International School, we nurture young minds, foster creativity, and build future leaders. With a team of dedicated educators, we provide a well-rounded learning experience that blends academics, sports, and values.",
-    image: "https://via.placeholder.com/500x500",
+  const [aboutUsData, setAboutUsData] = useState({
+    title: "",
+    description: ""
   });
 
-  const [tempSchoolInfo, setTempSchoolInfo] = useState({ ...schoolInfo });
+  const [profileImage, setProfileImage] = useState(null);
+
+  const [updatedAboutUs, setUpdatedAboutUs] = useState({});
+
   const [editSchool, setEditSchool] = useState(false);
 
   const [maxWords, setMaxWords] = useState(50); // Initialize maxWords
@@ -49,43 +29,59 @@ const AdminAbout = () => {
     setMaxWords(Number(e.target.value));
   };
 
-  const handleSchoolInfoChange = (e) => {
-    const { name, value } = e.target;
-    let updatedValue = value;
+  const handleSchoolInfoChange = async (e) => {
+    e.preventDefault();
 
-    if (name === "description") {
-      const words = value.split(" ");
-      if (words.length > maxWords) {
-        updatedValue = words.slice(0, maxWords).join(" ") + " ...";
-      }
-    }
-
-    setTempSchoolInfo({ ...tempSchoolInfo, [name]: updatedValue });
-  };
-
-  const handleSchoolImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTempSchoolInfo({ ...tempSchoolInfo, image: reader.result });
-      };
-      reader.readAsDataURL(file);
+    try {
+      const res = await axios.patch("/api/user/about", aboutUsData);
+      console.log(res);
+      setAboutUsData({ title: "", description: "" });
+      setEditSchool(false);
+    } catch (error) {
+      console.log(`Error: ${error}`)
     }
   };
 
-  const handleSaveSchool = () => {
-    setSchoolInfo({ ...tempSchoolInfo });
-    setEditSchool(false);
-  };
+  const handleGetAboutUs = async (requestAnimationFrame, res) => {
+    try {
+      const receivedData = await axios.get('/api/user/about')
+      setUpdatedAboutUs(receivedData.data)
+    } catch (error) {
+      console.log(`Error: ${error}`)
+    }
+  }
 
-  const handleDeleteSchoolInfo = () => {
-    setTempSchoolInfo({
-      name: "",
-      description: "",
-      image: "",
-    });
-  };
+  useEffect(() => {
+    handleGetAboutUs();
+  }, [updatedAboutUs]);
+
+  useEffect(() => {
+    handleGetAllTeachers();
+  }, [newTeacher])
+
+  // const handleSchoolImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setTempSchoolInfo({ ...tempSchoolInfo, image: reader.result });
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
+
+  // const handleSaveSchool = () => {
+  //   setSchoolInfo({ ...tempSchoolInfo });
+  //   setEditSchool(false);
+  // };
+
+  // const handleDeleteSchoolInfo = () => {
+  //   setTempSchoolInfo({
+  //     name: "",
+  //     description: "",
+  //     image: "",
+  //   });
+  // };
 
   const handleTeacherImageChange = (e) => {
     const file = e.target.files[0];
@@ -98,14 +94,40 @@ const AdminAbout = () => {
     }
   };
 
-  const handleAddTeacher = () => {
-    if (newTeacher.name && newTeacher.designation && newTeacher.image) {
-      setTeachers([...teachers, newTeacher]);
-      setNewTeacher({ name: "", designation: "", image: "" });
-    } else {
-      alert("Please fill in all fields.");
+  const handleAddTeacher = async () => {
+    console.log(newTeacher);
+    console.log(profileImage);
+
+    const data = new FormData();
+    data.append("name", newTeacher.name);
+    data.append("designation", newTeacher.designation);
+    data.append("profileImage", profileImage);
+
+    try {
+      const teacher = await axios.post('/api/user/teachers', data, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      console.log(teacher);
+      setNewTeacher({
+        name: "",
+        designation: ""
+      })
+      handleGetAllTeachers();
+    } catch (error) {
+      console.log(error);
     }
   };
+
+  const handleGetAllTeachers = async () => {
+    try {
+      const allTeacher = await axios.get('/api/user/teachers');
+      setTeachers(allTeacher.data.allTeachers);
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const handleEditTeacher = (index) => {
     setIsEditing(true);
@@ -113,13 +135,27 @@ const AdminAbout = () => {
     setNewTeacher(teachers[index]);
   };
 
-  const handleSaveTeacher = () => {
-    const updatedTeachers = [...teachers];
-    updatedTeachers[editingIndex] = newTeacher;
-    setTeachers(updatedTeachers);
-    setNewTeacher({ name: "", designation: "", image: "" });
-    setIsEditing(false);
-    setEditingIndex(null);
+  const handleSaveTeacher = async () => {
+    const id = teachers[editingIndex]._id;
+
+    const data = {
+      updatedName: newTeacher.name,
+      updatedDesignation: newTeacher.designation,
+      id: id
+    }
+
+    try {
+      const res = await axios.patch('/api/user/teachers', data);
+      console.log(res);
+      setNewTeacher({
+        name: "",
+        designation: ""
+      })
+      setIsEditing(false);
+      setProfileImage(null);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleDeleteTeacher = (index) => {
@@ -139,7 +175,7 @@ const AdminAbout = () => {
           {/* Image + Upload */}
           <div className="sm:w-1/3 flex flex-col items-center sm:items-start mb-10 sm:mb-0">
             <img
-              src={tempSchoolInfo.image || "https://via.placeholder.com/500x500"}
+              // src={tempSchoolInfo.image || "https://via.placeholder.com/500x500"}
               alt="School"
               className="rounded-lg shadow-xl w-full sm:w-[450px] sm:h-[400px] object-cover border-4 border-blue-500"
             />
@@ -147,7 +183,7 @@ const AdminAbout = () => {
               <>
                 <input
                   type="file"
-                  onChange={handleSchoolImageChange}
+                  // onChange={handleSchoolImageChange}
                   className="mt-4"
                   key={Math.random()} // This ensures the file input resets on each edit.
                 />
@@ -165,42 +201,43 @@ const AdminAbout = () => {
           <div className="sm:w-2/3 sm:pl-16">
             {editSchool ? (
               <>
-                <input
-                  type="text"
-                  name="name"
-                  value={tempSchoolInfo.name}
-                  onChange={handleSchoolInfoChange}
-                  className="text-2xl sm:text-4xl font-bold text-blue-900 border-2 border-blue-400 rounded-lg px-4 py-2 bg-white shadow-md w-full mb-4"
-                />
-                <textarea
-                  name="description"
-                  value={tempSchoolInfo.description}
-                  onChange={handleSchoolInfoChange}
-                  rows={5}
-                  className="text-gray-700 text-base sm:text-lg leading-relaxed border border-gray-300 rounded-lg p-4 w-full mb-4"
-                />
-                <div className="flex gap-4">
-                  <button
-                    onClick={handleSaveSchool}
-                    className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-800"
-                  >
-                    Update
-                  </button>
-                  <button
-                    onClick={handleDeleteSchoolInfo}
-                    className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-800"
-                  >
-                    Delete
-                  </button>
-                </div>
+                <form onSubmit={handleSchoolInfoChange}>
+                  <input
+                    type="text"
+                    name="name"
+                    value={aboutUsData.title}
+                    onChange={(e) => setAboutUsData((prev) => ({ ...prev, title: e.target.value }))}
+                    className="text-2xl sm:text-4xl font-bold text-blue-900 border-2 border-blue-400 rounded-lg px-4 py-2 bg-white shadow-md w-full mb-4"
+                  />
+                  <textarea
+                    name="description"
+                    value={aboutUsData.description}
+                    onChange={(e) => setAboutUsData((prev) => ({ ...prev, description: e.target.value }))}
+                    rows={5}
+                    className="text-gray-700 text-base sm:text-lg leading-relaxed border border-gray-300 rounded-lg p-4 w-full mb-4"
+                  />
+                  <div className="flex gap-4">
+                    <button
+                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-800"
+                    >
+                      Update
+                    </button>
+                    <button
+                      // onClick={handleDeleteSchoolInfo}
+                      className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-800"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </form>
               </>
             ) : (
               <>
                 <h2 className="text-2xl sm:text-4xl font-bold text-blue-900 mb-4">
-                  {schoolInfo.name}
+                  {updatedAboutUs?.aboutUs?.title}
                 </h2>
                 <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-4">
-                  {schoolInfo.description}
+                  {updatedAboutUs?.aboutUs?.description}
                 </p>
                 <button
                   onClick={() => setEditSchool(true)}
@@ -240,7 +277,7 @@ const AdminAbout = () => {
               className="bg-white shadow-2xl rounded-lg p-6 text-center transform transition-transform hover:scale-105"
             >
               <img
-                src={teacher.image}
+                src={teacher.profileImage}
                 alt={teacher.name}
                 className="mx-auto w-full h-64 object-cover rounded-md shadow-2xl"
               />
@@ -292,7 +329,8 @@ const AdminAbout = () => {
             />
             <input
               type="file"
-              onChange={handleTeacherImageChange}
+              name="profileImage"
+              onChange={(e) => setProfileImage(e.target.files[0])}
               className="p-2 border border-gray-300 rounded-lg"
             />
           </div>
