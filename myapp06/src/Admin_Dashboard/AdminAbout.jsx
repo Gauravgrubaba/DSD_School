@@ -17,11 +17,14 @@ const AdminAbout = () => {
     description: ""
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const [profileImage, setProfileImage] = useState(null);
 
   const [updatedAboutUs, setUpdatedAboutUs] = useState({});
 
   const [editSchool, setEditSchool] = useState(false);
+  const [deletingIndex, setDeletingIndex] = useState(null);
 
   const [maxWords, setMaxWords] = useState(50); // Initialize maxWords
 
@@ -59,41 +62,6 @@ const AdminAbout = () => {
     handleGetAllTeachers();
   }, [newTeacher])
 
-  // const handleSchoolImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setTempSchoolInfo({ ...tempSchoolInfo, image: reader.result });
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-
-  // const handleSaveSchool = () => {
-  //   setSchoolInfo({ ...tempSchoolInfo });
-  //   setEditSchool(false);
-  // };
-
-  // const handleDeleteSchoolInfo = () => {
-  //   setTempSchoolInfo({
-  //     name: "",
-  //     description: "",
-  //     image: "",
-  //   });
-  // };
-
-  const handleTeacherImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewTeacher({ ...newTeacher, image: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleAddTeacher = async () => {
     console.log(newTeacher);
     console.log(profileImage);
@@ -102,6 +70,8 @@ const AdminAbout = () => {
     data.append("name", newTeacher.name);
     data.append("designation", newTeacher.designation);
     data.append("profileImage", profileImage);
+
+    setIsLoading(true);
 
     try {
       const teacher = await axios.post('/api/user/teachers', data, {
@@ -113,10 +83,13 @@ const AdminAbout = () => {
       setNewTeacher({
         name: "",
         designation: ""
-      })
+      });
+      setProfileImage(null);
       handleGetAllTeachers();
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
     }
   };
 
@@ -138,14 +111,26 @@ const AdminAbout = () => {
   const handleSaveTeacher = async () => {
     const id = teachers[editingIndex]._id;
 
-    const data = {
-      updatedName: newTeacher.name,
-      updatedDesignation: newTeacher.designation,
-      id: id
+    const data = new FormData();
+    if (newTeacher.name !== "") {
+      data.append("updatedName", newTeacher.name);
     }
+    if (newTeacher.designation !== "") {
+      data.append("updatedDesignation", newTeacher.designation);
+    }
+    if (profileImage !== null) {
+      data.append("profileImage", profileImage);
+    }
+    data.append("id", id);
+
+    setIsLoading(true);
 
     try {
-      const res = await axios.patch('/api/user/teachers', data);
+      const res = await axios.patch(`/api/user/teachers/${id}`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
       console.log(res);
       setNewTeacher({
         name: "",
@@ -153,14 +138,31 @@ const AdminAbout = () => {
       })
       setIsEditing(false);
       setProfileImage(null);
+      setEditingIndex(null);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
+      setIsLoading(false);
     }
   };
 
-  const handleDeleteTeacher = (index) => {
-    const updatedTeachers = teachers.filter((_, i) => i !== index);
-    setTeachers(updatedTeachers);
+  const handleDeleteTeacher = async (index) => {
+    const id = teachers[index]._id;
+
+    setDeletingIndex(index);
+
+    setIsLoading(true);
+    try {
+      const res = await axios.delete(`/api/user/teachers/${id}`)
+      console.log(res);
+      setTeachers(res.data.allTeachers);
+      console.log(teachers);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+      setDeletingIndex(null);
+    }
   };
 
   return (
@@ -296,7 +298,30 @@ const AdminAbout = () => {
                   onClick={() => handleDeleteTeacher(index)}
                   className="text-red-600 hover:text-red-800"
                 >
-                  Delete
+                  {deletingIndex === index ? (
+                    <svg
+                      className="animate-spin h-5 w-5 text-red-600"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                  ) : (
+                    <span>Delete</span>
+                  )}
                 </button>
               </div>
             </div>
@@ -336,10 +361,33 @@ const AdminAbout = () => {
           </div>
           <div className="mt-4">
             <button
+              disabled={isLoading}
               onClick={isEditing ? handleSaveTeacher : handleAddTeacher}
-              className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-800 transition-all duration-300"
+              className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-800 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isEditing ? "Save Changes" : "Add Teacher"}
+              {isLoading && (
+                <svg
+                  className="animate-spin ml-2 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+              )}
             </button>
           </div>
         </div>

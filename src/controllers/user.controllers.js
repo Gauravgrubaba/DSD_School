@@ -2,6 +2,7 @@ import User from "../models/user.models.js";
 import SchoolSchema from "../models/school.models.js";
 import TeachersSchema from "../models/teachers.models.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const handleUserlogin = async (req, res) => {
     const { school_id, password } = req.body;
@@ -123,16 +124,40 @@ const handleGetAllTeachers = async(req, res) => {
 }
 
 const handleEditTeacher = async (req, res) => {
-    const { id, updatedName, updatedDesignation } = req.body;
+    const { id } = req.params;
+    const { updatedName, updatedDesignation } = req.body;
+    const file = req.file;
+
+    console.log(file);
     
     try {
-        await TeachersSchema.findOneAndUpdate({_id: id}, {
-            name: updatedName,
-            designation: updatedDesignation
-        })
+        const teacher = await TeachersSchema.findById({_id: id});
+
+        if(file && teacher.profileImage) {
+            const segment = teacher.profileImage.split('/');
+            const fileNameWithExtension = segment[segment.length - 1];
+            const publiId = fileNameWithExtension.split('.')[0];
+
+            const result = await cloudinary.uploader.destroy(publiId, { invalidate: true });
+        }
+
+        let imgUrl = "";
+
+        if(file) {
+            const uplaodedFile = await uploadOnCloudinary(file.path);
+            imgUrl = uplaodedFile?.secure_url || "";
+        }
+        
+        const updatedData = {};
+        if(updatedName) updatedData.name = updatedName;
+        if(updatedDesignation) updatedData.designation = updatedDesignation;
+        if(imgUrl) updatedData.profileImage = imgUrl
+
+        const updatedTeacher = await TeachersSchema.findOneAndUpdate({_id: id}, updatedData, {new: true});
         return res.status(200).json({
             response: "success",
-            message: "Teacher details updated successfully"
+            message: "Teacher details updated successfully",
+            teacherDetails: updatedTeacher
         })
     } catch (error) {
         return res.status(500).json({
@@ -142,14 +167,33 @@ const handleEditTeacher = async (req, res) => {
     }
 }
 
-// const handleProfilePictureUpload = (req, res) => {
-//     console.log("Hellllloooooo")
+const handleDeleteTeacher = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const teacher = await TeachersSchema.findById({ _id: id });
 
-//     console.log(req.body);
-//     console.log(req.file);
-
-//     return res.redirect('/');
-// }
+        if(teacher.profileImage) {
+            const segment = teacher.profileImage.split('/');
+            console.log(segment);
+            const fileNameWithExtension = segment[segment.length - 1];
+            const publicId = fileNameWithExtension.split('.')[0];
+            const result = await cloudinary.uploader.destroy(publicId, { invalidate: true });
+            console.log(result);
+        }
+        await TeachersSchema.findByIdAndDelete({ _id: id });
+        const updatedTeachers = await TeachersSchema.find({});
+        return res.status(200).json({
+            response: "success",
+            message: "Teacher details deleted",
+            allTeachers: updatedTeachers
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while deleting teacher details"
+        })
+    }
+}
 
 export {
     handleUserlogin,
@@ -158,5 +202,5 @@ export {
     handleAddTeacher,
     handleGetAllTeachers,
     handleEditTeacher,
-    // handleProfilePictureUpload
+    handleDeleteTeacher
 }
