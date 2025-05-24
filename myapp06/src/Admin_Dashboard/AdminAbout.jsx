@@ -12,43 +12,60 @@ const AdminAbout = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [profileImage, setProfileImage] = useState(null);
+  const [aboutUsImage, setAboutUsImage] = useState(null);
+
+  const [updatedAboutUs, setUpdatedAboutUs] = useState({});
   const [aboutUsData, setAboutUsData] = useState({
     title: "",
     description: ""
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [profileImage, setProfileImage] = useState(null);
-
-  const [updatedAboutUs, setUpdatedAboutUs] = useState({});
-
   const [editSchool, setEditSchool] = useState(false);
   const [deletingIndex, setDeletingIndex] = useState(null);
 
-  const [maxWords, setMaxWords] = useState(50); // Initialize maxWords
-
-  const handleWordLimitChange = (e) => {
-    setMaxWords(Number(e.target.value));
-  };
+  const [aboutUsSaving, setAboutUsSaving] = useState(false);
 
   const handleSchoolInfoChange = async (e) => {
     e.preventDefault();
 
+    setAboutUsSaving(true);
+
+    const data = new FormData();
+
+    if (aboutUsImage !== null) {
+      data.append("aboutUsImage", aboutUsImage);
+    };
+    if (aboutUsData.title !== null) {
+      data.append("title", aboutUsData.title);
+    };
+    if (aboutUsData.description !== null) {
+      data.append("description", aboutUsData.description);
+    }
+
     try {
-      const res = await axios.patch("/api/user/about", aboutUsData);
+      const res = await axios.patch("/api/user/about", data, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
       console.log(res);
-      setAboutUsData({ title: "", description: "" });
-      setEditSchool(false);
     } catch (error) {
-      console.log(`Error: ${error}`)
+      console.log(`Error is: ${error}`)
+    } finally {
+      setAboutUsData({ title: "", description: "" });
+      setAboutUsImage(null);
+      setEditSchool(false);
+      setAboutUsSaving(false);
     }
   };
 
-  const handleGetAboutUs = async (requestAnimationFrame, res) => {
+  const handleGetAboutUs = async (req, res) => {
     try {
       const receivedData = await axios.get('/api/user/about')
-      setUpdatedAboutUs(receivedData.data)
+      setUpdatedAboutUs(receivedData.data.aboutUs);
     } catch (error) {
       console.log(`Error: ${error}`)
     }
@@ -56,11 +73,11 @@ const AdminAbout = () => {
 
   useEffect(() => {
     handleGetAboutUs();
-  }, [updatedAboutUs]);
+  }, [editSchool]);
 
   useEffect(() => {
     handleGetAllTeachers();
-  }, [newTeacher])
+  }, [isLoading])
 
   const handleAddTeacher = async () => {
     console.log(newTeacher);
@@ -165,6 +182,14 @@ const AdminAbout = () => {
     }
   };
 
+  const handleDeleteClick = (e) => {
+    e.preventDefault();
+
+    setAboutUsData({ title: "", description: "" });
+    setAboutUsImage(null);
+    setEditSchool(false);
+  }
+
   return (
     <section className="bg-gray-100 py-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -177,24 +202,18 @@ const AdminAbout = () => {
           {/* Image + Upload */}
           <div className="sm:w-1/3 flex flex-col items-center sm:items-start mb-10 sm:mb-0">
             <img
-              // src={tempSchoolInfo.image || "https://via.placeholder.com/500x500"}
               alt="School"
+              src={updatedAboutUs?.image || "Loading..."}
               className="rounded-lg shadow-xl w-full sm:w-[450px] sm:h-[400px] object-cover border-4 border-blue-500"
             />
             {editSchool && (
               <>
                 <input
                   type="file"
-                  // onChange={handleSchoolImageChange}
-                  className="mt-4"
-                  key={Math.random()} // This ensures the file input resets on each edit.
+                  name="aboutUsImage"
+                  onChange={(e) => setAboutUsImage(e.target.files[0])}
+                  className="p-2 border border-gray-300 rounded-lg"
                 />
-                <button
-                  onClick={() => document.querySelector('input[type="file"]').click()}
-                  className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-800"
-                >
-                  Browse Image
-                </button>
               </>
             )}
           </div>
@@ -207,25 +226,49 @@ const AdminAbout = () => {
                   <input
                     type="text"
                     name="name"
-                    value={aboutUsData.title}
+                    value={aboutUsData?.title}
                     onChange={(e) => setAboutUsData((prev) => ({ ...prev, title: e.target.value }))}
                     className="text-2xl sm:text-4xl font-bold text-blue-900 border-2 border-blue-400 rounded-lg px-4 py-2 bg-white shadow-md w-full mb-4"
                   />
                   <textarea
                     name="description"
-                    value={aboutUsData.description}
+                    value={aboutUsData?.description}
                     onChange={(e) => setAboutUsData((prev) => ({ ...prev, description: e.target.value }))}
                     rows={5}
                     className="text-gray-700 text-base sm:text-lg leading-relaxed border border-gray-300 rounded-lg p-4 w-full mb-4"
                   />
                   <div className="flex gap-4">
                     <button
+                      disabled={aboutUsSaving}
+                      type="submit"
                       className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-800"
                     >
                       Update
+                      {aboutUsSaving && (
+                        <svg
+                          className="animate-spin ml-2 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          ></path>
+                        </svg>
+                      )}
                     </button>
                     <button
-                      // onClick={handleDeleteSchoolInfo}
+                      onClick={handleDeleteClick}
                       className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-800"
                     >
                       Delete
@@ -236,10 +279,10 @@ const AdminAbout = () => {
             ) : (
               <>
                 <h2 className="text-2xl sm:text-4xl font-bold text-blue-900 mb-4">
-                  {updatedAboutUs?.aboutUs?.title}
+                  {updatedAboutUs?.title || "Loading..."}
                 </h2>
                 <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-4">
-                  {updatedAboutUs?.aboutUs?.description}
+                  {updatedAboutUs?.description || "Loading..."}
                 </p>
                 <button
                   onClick={() => setEditSchool(true)}
@@ -250,20 +293,6 @@ const AdminAbout = () => {
               </>
             )}
           </div>
-        </div>
-
-        {/* Set Word Limit */}
-        <div className="flex items-center justify-between mb-4">
-          <label className="text-lg font-semibold text-gray-700">
-            Set Description Word Limit:
-          </label>
-          <input
-            type="number"
-            value={maxWords}
-            onChange={handleWordLimitChange}
-            className="p-2 border border-gray-300 rounded-lg"
-            min="1"
-          />
         </div>
 
         {/* Faculty Section */}

@@ -5,7 +5,7 @@ import upload from "../middlewares/multer.middlewares.js";
 const router = express.Router();
 
 router.post('/login', handleUserlogin);
-router.patch('/about', handleAboutUsUpdate);
+router.patch('/about', upload.single("aboutUsImage"), handleAboutUsUpdate);
 router.get('/about', handleGetAboutUs);
 router.post('/teachers', upload.single("profileImage"), handleAddTeacher);
 router.get('/teachers', handleGetAllTeachers);

@@ -11,8 +11,7 @@ const About = () => {
   const retrieveAboutUsData = async () => {
     try {
       const receivedData = await axios.get('/api/user/about');
-      setAboutUs(receivedData.data);
-      console.log(receivedData.data);
+      setAboutUs(receivedData.data.aboutUs);
     } catch (error) {
       console.log(`Error: ${error}`)
     }
@@ -46,7 +45,7 @@ const About = () => {
           {/* Left: School Image with Larger Size & Shadow */}
           <div className="sm:w-1/3 flex justify-center sm:justify-start mb-10 sm:mb-0">
             <img
-              src="https://via.placeholder.com/500x500" // Replace with actual school image
+              src={aboutUs?.image}
               alt="School"
               className="rounded-lg shadow-2xl w-full sm:w-[450px] sm:h-[400px] object-cover border-4 border-blue-500"
             />
@@ -55,10 +54,10 @@ const About = () => {
           {/* Right: School Description */}
           <div className="sm:w-2/3 sm:pl-16 text-center sm:text-left">
             <h2 className="text-2xl sm:text-4xl font-bold text-blue-900 mb-6 sm:mb-8">
-              {aboutUs?.aboutUs?.title || "Loading..."}
+              {aboutUs?.title || "Loading..."}
             </h2>
             <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
-              {aboutUs?.aboutUs?.description || "Loading..."}
+              {aboutUs?.description || "Loading..."}
             </p>
           </div>
         </div>

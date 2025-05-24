@@ -19,7 +19,7 @@ const schoolSchema = new mongoose.Schema(
                 type: String
             },
             image: {
-                type: String
+                type: String,
             }
         }
     }, {

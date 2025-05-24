@@ -40,20 +40,42 @@ const handleUserlogin = async (req, res) => {
 
 const handleAboutUsUpdate = async (req, res) => {
     const { title, description } = req.body;
+    const file = req.file;
 
     try {
-        const about = await SchoolSchema.findOneAndUpdate({schoolName: "DSD"}, {
-            $set: {
-                "aboutUs.title": title,
-                "aboutUs.description": description
-            }
+        const schoolAboutUs = await SchoolSchema.findOne({schoolName: "DSD"});
+        
+        if(file && schoolAboutUs?.aboutUs?.image) {
+            const segment = schoolAboutUs.aboutUs.image.split('/');
+            const fileWithoutExtension = segment[segment.length - 1];
+            const publicId = fileWithoutExtension.split('.')[0];
+
+            const result = await cloudinary.uploader.destroy(publicId, {invalidate: true});
+        }
+
+        let imgURL = ""
+
+        if(file) {
+            const uploadResult = await uploadOnCloudinary(file.path);
+            imgURL = uploadResult?.secure_url || ""
+        }
+
+        const updatedData = {};
+        if(title) updatedData["aboutUs.title"] = title;
+        if(description) updatedData["aboutUs.description"] = description;
+        if(imgURL) updatedData["aboutUs.image"] = imgURL;
+
+        await SchoolSchema.findOneAndUpdate({schoolName: "DSD"}, {
+            $set: updatedData
         }, {
             new: true
         });
 
+        const data = await SchoolSchema.findOne({schoolName: "DSD"});
+
         return res.status(200).json({
             response: "success",
-            updates: about
+            updates: data
         })
     } catch (error) {
         return res.status(500).json({
@@ -66,7 +88,6 @@ const handleAboutUsUpdate = async (req, res) => {
 const handleGetAboutUs = async (req, res) => {
     try {
         const data = await SchoolSchema.findOne({schoolName: "DSD"});
-        console.log(data.aboutUs);
         return res.status(200).json({
             response: "success",
             aboutUs: data.aboutUs
