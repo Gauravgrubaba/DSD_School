@@ -43,7 +43,7 @@ const AdminAbout = () => {
   const [tempSchoolInfo, setTempSchoolInfo] = useState({ ...schoolInfo });
   const [editSchool, setEditSchool] = useState(false);
 
-  const [maxWords, setMaxWords] = useState(50); // Initialize maxWords
+  const [maxWords, setMaxWords] = useState(50);
 
   const handleWordLimitChange = (e) => {
     setMaxWords(Number(e.target.value));
@@ -128,15 +128,14 @@ const AdminAbout = () => {
   };
 
   return (
-    <section className="bg-gray-100 py-20 px-6">
+    <section className="bg-gray-100 pt-8 pb-20 px-6">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-700 text-center uppercase tracking-wide pt-16 sm:pt-24 pb-16">
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-700 text-center uppercase tracking-wide pt-4 sm:pt-6 pb-10">
           About Us
         </h2>
 
         {/* School Info */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-20 bg-white p-6 rounded-xl shadow-2xl">
-          {/* Image + Upload */}
           <div className="sm:w-1/3 flex flex-col items-center sm:items-start mb-10 sm:mb-0">
             <img
               src={tempSchoolInfo.image || "https://via.placeholder.com/500x500"}
@@ -149,7 +148,7 @@ const AdminAbout = () => {
                   type="file"
                   onChange={handleSchoolImageChange}
                   className="mt-4"
-                  key={Math.random()} // This ensures the file input resets on each edit.
+                  key={Math.random()}
                 />
                 <button
                   onClick={() => document.querySelector('input[type="file"]').click()}
@@ -161,7 +160,6 @@ const AdminAbout = () => {
             )}
           </div>
 
-          {/* Details */}
           <div className="sm:w-2/3 sm:pl-16">
             {editSchool ? (
               <>
@@ -213,7 +211,6 @@ const AdminAbout = () => {
           </div>
         </div>
 
-        {/* Set Word Limit */}
         <div className="flex items-center justify-between mb-4">
           <label className="text-lg font-semibold text-gray-700">
             Set Description Word Limit:
@@ -227,12 +224,10 @@ const AdminAbout = () => {
           />
         </div>
 
-        {/* Faculty Section */}
         <h3 className="text-3xl sm:text-4xl font-semibold text-blue-800 text-center mb-12">
           Meet Our Faculty
         </h3>
 
-        {/* Teachers Display */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
           {teachers.map((teacher, index) => (
             <div
@@ -266,7 +261,6 @@ const AdminAbout = () => {
           ))}
         </div>
 
-        {/* Add/Edit Teacher Form */}
         <div className="mt-12">
           <h4 className="text-2xl font-semibold text-gray-800 mb-4">
             {isEditing ? "Edit Teacher" : "Add Teacher"}
