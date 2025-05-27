@@ -4,6 +4,8 @@ const AdminHome = () => {
   const [heroTitle, setHeroTitle] = useState("Empowering Young Minds");
   const [heroSubTitle, setHeroSubTitle] = useState("Your Child’s Bright Future Begins Here");
   const [heroBgImage, setHeroBgImage] = useState(null); // URL or base64
+const [aboutText2, setAboutText2] = useState("");
+const [aboutVideo, setAboutVideo] = useState(null);
 
   const [aboutText, setAboutText] = useState(
     "We are committed to providing high-quality education with a focus on personal growth, critical thinking, and creativity..."
@@ -19,6 +21,7 @@ const AdminHome = () => {
     "The Kalam Project",
   ]);
 
+  
   const [news, setNews] = useState(["18 Dec: News for October 2024"]);
 
   const [quotations, setQuotations] = useState([
@@ -144,15 +147,49 @@ const AdminHome = () => {
         />
       </div>
 
-      {/* About Section */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2 text-blue-600">📘 About Us</h2>
-        <textarea
-          className="border p-2 w-full h-32"
-          value={aboutText}
-          onChange={(e) => setAboutText(e.target.value)}
-        />
-      </div>
+     {/* About Section */}
+<div className="bg-white p-6 rounded-xl shadow">
+  <h2 className="text-xl font-semibold mb-4 text-blue-600">📘 About Us</h2>
+
+  {/* Text Area 1 */}
+  <textarea
+    className="border p-2 w-full h-24 mb-4"
+    value={aboutText}
+    onChange={(e) => setAboutText(e.target.value)}
+    placeholder="Write about the school's vision or mission..."
+  />
+
+  {/* Text Area 2 */}
+  <textarea
+    className="border p-2 w-full h-24 mb-4"
+    value={aboutText2}
+    onChange={(e) => setAboutText2(e.target.value)}
+    placeholder="Write about the school's journey or achievements..."
+  />
+
+  {/* Video Upload */}
+  <input
+    type="file"
+    accept="video/*"
+    id="aboutVideoInput"
+    onChange={(e) => handleAboutVideoUpload(e)}
+    className="hidden"
+  />
+  <button
+    type="button"
+    onClick={() => document.getElementById("aboutVideoInput").click()}
+    className="mb-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+  >
+    Upload About Section Video
+  </button>
+
+  {aboutVideo && (
+    <video controls className="w-full rounded-lg">
+      <source src={aboutVideo} type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  )}
+</div>
 
       {/* Notices */}
       <div className="bg-white p-6 rounded-xl shadow">
