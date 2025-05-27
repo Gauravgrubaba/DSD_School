@@ -38,6 +38,7 @@ const Academics = () => {
         reader.readAsDataURL(file);
       });
     }
+    console.log(files);
   };
 
   // Handle text input change for overlay text
