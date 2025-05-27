@@ -1,270 +1,178 @@
 import React, { useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
 
-const AdminEvents = () => {
-  // Sample events data for demonstration
-  const [events, setEvents] = useState([
-    { id: 1, title: "Music Festival", description: "Enjoy live performances by top artists.", image: "/music-festival.jpg" },
-    { id: 2, title: "Startup Meetup", description: "Connect with investors and entrepreneurs.", image: "/startup-meetup.jpg" },
-    { id: 3, title: "National Sports Day", description: "Watch thrilling sports competitions.", image: "/sports-day.jpg" },
-    { id: 4, title: "AI Hackathon", description: "Show your coding skills and win prizes.", image: "/coding-hackathon.jpg" },
-    { id: 5, title: "Tech Conference", description: "Explore AI, ML, and cloud computing.", image: "/tech-conference.jpg" },
-  ]);
-
-  const [newEvent, setNewEvent] = useState({
-    title: "",
-    description: "",
-    image: "",
+const EventSection = () => {
+  // Tagline state (only one tagline)
+  const [tagline, setTagline] = useState({
+    id: 1,
+    text: "Empowering your vision every day.",
   });
 
-  const [editEvent, setEditEvent] = useState(null);
+  // Events state
+  const [events, setEvents] = useState([]);
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [eventImage, setEventImage] = useState(null);
 
-  // State for the editable text in the Main and Sub sections
-  const [mainText, setMainText] = useState("This is the main section where you can provide some key information.");
-  const [subText, setSubText] = useState("This is the sub-section where additional information can be placed to provide further details.");
+  const handleDeleteTagline = (id) => {
+    if (tagline && tagline.id === id) {
+      setTagline(null);
+    }
+  };
 
+  const handleUpdateTagline = (id, oldText) => {
+    const updatedText = prompt("Update tagline:", oldText);
+    if (updatedText !== null && updatedText.trim() !== "") {
+      setTagline({ id, text: updatedText.trim() });
+    }
+  };
+
+  // Event handlers
   const handleAddEvent = () => {
-    if (newEvent.title && newEvent.description && newEvent.image) {
-      setEvents([ ...events, { id: events.length + 1, ...newEvent } ]);
-      setNewEvent({ title: "", description: "", image: "" });
-    } else {
-      alert("Please fill all fields!");
-    }
-  };
+    if (!eventTitle.trim() || !eventDescription.trim()) return;
 
-  const handleEditEvent = (event) => {
-    setEditEvent(event);
-  };
+    const newEvent = {
+      id: Date.now(),
+      title: eventTitle.trim(),
+      description: eventDescription.trim(),
+      image: eventImage ? URL.createObjectURL(eventImage) : null,
+    };
 
-  const handleSaveEditEvent = () => {
-    if (editEvent) {
-      setEvents(events.map(event => event.id === editEvent.id ? editEvent : event));
-      setEditEvent(null);
-    }
+    setEvents([...events, newEvent]);
+    setEventTitle("");
+    setEventDescription("");
+    setEventImage(null);
+    document.getElementById("event-image-input").value = "";
   };
 
   const handleDeleteEvent = (id) => {
-    setEvents(events.filter(event => event.id !== id));
+    setEvents(events.filter((e) => e.id !== id));
   };
 
-  // Handle changes for editable main and sub section text
-  const handleMainTextChange = (e) => setMainText(e.target.value);
-  const handleSubTextChange = (e) => setSubText(e.target.value);
-
-  const handleUpdateMainSection = () => console.log("Main section updated:", mainText);
-  const handleDeleteMainSection = () => setMainText("");
-  const handleUpdateSubSection = () => console.log("Sub section updated:", subText);
-  const handleDeleteSubSection = () => setSubText("");
+  const handleEventImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setEventImage(e.target.files[0]);
+    }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Page Heading and Sub-heading Section */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4">Admin Event Management</h1>
-        <p className="text-lg text-gray-600">
-          Use this panel to manage the events for your school. You can add, edit, or delete events to keep the students and staff informed about upcoming activities.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-10 max-w-7xl mx-auto">
+      {/* Main Heading */}
+      <h1 className="text-5xl font-extrabold text-indigo-700 text-center mb-12">
+        Admin Events
+      </h1>
 
-      {/* Main and Sub Sections */}
-      <div className="bg-white p-6 rounded-lg shadow-lg mt-8">
-        <h3 className="text-2xl font-semibold text-blue-600 mb-4">Main Section</h3>
-        <textarea
-          value={mainText}
-          onChange={handleMainTextChange}
-          className="w-full p-3 border-2 border-gray-300 rounded-md mb-4"
-          placeholder="Write the main section content here"
-          rows="4"
-        />
-        <div className="flex gap-4 flex-wrap">
-          <button
-            onClick={handleUpdateMainSection}
-            className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-800 transition"
+      <div className="flex flex-col md:flex-row gap-10">
+        {/* Tagline Section */}
+        <section className="bg-white rounded-lg shadow-lg p-8 w-full md:w-1/2 flex flex-col items-center">
+          <h2 className="text-3xl font-extrabold text-indigo-700 mb-6 border-b-4 border-indigo-300 pb-2 w-full text-center">
+            Tagline
+          </h2>
+
+          {!tagline ? (
+            <p className="text-gray-400 italic text-center">No tagline available.</p>
+          ) : (
+            <div className="bg-indigo-50 rounded-lg p-8 max-w-xl shadow-md w-full flex flex-col items-center">
+              <p className="text-xl italic text-indigo-900 mb-6 text-center">
+                “{tagline.text}”
+              </p>
+
+              <div className="flex space-x-6">
+                <button
+                  onClick={() => handleUpdateTagline(tagline.id, tagline.text)}
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                >
+                  Update
+                </button>
+                <button
+                  onClick={() => handleDeleteTagline(tagline.id)}
+                  className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Events Section */}
+        <section className="bg-white rounded-lg shadow-lg p-8 w-full md:w-1/2 flex flex-col">
+          <h2 className="text-3xl font-extrabold text-indigo-700 mb-6 border-b-4 border-indigo-300 pb-2">
+            Events
+          </h2>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddEvent();
+            }}
+            className="flex flex-col space-y-4 mb-8"
           >
-            Update Main Section
-          </button>
-          <button
-            onClick={handleDeleteMainSection}
-            className="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-800 transition"
-          >
-            Delete Main Section
-          </button>
-        </div>
-        
-        {/* Sub Section */}
-        <div className="bg-gray-100 p-4 rounded-md mt-6">
-          <h4 className="text-xl font-semibold text-blue-500 mb-2">Sub Section</h4>
-          <textarea
-            value={subText}
-            onChange={handleSubTextChange}
-            className="w-full p-3 border-2 border-gray-300 rounded-md"
-            placeholder="Write the sub-section content here"
-            rows="4"
-          />
-          <div className="flex gap-4 mt-4 flex-wrap">
+            <input
+              type="text"
+              placeholder="Event Title"
+              value={eventTitle}
+              onChange={(e) => setEventTitle(e.target.value)}
+              className="border border-indigo-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+              required
+            />
+            <textarea
+              placeholder="Event Description"
+              value={eventDescription}
+              onChange={(e) => setEventDescription(e.target.value)}
+              rows={3}
+              className="border border-indigo-300 rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+              required
+            />
+            <input
+              id="event-image-input"
+              type="file"
+              accept="image/*"
+              onChange={handleEventImageChange}
+              className="text-indigo-700"
+            />
             <button
-              onClick={handleUpdateSubSection}
-              className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-800 transition"
+              type="submit"
+              className="bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition"
             >
-              Update Sub Section
+              Add Event
             </button>
-            <button
-              onClick={handleDeleteSubSection}
-              className="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-800 transition"
-            >
-              Delete Sub Section
-            </button>
-          </div>
-        </div>
-      </div>
+          </form>
 
-      {/* Add Event Section */}
-      <div className="bg-white p-6 rounded-lg shadow-lg mt-8">
-        <h3 className="text-2xl font-semibold mb-2 text-blue-600">Add New Event</h3>
-        <p className="text-lg text-gray-600 mb-4">Fill in the details below to add a new event to the list:</p>
-
-        <div className="mb-4">
-          <label className="block text-lg font-semibold">Event Title</label>
-          <input
-            type="text"
-            value={newEvent.title}
-            onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-            className="w-full p-3 border-2 border-gray-300 rounded-md"
-            placeholder="Enter event title"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-lg font-semibold">Event Description</label>
-          <textarea
-            value={newEvent.description}
-            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-            className="w-full p-3 border-2 border-gray-300 rounded-md"
-            placeholder="Enter event description"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-lg font-semibold">Event Image URL</label>
-          <input
-            type="text"
-            value={newEvent.image}
-            onChange={(e) => setNewEvent({ ...newEvent, image: e.target.value })}
-            className="w-full p-3 border-2 border-gray-300 rounded-md"
-            placeholder="Enter event image URL"
-          />
-        </div>
-        <button
-          onClick={handleAddEvent}
-          className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-800 transition"
-        >
-          Add Event
-        </button>
-      </div>
-
-      {/* Event List Section */}
-      <div className="bg-white p-6 rounded-lg shadow-lg mt-8">
-        <h3 className="text-2xl font-semibold mb-2 text-blue-600">Event List</h3>
-        <p className="text-lg text-gray-600 mb-4">Here is the list of all upcoming events. You can edit or delete events from this list:</p>
-
-        <Swiper
-          modules={[Pagination, Autoplay]}
-          slidesPerView={1}
-          spaceBetween={20}
-          loop={true}
-          autoplay={{ delay: 2000, disableOnInteraction: false }}
-          pagination={{ clickable: true }}
-          breakpoints={{
-            640: { slidesPerView: 1 },
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-          }}
-          className="mt-10"
-        >
-          {events.map((event) => (
-            <SwiperSlide key={event.id}>
-              <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-[360px] mx-auto">
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-56 sm:h-64 object-cover rounded-lg mb-4"
-                />
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-800">{event.title}</h3>
-                <p className="text-base sm:text-lg text-gray-600 mt-2">{event.description}</p>
-                <div className="flex justify-between mt-4">
+          <div className="flex-grow overflow-y-auto max-h-[420px] space-y-6 pr-2">
+            {events.length === 0 ? (
+              <p className="text-gray-400 text-center italic">No events added yet.</p>
+            ) : (
+              events.map(({ id, title, description, image }) => (
+                <div
+                  key={id}
+                  className="flex items-center bg-indigo-50 rounded-lg p-4 shadow-md hover:shadow-indigo-300 transition-shadow"
+                >
+                  {image && (
+                    <img
+                      src={image}
+                      alt={title}
+                      className="w-24 h-24 rounded-lg object-cover mr-6 border border-indigo-300"
+                    />
+                  )}
+                  <div className="flex-grow">
+                    <h3 className="text-xl font-bold text-indigo-900 mb-1">{title}</h3>
+                    <p className="text-indigo-800">{description}</p>
+                  </div>
                   <button
-                    onClick={() => handleEditEvent(event)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteEvent(event.id)}
-                    className="text-red-600 hover:text-red-800"
+                    onClick={() => handleDeleteEvent(id)}
+                    className="ml-6 text-red-500 font-semibold hover:text-red-700 transition-colors"
+                    aria-label="Delete event"
                   >
                     Delete
                   </button>
                 </div>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+              ))
+            )}
+          </div>
+        </section>
       </div>
-
-      {/* Edit Event Section */}
-      {editEvent && (
-        <div className="bg-white p-6 rounded-lg shadow-lg mt-8">
-          <h3 className="text-2xl font-semibold mb-2 text-blue-600">Edit Event</h3>
-          <p className="text-lg text-gray-600 mb-4">Make changes to the selected event below:</p>
-
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">Event Title</label>
-            <input
-              type="text"
-              value={editEvent.title}
-              onChange={(e) => setEditEvent({ ...editEvent, title: e.target.value })}
-              className="w-full p-3 border-2 border-gray-300 rounded-md"
-              placeholder="Enter event title"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">Event Description</label>
-            <textarea
-              value={editEvent.description}
-              onChange={(e) => setEditEvent({ ...editEvent, description: e.target.value })}
-              className="w-full p-3 border-2 border-gray-300 rounded-md"
-              placeholder="Enter event description"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">Event Image URL</label>
-            <input
-              type="text"
-              value={editEvent.image}
-              onChange={(e) => setEditEvent({ ...editEvent, image: e.target.value })}
-              className="w-full p-3 border-2 border-gray-300 rounded-md"
-              placeholder="Enter event image URL"
-            />
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={handleSaveEditEvent}
-              className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-800 transition"
-            >
-              Save Changes
-            </button>
-            <button
-              onClick={() => setEditEvent(null)}
-              className="bg-gray-600 text-white px-6 py-3 rounded-full hover:bg-gray-800 transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default AdminEvents;
+export default EventSection;

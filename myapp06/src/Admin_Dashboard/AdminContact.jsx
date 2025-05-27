@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 
 const AdminContact = () => {
   const [mapLocation, setMapLocation] = useState('');
-  const [address, setAddress] = useState({
-    main: '',
-    sub: ['', '', '', '', ''],
-  });
+  const [addressLine1, setAddressLine1] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
+  const [city, setCity] = useState('');
+  const [pin, setPin] = useState('');
+  const [state, setState] = useState('');
   const [messages, setMessages] = useState([
     { id: 1, name: 'John Doe', message: 'Looking for more information on admissions.' },
     { id: 2, name: 'Jane Smith', message: 'How can I join extracurricular activities?' },
   ]);
   const [updatedMessage, setUpdatedMessage] = useState('');
 
-  // Handle Google Map Location Change
   const handleMapLocationChange = (e) => {
     setMapLocation(e.target.value);
   };
@@ -22,39 +22,18 @@ const AdminContact = () => {
   };
 
   const handleUpdateMapLocation = () => {
-    // Simulate update (you can add an API call here)
     alert('Google Map Location Updated!');
   };
 
-  // Handle Address Changes (Main and Sub)
-  const handleMainAddressChange = (e) => {
-    setAddress({ ...address, main: e.target.value });
-  };
-
-  const handleSubAddressChange = (index, e) => {
-    const updatedSub = [...address.sub];
-    updatedSub[index] = e.target.value;
-    setAddress({ ...address, sub: updatedSub });
-  };
-
-  const handleDeleteSubAddress = (index) => {
-    const updatedSub = address.sub.filter((_, idx) => idx !== index);
-    setAddress({ ...address, sub: updatedSub });
-  };
-
-  const handleAddSubAddress = () => {
-    setAddress({
-      ...address,
-      sub: [...address.sub, ''],
-    });
-  };
-
   const handleUpdateAddress = () => {
-    // Simulate update (you can add an API call here)
-    alert('Address Updated!');
+    alert(`Address Updated:
+Address Line 1: ${addressLine1}
+Address Line 2: ${addressLine2}
+City: ${city}
+Pin: ${pin}
+State: ${state}`);
   };
 
-  // Handle Message Deletion and Update
   const handleDeleteMessage = (id) => {
     const updatedMessages = messages.filter((msg) => msg.id !== id);
     setMessages(updatedMessages);
@@ -76,7 +55,7 @@ const AdminContact = () => {
     <div className="container mx-auto p-6">
       <h2 className="text-3xl font-bold text-center mb-8">Admin Contact Panel</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
+
         {/* Google Map Location Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-300">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Google Map Location</h3>
@@ -123,44 +102,79 @@ const AdminContact = () => {
         <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-300">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Address Management</h3>
 
-          {/* Main Address */}
           <div className="mb-4">
-            <label className="block text-lg font-semibold">Main Address</label>
+            <label className="block text-lg font-semibold">Address Line 1</label>
             <input
               type="text"
-              value={address.main}
-              onChange={handleMainAddressChange}
+              value={addressLine1}
+              onChange={(e) => setAddressLine1(e.target.value)}
               className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter Main Address"
+              placeholder="Enter Address Line 1"
             />
           </div>
 
-          {/* Sub Addresses */}
           <div className="mb-4">
-            <label className="block text-lg font-semibold">Sub Addresses</label>
-            {address.sub.map((sub, index) => (
-              <div key={index} className="flex gap-4 items-center mb-3">
-                <input
-                  type="text"
-                  value={sub}
-                  onChange={(e) => handleSubAddressChange(index, e)}
-                  className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={`Sub Address ${index + 1}`}
-                />
-                <button
-                  onClick={() => handleDeleteSubAddress(index)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
-            <button
-              className="text-blue-600 mt-4 hover:text-blue-800"
-              onClick={handleAddSubAddress}
+            <label className="block text-lg font-semibold">Address Line 2</label>
+            <input
+              type="text"
+              value={addressLine2}
+              onChange={(e) => setAddressLine2(e.target.value)}
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Address Line 2"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-lg font-semibold">City</label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter City"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-lg font-semibold">Pin Code</label>
+            <input
+              type="text"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Pin Code"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-lg font-semibold">State</label>
+            <select
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Add Sub Address
-            </button>
+              <option value="">Select State</option>
+              <option>Uttar Pradesh</option>
+              <option>Maharashtra</option>
+              <option>Bihar</option>
+              <option>Delhi</option>
+              <option>Madhya Pradesh</option>
+              <option>Tamil Nadu</option>
+              <option>Punjab</option>
+              <option>West Bengal</option>
+              <option>Rajasthan</option>
+              <option>Haryana</option>
+              <option>Gujarat</option>
+              <option>Karnataka</option>
+              <option>Assam</option>
+              <option>Jharkhand</option>
+              <option>Odisha</option>
+              <option>Chhattisgarh</option>
+              <option>Kerala</option>
+              <option>Andhra Pradesh</option>
+              <option>Uttarakhand</option>
+              <option>Other</option>
+            </select>
           </div>
 
           <div className="flex gap-4">
