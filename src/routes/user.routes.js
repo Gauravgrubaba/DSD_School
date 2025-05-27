@@ -1,5 +1,6 @@
 import express from "express";
 import { 
+    handleGetMapAddress,
     handleAboutUsUpdate, 
     handleAddTeacher, 
     handleDeleteTeacher, 
@@ -8,7 +9,8 @@ import {
     handleGetAddress, 
     handleGetAllTeachers, 
     handleUpdateAddress, 
-    handleUserlogin 
+    handleUserlogin, 
+    handleUpdateMapAddress
 } from "../controllers/user.controllers.js";
 import upload from "../middlewares/multer.middlewares.js";
 
@@ -22,7 +24,9 @@ router.get('/teachers', handleGetAllTeachers);
 router.patch('/teachers/:id', upload.single("profileImage"), handleEditTeacher);
 router.delete('/teachers/:id', handleDeleteTeacher);
 
-router.patch('/address', handleUpdateAddress)
-router.get('/address', handleGetAddress)
+router.patch('/address', handleUpdateAddress);
+router.get('/address', handleGetAddress);
+router.patch('/mapaddress', handleUpdateMapAddress);
+router.get('/mapaddress', handleGetMapAddress);
 
 export default router;

@@ -4,20 +4,29 @@ import axios from "axios";
 const Contact = () => {
 
   const [address, setAddress] = useState({});
+  const [mapAddress, setMapAddress] = useState("");
 
   const handleGetAddress = async () => {
     try {
       const res = await axios.get('/api/user/address');
-      // console.log(res.data.address);
       setAddress(res.data.address);
-      console.log(res.data.address);
     } catch (error) {
       console.log(error);
     }
   }
 
+  const handleGetMapAddress = async () => {
+    try {
+      const res = await axios.get('/api/user/mapaddress');
+      setMapAddress(res?.data?.mapAddress);
+    } catch (error) {
+      console.log("Error: ", error)
+    }
+  }
+
   useEffect(() => {
     handleGetAddress();
+    handleGetMapAddress();
   }, []);
 
   return (
@@ -122,7 +131,7 @@ const Contact = () => {
             <iframe
               title="Google Maps"
               className="w-full h-full border-0 rounded-lg"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.836769404547!2d-122.0842496846924!3d37.421999979822824!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808fbb5c1b6a7e6f%3A0x57cd1b654634da52!2sGoogleplex!5e0!3m2!1sen!2sus!4v1649783041112!5m2!1sen!2sus"
+              src={mapAddress}
               allowFullScreen=""
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

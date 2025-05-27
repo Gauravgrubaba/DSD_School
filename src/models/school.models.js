@@ -45,6 +45,9 @@ const schoolSchema = new mongoose.Schema(
                 type: String,
                 required: true
             }
+        },
+        mapAddress: {
+            type: String
         }
     }, {
         timestamps: true

@@ -22,8 +22,21 @@ const AdminContact = () => {
     setMapLocation('');
   };
 
-  const handleUpdateMapLocation = () => {
-    alert('Google Map Location Updated!');
+  const handleUpdateMapLocation = async (e) => {
+    e.preventDefault();
+
+    console.log(mapLocation);
+
+    if(!mapLocation) {
+      return alert("Map location cannot be empty")
+    }
+
+    try {
+      const res = await axios.patch('/api/user/mapaddress', { mapLocation });
+      console.log(res);
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   const handleUpdateAddress = async (e) => {
@@ -97,7 +110,7 @@ const AdminContact = () => {
             <input
               type="text"
               value={mapLocation}
-              onChange={handleMapLocationChange}
+              onChange={(e) => setMapLocation(e.target.value)}
               className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter Google Map Embed URL"
             />

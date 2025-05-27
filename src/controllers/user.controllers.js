@@ -6,10 +6,10 @@ import { v2 as cloudinary } from "cloudinary";
 
 const handleUserlogin = async (req, res) => {
     const { school_id, password } = req.body;
-    
+
     try {
-        const userExist = await User.findOne({school_id: school_id});
-        if(!userExist) {
+        const userExist = await User.findOne({ school_id: school_id });
+        if (!userExist) {
             return res.status(404).json({
                 response: "error",
                 message: "User not found"
@@ -17,7 +17,7 @@ const handleUserlogin = async (req, res) => {
         }
 
         const isPasswordValid = userExist.password === password;
-        if(!isPasswordValid) {
+        if (!isPasswordValid) {
             return res.status(404).json({
                 response: "error",
                 message: "Invalid password"
@@ -43,35 +43,35 @@ const handleAboutUsUpdate = async (req, res) => {
     const file = req.file;
 
     try {
-        const schoolAboutUs = await SchoolSchema.findOne({schoolName: "DSD"});
-        
-        if(file && schoolAboutUs?.aboutUs?.image) {
+        const schoolAboutUs = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (file && schoolAboutUs?.aboutUs?.image) {
             const segment = schoolAboutUs.aboutUs.image.split('/');
             const fileWithoutExtension = segment[segment.length - 1];
             const publicId = fileWithoutExtension.split('.')[0];
 
-            const result = await cloudinary.uploader.destroy(publicId, {invalidate: true});
+            const result = await cloudinary.uploader.destroy(publicId, { invalidate: true });
         }
 
         let imgURL = ""
 
-        if(file) {
+        if (file) {
             const uploadResult = await uploadOnCloudinary(file.path);
             imgURL = uploadResult?.secure_url || ""
         }
 
         const updatedData = {};
-        if(title) updatedData["aboutUs.title"] = title;
-        if(description) updatedData["aboutUs.description"] = description;
-        if(imgURL) updatedData["aboutUs.image"] = imgURL;
+        if (title) updatedData["aboutUs.title"] = title;
+        if (description) updatedData["aboutUs.description"] = description;
+        if (imgURL) updatedData["aboutUs.image"] = imgURL;
 
-        await SchoolSchema.findOneAndUpdate({schoolName: "DSD"}, {
+        await SchoolSchema.findOneAndUpdate({ schoolName: "DSD" }, {
             $set: updatedData
         }, {
             new: true
         });
 
-        const data = await SchoolSchema.findOne({schoolName: "DSD"});
+        const data = await SchoolSchema.findOne({ schoolName: "DSD" });
 
         return res.status(200).json({
             response: "success",
@@ -87,7 +87,7 @@ const handleAboutUsUpdate = async (req, res) => {
 
 const handleGetAboutUs = async (req, res) => {
     try {
-        const data = await SchoolSchema.findOne({schoolName: "DSD"});
+        const data = await SchoolSchema.findOne({ schoolName: "DSD" });
         return res.status(200).json({
             response: "success",
             aboutUs: data.aboutUs
@@ -100,14 +100,14 @@ const handleGetAboutUs = async (req, res) => {
     }
 }
 
-const handleAddTeacher = async(req, res) => {
+const handleAddTeacher = async (req, res) => {
     const { name, designation } = req.body;
     const file = req.file;
 
     try {
         let imgUrl = "";
 
-        if(file) {
+        if (file) {
             const uploadResult = await uploadOnCloudinary(file.path);
             imgUrl = uploadResult?.secure_url || "";
         }
@@ -129,13 +129,13 @@ const handleAddTeacher = async(req, res) => {
     }
 }
 
-const handleGetAllTeachers = async(req, res) => {
+const handleGetAllTeachers = async (req, res) => {
     try {
         const teachers = await TeachersSchema.find({});
         return res.status(200).json({
             response: "success",
             allTeachers: teachers
-        }) 
+        })
     } catch (error) {
         return res.send(500).json({
             response: "error",
@@ -150,11 +150,11 @@ const handleEditTeacher = async (req, res) => {
     const file = req.file;
 
     console.log(file);
-    
-    try {
-        const teacher = await TeachersSchema.findById({_id: id});
 
-        if(file && teacher.profileImage) {
+    try {
+        const teacher = await TeachersSchema.findById({ _id: id });
+
+        if (file && teacher.profileImage) {
             const segment = teacher.profileImage.split('/');
             const fileNameWithExtension = segment[segment.length - 1];
             const publiId = fileNameWithExtension.split('.')[0];
@@ -164,17 +164,17 @@ const handleEditTeacher = async (req, res) => {
 
         let imgUrl = "";
 
-        if(file) {
+        if (file) {
             const uplaodedFile = await uploadOnCloudinary(file.path);
             imgUrl = uplaodedFile?.secure_url || "";
         }
-        
-        const updatedData = {};
-        if(updatedName) updatedData.name = updatedName;
-        if(updatedDesignation) updatedData.designation = updatedDesignation;
-        if(imgUrl) updatedData.profileImage = imgUrl
 
-        const updatedTeacher = await TeachersSchema.findOneAndUpdate({_id: id}, updatedData, {new: true});
+        const updatedData = {};
+        if (updatedName) updatedData.name = updatedName;
+        if (updatedDesignation) updatedData.designation = updatedDesignation;
+        if (imgUrl) updatedData.profileImage = imgUrl
+
+        const updatedTeacher = await TeachersSchema.findOneAndUpdate({ _id: id }, updatedData, { new: true });
         return res.status(200).json({
             response: "success",
             message: "Teacher details updated successfully",
@@ -193,7 +193,7 @@ const handleDeleteTeacher = async (req, res) => {
     try {
         const teacher = await TeachersSchema.findById({ _id: id });
 
-        if(teacher.profileImage) {
+        if (teacher.profileImage) {
             const segment = teacher.profileImage.split('/');
             console.log(segment);
             const fileNameWithExtension = segment[segment.length - 1];
@@ -221,14 +221,14 @@ const handleUpdateAddress = async (req, res) => {
 
     const updatedData = {};
 
-    if(addressLine1) updatedData["address.addressLine1"] = addressLine1;
-    if(addressLine2) updatedData["address.addressLine2"] = addressLine2;
-    if(city) updatedData["address.city"] = city;
-    if(pin) updatedData["address.pin"] = pin;
-    if(state) updatedData["address.state"] = state;
+    if (addressLine1) updatedData["address.addressLine1"] = addressLine1;
+    if (addressLine2) updatedData["address.addressLine2"] = addressLine2;
+    if (city) updatedData["address.city"] = city;
+    if (pin) updatedData["address.pin"] = pin;
+    if (state) updatedData["address.state"] = state;
 
     try {
-        const d = await SchoolSchema.findOneAndUpdate({ schoolName: "DSD"}, {
+        const d = await SchoolSchema.findOneAndUpdate({ schoolName: "DSD" }, {
             $set: updatedData
         }, {
             new: true
@@ -264,6 +264,46 @@ const handleGetAddress = async (req, res) => {
     }
 }
 
+const handleUpdateMapAddress = async (req, res) => {
+    const { mapLocation } = req.body;
+    try {
+        await SchoolSchema.findOneAndUpdate({ schoolName: "DSD" }, {
+            $set: { mapAddress: mapLocation }
+        }, {
+            new: true
+        })
+        return res.status(200).json({
+            response: "success",
+            message: "Map updated"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while updating map address"
+        })
+    }
+}
+
+const handleGetMapAddress = async (req, res) => {
+    try {
+        const fetchedResponse = await SchoolSchema.findOne({ schoolName: "DSD" });
+        // console.log("response: ", res?.mapAddress);
+        const data = fetchedResponse?.mapAddress;
+        return res.status(200).json({
+            response: "success",
+            mapAddress: data
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while fetching map address",
+            err: error
+        })
+    }
+}
+
 export {
     handleUserlogin,
     handleAboutUsUpdate,
@@ -273,5 +313,7 @@ export {
     handleEditTeacher,
     handleDeleteTeacher,
     handleUpdateAddress,
-    handleGetAddress
+    handleGetAddress,
+    handleUpdateMapAddress,
+    handleGetMapAddress
 }
