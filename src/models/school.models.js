@@ -21,6 +21,33 @@ const schoolSchema = new mongoose.Schema(
             image: {
                 type: String,
             }
+        },
+        academicImages: {
+            type: [String]
+        },
+        address: {
+            addressLine1: {
+                type: String,
+                required: true
+            },
+            addressLine2: {
+                type: String
+            },
+            city: {
+                type: String,
+                required: true
+            },
+            state: {
+                type: String,
+                required: true
+            },
+            pin: {
+                type: String,
+                required: true
+            }
+        },
+        mapAddress: {
+            type: String
         }
     }, {
         timestamps: true

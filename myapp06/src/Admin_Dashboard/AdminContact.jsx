@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from "axios";
 
 const AdminContact = () => {
   const [mapLocation, setMapLocation] = useState('');
@@ -21,17 +22,62 @@ const AdminContact = () => {
     setMapLocation('');
   };
 
-  const handleUpdateMapLocation = () => {
-    alert('Google Map Location Updated!');
+  const handleUpdateMapLocation = async (e) => {
+    e.preventDefault();
+
+    console.log(mapLocation);
+
+    if(!mapLocation) {
+      return alert("Map location cannot be empty")
+    }
+
+    try {
+      const res = await axios.patch('/api/user/mapaddress', { mapLocation });
+      console.log(res);
+    } catch (error) {
+      console.log(error)
+    }
   };
 
-  const handleUpdateAddress = () => {
-    alert(`Address Updated:
-Address Line 1: ${addressLine1}
-Address Line 2: ${addressLine2}
-City: ${city}
-Pin: ${pin}
-State: ${state}`);
+  const handleUpdateAddress = async (e) => {
+    e.preventDefault();
+
+    if(!addressLine1) {
+      return alert("Address line 1 is required")
+    }
+    if(!city) {
+      return alert('City is required')
+    }
+    if(!pin) {
+      return alert('Pincode is required')
+    }
+    if(!(pin && /^\d{6}$/.test(pin))) {
+      return alert("Pin can only contain numbers and should be of length 6")
+    }
+    if(!state) {
+      return alert("State is required")
+    }
+
+    const data = {
+      addressLine1: addressLine1,
+      addressLine2: addressLine2,
+      city: city,
+      pin: pin,
+      state: state
+    }
+
+    try {
+      const res = await axios.patch('/api/user/address', data);
+      console.log(res);
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setAddressLine1('');
+      setAddressLine2('');
+      setCity('');
+      setPin('');
+      setState('')
+    }
   };
 
   const handleDeleteMessage = (id) => {
@@ -64,7 +110,7 @@ State: ${state}`);
             <input
               type="text"
               value={mapLocation}
-              onChange={handleMapLocationChange}
+              onChange={(e) => setMapLocation(e.target.value)}
               className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter Google Map Embed URL"
             />
@@ -103,7 +149,7 @@ State: ${state}`);
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Address Management</h3>
 
           <div className="mb-4">
-            <label className="block text-lg font-semibold">Address Line 1</label>
+            <label className="block text-lg font-semibold">Address Line 1<em className='text-red-500'>*</em></label>
             <input
               type="text"
               value={addressLine1}
@@ -125,7 +171,7 @@ State: ${state}`);
           </div>
 
           <div className="mb-4">
-            <label className="block text-lg font-semibold">City</label>
+            <label className="block text-lg font-semibold">City<em className='text-red-500'>*</em></label>
             <input
               type="text"
               value={city}
@@ -136,7 +182,7 @@ State: ${state}`);
           </div>
 
           <div className="mb-4">
-            <label className="block text-lg font-semibold">Pin Code</label>
+            <label className="block text-lg font-semibold">Pin Code<em className='text-red-500'>*</em></label>
             <input
               type="text"
               value={pin}
@@ -147,7 +193,7 @@ State: ${state}`);
           </div>
 
           <div className="mb-4">
-            <label className="block text-lg font-semibold">State</label>
+            <label className="block text-lg font-semibold">State<em className='text-red-500'>*</em></label>
             <select
               value={state}
               onChange={(e) => setState(e.target.value)}

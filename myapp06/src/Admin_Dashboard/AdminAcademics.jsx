@@ -27,6 +27,7 @@ const AdminAcademics = () => {
       const imageUrl = URL.createObjectURL(file);
       setHeroImage(imageUrl);
     }
+    console.log(files);
   };
 
   // Add current hero image + text to heroSections array

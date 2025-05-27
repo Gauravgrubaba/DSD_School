@@ -1,5 +1,17 @@
 import express from "express";
-import { handleAboutUsUpdate, handleAddTeacher, handleDeleteTeacher, handleEditTeacher, handleGetAboutUs, handleGetAllTeachers, handleUserlogin } from "../controllers/user.controllers.js";
+import { 
+    handleGetMapAddress,
+    handleAboutUsUpdate, 
+    handleAddTeacher, 
+    handleDeleteTeacher, 
+    handleEditTeacher, 
+    handleGetAboutUs, 
+    handleGetAddress, 
+    handleGetAllTeachers, 
+    handleUpdateAddress, 
+    handleUserlogin, 
+    handleUpdateMapAddress
+} from "../controllers/user.controllers.js";
 import upload from "../middlewares/multer.middlewares.js";
 
 const router = express.Router();
@@ -12,6 +24,9 @@ router.get('/teachers', handleGetAllTeachers);
 router.patch('/teachers/:id', upload.single("profileImage"), handleEditTeacher);
 router.delete('/teachers/:id', handleDeleteTeacher);
 
-// router.post('/upload', upload.single("profileImage"), handleProfilePictureUpload);
+router.patch('/address', handleUpdateAddress);
+router.get('/address', handleGetAddress);
+router.patch('/mapaddress', handleUpdateMapAddress);
+router.get('/mapaddress', handleGetMapAddress);
 
 export default router;
