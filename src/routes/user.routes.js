@@ -5,6 +5,7 @@ import {
     handleDeleteTeacher, 
     handleEditTeacher, 
     handleGetAboutUs, 
+    handleGetAddress, 
     handleGetAllTeachers, 
     handleUpdateAddress, 
     handleUserlogin 
@@ -21,6 +22,7 @@ router.get('/teachers', handleGetAllTeachers);
 router.patch('/teachers/:id', upload.single("profileImage"), handleEditTeacher);
 router.delete('/teachers/:id', handleDeleteTeacher);
 
-router.patch('/updateAddress', handleUpdateAddress)
+router.patch('/address', handleUpdateAddress)
+router.get('/address', handleGetAddress)
 
 export default router;

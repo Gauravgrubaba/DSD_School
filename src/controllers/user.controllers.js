@@ -217,7 +217,51 @@ const handleDeleteTeacher = async (req, res) => {
 }
 
 const handleUpdateAddress = async (req, res) => {
-    console.log(req.body);
+    const { addressLine1, addressLine2, city, pin, state } = req.body;
+
+    const updatedData = {};
+
+    if(addressLine1) updatedData["address.addressLine1"] = addressLine1;
+    if(addressLine2) updatedData["address.addressLine2"] = addressLine2;
+    if(city) updatedData["address.city"] = city;
+    if(pin) updatedData["address.pin"] = pin;
+    if(state) updatedData["address.state"] = state;
+
+    try {
+        const d = await SchoolSchema.findOneAndUpdate({ schoolName: "DSD"}, {
+            $set: updatedData
+        }, {
+            new: true
+        });
+
+        console.log(d);
+
+        return res.status(200).json({
+            response: "success",
+            message: "School address updated."
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while updating address."
+        })
+    }
+}
+
+const handleGetAddress = async (req, res) => {
+    try {
+        const data = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const address = data.address;
+        return res.status(200).json({
+            response: "success",
+            address: address
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while fetching address"
+        })
+    }
 }
 
 export {
@@ -228,5 +272,6 @@ export {
     handleGetAllTeachers,
     handleEditTeacher,
     handleDeleteTeacher,
-    handleUpdateAddress
+    handleUpdateAddress,
+    handleGetAddress
 }

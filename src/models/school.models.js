@@ -41,8 +41,8 @@ const schoolSchema = new mongoose.Schema(
                 type: String,
                 required: true
             },
-            pinCode: {
-                type: Number,
+            pin: {
+                type: String,
                 required: true
             }
         }
