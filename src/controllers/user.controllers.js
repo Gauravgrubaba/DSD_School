@@ -216,6 +216,10 @@ const handleDeleteTeacher = async (req, res) => {
     }
 }
 
+const handleUpdateAddress = async (req, res) => {
+    console.log(req.body);
+}
+
 export {
     handleUserlogin,
     handleAboutUsUpdate,
@@ -223,5 +227,6 @@ export {
     handleAddTeacher,
     handleGetAllTeachers,
     handleEditTeacher,
-    handleDeleteTeacher
+    handleDeleteTeacher,
+    handleUpdateAddress
 }
