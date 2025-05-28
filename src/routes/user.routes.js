@@ -10,7 +10,10 @@ import {
     handleGetAllTeachers, 
     handleUpdateAddress, 
     handleUserlogin, 
-    handleUpdateMapAddress
+    handleUpdateMapAddress,
+    handleContactUsMessage,
+    handleGetAllMessage,
+    handleUpdateMessageStatus
 } from "../controllers/user.controllers.js";
 import upload from "../middlewares/multer.middlewares.js";
 
@@ -28,5 +31,9 @@ router.patch('/address', handleUpdateAddress);
 router.get('/address', handleGetAddress);
 router.patch('/mapaddress', handleUpdateMapAddress);
 router.get('/mapaddress', handleGetMapAddress);
+
+router.post('/message', handleContactUsMessage);
+router.get('/message', handleGetAllMessage);
+router.patch('/message/:id', handleUpdateMessageStatus)
 
 export default router;
