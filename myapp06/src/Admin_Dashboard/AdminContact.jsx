@@ -9,9 +9,10 @@ const AdminContact = () => {
   const [pin, setPin] = useState('');
   const [state, setState] = useState('');
   const [messages, setMessages] = useState([]);
-  const [updatedMessage, setUpdatedMessage] = useState('');
 
   const [selectedStatus, setSelectedStatus] = useState("All");
+
+  const [changingStatusIndex, setChangingStatusIndex] = useState(null);
 
   const filteredMessage = selectedStatus === 'All' ? messages : messages.filter((msg) => msg.status === selectedStatus);
 
@@ -92,25 +93,16 @@ const AdminContact = () => {
   }, [])
 
   const handleChangeStatus = async (id) => {
+    setChangingStatusIndex(id);
     try {
       const res = await axios.patch(`/api/user/message/${id}`);
       console.log(res);
       setMessages(res?.data?.allMessage);
     } catch (error) {
       console.log(error)
+    } finally {
+      setChangingStatusIndex(null);
     }
-  };
-
-  const handleUpdateMessage = (id) => {
-    const updatedMessages = messages.map((msg) => {
-      if (msg.id === id) {
-        return { ...msg, message: updatedMessage };
-      }
-      return msg;
-    });
-    setMessages(updatedMessages);
-    setUpdatedMessage('');
-    alert('Message Updated!');
   };
 
   return (
@@ -285,7 +277,30 @@ const AdminContact = () => {
                     className="text-red-600 hover:text-red-800"
                     onClick={() => handleChangeStatus(msg._id)}
                   >
-                    Change Status
+                    {changingStatusIndex === msg._id ? (
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        ></path>
+                      </svg>
+                    ) : (
+                      <span>Change Status to Contacted</span>
+                    )}
                   </button>
                 </div>}
               </div>
