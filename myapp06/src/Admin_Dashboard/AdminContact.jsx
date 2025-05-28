@@ -194,17 +194,20 @@ const AdminContact = () => {
             ))
           )}
 
-          {/* Pagination Controls */}
-          <div className="flex flex-wrap justify-center mt-4 gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1 rounded-full border ${page === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-              >
-                {page}
-              </button>
-            ))}
+
+          {/* Dropdown for direct page selection */}
+          <div className="flex justify-center items-center mt-4 gap-2">
+            <label htmlFor="page-select" className="mr-2">Go to page:</label>
+            <select
+              id="page-select"
+              value={currentPage}
+              onChange={(e) => setCurrentPage(Number(e.target.value))}
+              className="border border-gray-300 rounded px-2 py-1"
+            >
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <option key={page} value={page}>{page}</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
