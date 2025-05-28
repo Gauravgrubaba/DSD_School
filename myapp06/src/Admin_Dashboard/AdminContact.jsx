@@ -11,8 +11,19 @@ const AdminContact = () => {
   const [messages, setMessages] = useState([
     { id: 1, name: 'John Doe', message: 'Looking for more information on admissions.' },
     { id: 2, name: 'Jane Smith', message: 'How can I join extracurricular activities?' },
+    { id: 3, name: 'Alex Johnson', message: 'When are the exams scheduled?' },
+    { id: 4, name: 'Emily Carter', message: 'Requesting previous year papers.' },
+    { id: 5, name: 'Michael Brown', message: 'Need help with hostel information.' },
   ]);
   const [updatedMessage, setUpdatedMessage] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const messagesPerPage = 2;
+
+  const indexOfLastMessage = currentPage * messagesPerPage;
+  const indexOfFirstMessage = indexOfLastMessage - messagesPerPage;
+  const currentMessages = messages.slice(indexOfFirstMessage, indexOfLastMessage);
+  const totalPages = Math.ceil(messages.length / messagesPerPage);
 
   const handleMapLocationChange = (e) => {
     setMapLocation(e.target.value);
@@ -25,67 +36,57 @@ const AdminContact = () => {
   const handleUpdateMapLocation = async (e) => {
     e.preventDefault();
 
-    console.log(mapLocation);
-
-    if(!mapLocation) {
-      return alert("Map location cannot be empty")
+    if (!mapLocation) {
+      return alert("Map location cannot be empty");
     }
 
     try {
       const res = await axios.patch('/api/user/mapaddress', { mapLocation });
       console.log(res);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
   const handleUpdateAddress = async (e) => {
     e.preventDefault();
 
-    if(!addressLine1) {
-      return alert("Address line 1 is required")
-    }
-    if(!city) {
-      return alert('City is required')
-    }
-    if(!pin) {
-      return alert('Pincode is required')
-    }
-    if(!(pin && /^\d{6}$/.test(pin))) {
-      return alert("Pin can only contain numbers and should be of length 6")
-    }
-    if(!state) {
-      return alert("State is required")
-    }
+    if (!addressLine1) return alert("Address line 1 is required");
+    if (!city) return alert('City is required');
+    if (!pin) return alert('Pincode is required');
+    if (!(pin && /^\d{6}$/.test(pin))) return alert("Pin must be a 6-digit number");
+    if (!state) return alert("State is required");
 
-    const data = {
-      addressLine1: addressLine1,
-      addressLine2: addressLine2,
-      city: city,
-      pin: pin,
-      state: state
-    }
+    const data = { addressLine1, addressLine2, city, pin, state };
 
     try {
       const res = await axios.patch('/api/user/address', data);
       console.log(res);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setAddressLine1('');
       setAddressLine2('');
       setCity('');
       setPin('');
-      setState('')
+      setState('');
     }
   };
 
   const handleDeleteMessage = (id) => {
     const updatedMessages = messages.filter((msg) => msg.id !== id);
     setMessages(updatedMessages);
+    // If deleting the last message on the current page, move to previous page if needed
+    if ((currentPage - 1) * messagesPerPage >= updatedMessages.length && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
   const handleUpdateMessage = (id) => {
+    if (!updatedMessage.trim()) {
+      alert("Updated message cannot be empty");
+      return;
+    }
     const updatedMessages = messages.map((msg) => {
       if (msg.id === id) {
         return { ...msg, message: updatedMessage };
@@ -95,6 +96,10 @@ const AdminContact = () => {
     setMessages(updatedMessages);
     setUpdatedMessage('');
     alert('Message Updated!');
+  };
+
+  const handlePageSelect = (e) => {
+    setCurrentPage(Number(e.target.value));
   };
 
   return (
@@ -110,7 +115,7 @@ const AdminContact = () => {
             <input
               type="text"
               value={mapLocation}
-              onChange={(e) => setMapLocation(e.target.value)}
+              onChange={handleMapLocationChange}
               className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter Google Map Embed URL"
             />
@@ -236,10 +241,28 @@ const AdminContact = () => {
         {/* Message Management Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-300">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Messages from Users</h3>
-          {messages.length === 0 ? (
+
+          {/* Dropdown inside message box */}
+          <div className="mb-4 flex items-center gap-2">
+            <label htmlFor="pageSelect" className="font-semibold">Select Page:</label>
+            <select
+              id="pageSelect"
+              value={currentPage}
+              onChange={handlePageSelect}
+              className="border-2 border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {[...Array(totalPages)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  Page {i + 1}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {currentMessages.length === 0 ? (
             <p>No messages to show</p>
           ) : (
-            messages.map((msg) => (
+            currentMessages.map((msg) => (
               <div key={msg.id} className="bg-white p-4 mb-4 rounded-md shadow-sm border-2 border-gray-200">
                 <h4 className="font-semibold">{msg.name}</h4>
                 <p>{msg.message}</p>
@@ -266,8 +289,26 @@ const AdminContact = () => {
               </div>
             ))
           )}
-        </div>
 
+          {/* Pagination Controls */}
+          <div className="flex justify-center my-4 gap-4">
+            <button
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Prev
+            </button>
+            <span className="self-center">Page {currentPage} of {totalPages}</span>
+            <button
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,123 +1,279 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const Admission = () => {
-  const [formOpen, setFormOpen] = useState(false);
-  const [scannerOpen, setScannerOpen] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    age: "",
+    fullName: "",
     fatherName: "",
     motherName: "",
+    gender: "",
+    dob: "",
     email: "",
     phone: "",
-    class: "",
-    message: "",
+    currentAddress: "",
+    permanentAddress: "",
+    city: "",
+    state: "",
+    pincode: "",
+    classApplied: "",
   });
 
-  // Handle input change
+  const [submitted, setSubmitted] = useState(false);
+  const formRef = useRef();
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    setScannerOpen(true); // Open scanner after form submission
+    setSubmitted(true);
   };
 
-  // Simulate successful payment scan
-  const handlePaymentScan = () => {
-    setSubmitted(true);
-    setScannerOpen(false);
-    setFormOpen(false);
+  const handleDownload = async () => {
+    const element = formRef.current;
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save("DSD_Admission_Form.pdf");
   };
+
+  const inputClasses =
+    "border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500";
 
   return (
-    <div className="pt-24 container mx-auto px-4 py-6">
-      {/* Scrolling News Bar */}
-      <div className="bg-blue-600 text-white py-2 overflow-hidden whitespace-nowrap">
-        <marquee behavior="scroll" direction="left" className="text-lg font-semibold">
-          🔹 Admissions Open for 2025-26! Apply Now! 🔹 Last Date: 30th April 2025 🔹 Limited Seats Available!
-        </marquee>
-      </div>
-
-      {/* Button to Open Admission Form */}
-      <div className="flex justify-center mt-6">
-        <button
-          onClick={() => setFormOpen(true)}
-          className="bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-semibold shadow-md hover:bg-blue-800 transition"
+    <div className="pt-28 p-4 bg-gray-100 min-h-screen">
+      {!submitted ? (
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6"
         >
-          Fill Admission Form
-        </button>
-      </div>
+          <div className="bg-blue-900 text-white py-6 px-6 rounded-t-lg mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">DSD SCHOOL</h1>
+              <h2 className="text-md uppercase tracking-wide">
+                Educational & Literary Academy
+              </h2>
+            </div>
+          </div>
 
-      {/* Admission Form Below the Header */}
-      {formOpen && (
-        <div className="mt-8 bg-white p-8 rounded-xl shadow-lg border border-gray-200 transition-transform transform scale-95 animate-fadeIn w-full max-w-lg mx-auto">
-          <h3 className="text-3xl font-bold text-blue-700 text-center mb-4">Admission Form</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-            <input type="number" name="age" placeholder="Age" value={formData.age} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-            <input type="text" name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-            <input type="text" name="motherName" placeholder="Mother's Name" value={formData.motherName} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-            <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-            <input type="text" name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-            <select name="class" value={formData.class} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">Select Class</option>
-              <option value="1">Class 1</option>
-              <option value="2">Class 2</option>
-              <option value="3">Class 3</option>
-              <option value="4">Class 4</option>
-              <option value="5">Class 5</option>
-            </select>
-            <textarea name="message" placeholder="Additional Message (Optional)" value={formData.message} onChange={handleChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-            
-            {/* Payment Button (Inside the Form, Styled Properly) */}
-            <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-lg text-lg font-semibold shadow-md hover:bg-green-800 transition">
-              Proceed to Payment
-            </button>
-          </form>
+          <h2 className="text-xl font-semibold text-center mb-4">
+            Admission Form
+          </h2>
 
-          {/* Close Form Button */}
-          <button onClick={() => setFormOpen(false)} className="mt-3 text-red-600 font-semibold hover:underline block text-center w-full">
-            Close
-          </button>
-        </div>
-      )}
-
-      {/* Fullscreen QR Scanner for Payment */}
-      {scannerOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-3xl text-center relative">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Scan QR Code to Pay</h3>
-            <img
-              src="https://via.placeholder.com/400x400" // Replace with actual QR code image
-              alt="QR Code"
-              className="mx-auto w-96 h-96"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="Full Name"
             />
-            <p className="text-gray-600 mt-2">Use any UPI app to scan & pay.</p>
 
-            {/* Simulating successful scan */}
+            <input
+              name="dob"
+              type="date"
+              value={formData.dob}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="Date of Birth"
+            />
+
+            <input
+              name="fatherName"
+              value={formData.fatherName}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="Father's Name"
+            />
+
+            <input
+              name="motherName"
+              value={formData.motherName}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="Mother's Name"
+            />
+
+            <div className="flex items-center gap-4">
+              <label className="text-sm font-medium">Gender:</label>
+              {["Male", "Female", "Other"].map((g) => (
+                <label key={g} className="text-sm flex items-center">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value={g}
+                    onChange={handleChange}
+                    required
+                    className="mr-1"
+                  />
+                  {g}
+                </label>
+              ))}
+            </div>
+
+            <input
+              name="classApplied"
+              value={formData.classApplied}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="Class Applying For"
+            />
+
+            <input
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="Email Address"
+            />
+
+            <input
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="Phone Number"
+            />
+
+            <textarea
+              name="currentAddress"
+              value={formData.currentAddress}
+              onChange={handleChange}
+              required
+              className={`${inputClasses} md:col-span-2 resize-none`}
+              placeholder="Current Address"
+            ></textarea>
+
+            <textarea
+              name="permanentAddress"
+              value={formData.permanentAddress}
+              onChange={handleChange}
+              required
+              className={`${inputClasses} md:col-span-2 resize-none`}
+              placeholder="Permanent Address"
+            ></textarea>
+
+            <input
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="City"
+            />
+
+            <input
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="State"
+            />
+
+            <input
+              name="pincode"
+              value={formData.pincode}
+              onChange={handleChange}
+              required
+              className={inputClasses}
+              placeholder="Pincode"
+            />
+          </div>
+
+          <div className="mt-6 text-center">
             <button
-              onClick={handlePaymentScan}
-              className="mt-4 bg-green-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-green-800 transition"
+              type="submit"
+              className="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700"
             >
-              Payment Completed
-            </button>
-
-            {/* Close Scanner Option */}
-            <button onClick={() => setScannerOpen(false)} className="absolute top-4 right-4 text-red-600 font-semibold hover:underline">
-              ✖
+              Submit
             </button>
           </div>
-        </div>
-      )}
+        </form>
+      ) : (
+        <div
+          className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 m-4"
+          ref={formRef}
+        >
+          <div className="bg-blue-900 text-white py-6 px-6 rounded-t-lg mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">DSD SCHOOL</h1>
+              <h2 className="text-md uppercase tracking-wide">
+                Educational & Literary Academy
+              </h2>
+            </div>
+          </div>
 
-      {/* Success Message */}
-      {submitted && (
-        <div className="mt-6 text-center text-green-700 font-semibold text-xl">
-          ✅ Admission Form Successfully Submitted & Fee Paid!
+          <h2 className="text-xl font-semibold text-center mb-4">
+            Admission Form
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <p>
+              <strong>Full Name:</strong> {formData.fullName}
+            </p>
+            <p>
+              <strong>Date of Birth:</strong> {formData.dob}
+            </p>
+            <p>
+              <strong>Father's Name:</strong> {formData.fatherName}
+            </p>
+            <p>
+              <strong>Mother's Name:</strong> {formData.motherName}
+            </p>
+            <p>
+              <strong>Gender:</strong> {formData.gender}
+            </p>
+            <p>
+              <strong>Class:</strong> {formData.classApplied}
+            </p>
+            <p>
+              <strong>Email:</strong> {formData.email}
+            </p>
+            <p>
+              <strong>Phone:</strong> {formData.phone}
+            </p>
+            <p className="md:col-span-2">
+              <strong>Current Address:</strong> {formData.currentAddress}
+            </p>
+            <p className="md:col-span-2">
+              <strong>Permanent Address:</strong> {formData.permanentAddress}
+            </p>
+            <p>
+              <strong>City:</strong> {formData.city}
+            </p>
+            <p>
+              <strong>State:</strong> {formData.state}
+            </p>
+            <p>
+              <strong>Pincode:</strong> {formData.pincode}
+            </p>
+          </div>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleDownload}
+              className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700"
+            >
+              Download as PDF
+            </button>
+          </div>
         </div>
       )}
     </div>

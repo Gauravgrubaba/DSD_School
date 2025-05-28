@@ -121,12 +121,7 @@ const Home = () => {
                 <FaCheckCircle className="text-indigo-600 mr-2" /> Qualified Teachers
               </div>
             </div>
-            <a
-              href="#"
-              className="btn inline-block bg-pink-500 text-white px-6 md:px-8 py-3 rounded-full mt-6 font-semibold"
-            >
-              More Details
-            </a>
+           
           </div>
         </div>
       </div>
