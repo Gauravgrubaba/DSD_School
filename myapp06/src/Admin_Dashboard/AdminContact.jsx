@@ -82,6 +82,18 @@ const AdminContact = () => {
     }
   };
 
+  // New: Delete message handler
+  const handleDeleteMessage = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
+    try {
+      const res = await axios.delete(`/api/user/message/${id}`);
+      // Assuming API returns updated message list or you can refetch
+      setMessages(res?.data?.allMessage || messages.filter(m => m._id !== id));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedStatus]);
@@ -175,25 +187,37 @@ const AdminContact = () => {
             <p>No messages to show</p>
           ) : (
             currentMessages.map((msg) => (
-              <div key={msg._id} className="bg-white p-4 mb-4 rounded-md border shadow-sm">
+              <div key={msg._id} className="bg-white p-4 mb-4 rounded-md border shadow-sm relative">
                 <h4><b>Name:</b> {msg.fullName}</h4>
                 <h4><b>Email:</b> {msg.email}</h4>
                 <h4><b>Phone:</b> {msg.phoneno}</h4>
                 <p><b>Message:</b> {msg.message}</p>
                 <p><b>Time:</b> {new Date(msg.dateAndTime).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
                 <p><b>Status:</b> <span className={msg.status === "Pending" ? "text-red-500" : "text-green-600"}>{msg.status}</span></p>
-                {msg.status === "Pending" && (
+
+                <div className="flex gap-3 mt-2">
+                  {msg.status === "Pending" && (
+                    <button
+                      className="text-blue-600 hover:text-blue-900"
+                      onClick={() => handleChangeStatus(msg._id)}
+                      disabled={changingStatusIndex === msg._id}
+                    >
+                      {changingStatusIndex === msg._id ? 'Updating...' : 'Mark as Contacted'}
+                    </button>
+                  )}
+
                   <button
-                    className="mt-2 text-blue-500 hover:text-blue-800"
-                    onClick={() => handleChangeStatus(msg._id)}
+                    className="text-red-600 hover:text-red-900"
+                    onClick={() => handleDeleteMessage(msg._id)}
                   >
-                    {changingStatusIndex === msg._id ? 'Updating...' : 'Mark as Contacted'}
+                    Delete
                   </button>
-                )}
+                </div>
               </div>
             ))
           )}
 
+          
 
           {/* Dropdown for direct page selection */}
           <div className="flex justify-center items-center mt-4 gap-2">
