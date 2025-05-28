@@ -3,6 +3,7 @@ import SchoolSchema from "../models/school.models.js";
 import TeachersSchema from "../models/teachers.models.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
+import MessageSchema from "../models/message.models.js";
 
 const handleUserlogin = async (req, res) => {
     const { school_id, password } = req.body;
@@ -304,6 +305,61 @@ const handleGetMapAddress = async (req, res) => {
     }
 }
 
+const handleContactUsMessage = async (req, res) => {
+    const data = req.body;
+    try {
+        await MessageSchema.create(data);
+        return res.status(200).json({
+            response: "success",
+            message: "Message sent, Our staff will contact you soon"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while sending message"
+        })
+    }
+}
+
+const handleGetAllMessage = async (req, res) => {
+    try {
+        const result = await MessageSchema.find({});
+        return res.status(200).json({
+            response: "success",
+            messages: result
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while fetching messages"
+        })
+    }
+}
+
+const handleUpdateMessageStatus = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await MessageSchema.findOneAndUpdate({_id: id}, {
+            status: "Contacted"
+        }, {
+            new: true
+        })
+
+        const allMessage = await MessageSchema.find({});
+        return res.status(200).json({
+            response: "success",
+            message: "Status changed",
+            allMessage: allMessage
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while changing status of message"
+        })
+    }
+}
+
 export {
     handleUserlogin,
     handleAboutUsUpdate,
@@ -315,5 +371,8 @@ export {
     handleUpdateAddress,
     handleGetAddress,
     handleUpdateMapAddress,
-    handleGetMapAddress
+    handleGetMapAddress,
+    handleContactUsMessage,
+    handleGetAllMessage,
+    handleUpdateMessageStatus
 }

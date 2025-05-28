@@ -6,6 +6,22 @@ const Contact = () => {
   const [address, setAddress] = useState({});
   const [mapAddress, setMapAddress] = useState("");
 
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phoneno: '',
+    message: ''
+  })
+
+  const [formErrors, setFormErrors] = useState({});
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^[6-9]\d{9}$/;
+
   const handleGetAddress = async () => {
     try {
       const res = await axios.get('/api/user/address');
@@ -21,6 +37,54 @@ const Contact = () => {
       setMapAddress(res?.data?.mapAddress);
     } catch (error) {
       console.log("Error: ", error)
+    }
+  }
+
+  const handleContact = async (e) => {
+    e.preventDefault();
+
+    setIsLoading(true);
+
+    const errors = {};
+
+    if (!formData.fullName) {
+      errors.fullName = "Full Name is required";
+    }
+
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      errors.email = "Valid Email is required";
+    }
+
+    if (!formData.phoneno || !phoneRegex.test(formData.phoneno)) {
+      errors.phoneno = "Valid Phone Number is required";
+    }
+
+    if (!formData.message) {
+      errors.message = "Message is required";
+    }
+
+    if (Object.keys(errors).length) {
+      setFormErrors(errors);
+      setIsLoading(false);
+      return
+    } else {
+      setFormErrors({});
+    }
+
+    try {
+      const res = await axios.post('/api/user/message', formData);
+      console.log(res);
+      setSuccessMessage(res?.data?.message);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+      setFormData({
+        fullName: '',
+        email: '',
+        phoneno: '',
+        message: ''
+      });
     }
   }
 
@@ -82,42 +146,93 @@ const Contact = () => {
               Send Us a Message
             </h2>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleContact}>
               <input
                 type="text"
                 name="name"
+                value={formData.fullName}
                 placeholder="Full Name"
+                onChange={(e) => setFormData((prev => ({
+                  ...prev,
+                  fullName: e.target.value
+                })))}
                 className="w-full py-3 px-4 rounded-lg border border-black text-gray-800 focus:border-blue-500 focus:outline-none"
               />
+              {formErrors.fullName && <span className="text-red-500">Full Name is required</span>}
 
               <input
                 type="email"
                 name="email"
+                value={formData.email}
                 placeholder="Email"
+                onChange={(e) => setFormData((prev => ({
+                  ...prev,
+                  email: e.target.value
+                })))}
                 className="w-full py-3 px-4 rounded-lg border border-black text-gray-800 focus:border-blue-500 focus:outline-none"
               />
+              {formErrors.email && <span className="text-red-500">Valid Email is required</span>}
 
               <input
                 type="tel"
                 name="phone"
+                value={formData.phoneno}
                 placeholder="Phone Number"
+                onChange={(e) => setFormData((prev => ({
+                  ...prev,
+                  phoneno: e.target.value
+                })))}
                 className="w-full py-3 px-4 rounded-lg border border-black text-gray-800 focus:border-blue-500 focus:outline-none"
               />
+              {formErrors.phoneno && <span className="text-red-500">Valid Phone Number is required</span>}
 
               <textarea
                 name="message"
+                value={formData.message}
                 rows="4"
                 placeholder="Your Message"
+                onChange={(e) => setFormData((prev) => ({
+                  ...prev,
+                  message: e.target.value
+                }))}
                 className="w-full py-3 px-4 rounded-lg border border-black text-gray-800 focus:border-blue-500 focus:outline-none"
               ></textarea>
+              {formErrors.message && <span className="text-red-500">Message is required</span>}
 
               {/* Submit Button with Blue Color & Shadow */}
               <button
+                disabled={isLoading}
                 type="submit"
                 className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-xl hover:bg-blue-500 transition duration-300"
               >
-                Submit
+                <div className="flex justify-center items-center">
+                  {isLoading ? (  
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    <span>Submit</span>
+                  )}
+                </div>
               </button>
+              {successMessage && <span className="text-green-500">{successMessage}</span>}
             </form>
           </div>
         </div>
