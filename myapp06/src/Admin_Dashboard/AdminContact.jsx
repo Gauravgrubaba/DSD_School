@@ -11,10 +11,15 @@ const AdminContact = () => {
   const [messages, setMessages] = useState([]);
 
   const [selectedStatus, setSelectedStatus] = useState("All");
-
   const [changingStatusIndex, setChangingStatusIndex] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const messagesPerPage = 5;
 
   const filteredMessage = selectedStatus === 'All' ? messages : messages.filter((msg) => msg.status === selectedStatus);
+  const totalPages = Math.ceil(filteredMessage.length / messagesPerPage);
+  const indexOfLastMessage = currentPage * messagesPerPage;
+  const indexOfFirstMessage = indexOfLastMessage - messagesPerPage;
+  const currentMessages = filteredMessage.slice(indexOfFirstMessage, indexOfLastMessage);
 
   const handleDeleteMapLocation = () => {
     setMapLocation('');
@@ -22,13 +27,7 @@ const AdminContact = () => {
 
   const handleUpdateMapLocation = async (e) => {
     e.preventDefault();
-
-    console.log(mapLocation);
-
-    if (!mapLocation) {
-      return alert("Map location cannot be empty")
-    }
-
+    if (!mapLocation) return alert("Map location cannot be empty");
     try {
       const res = await axios.patch('/api/user/mapaddress', { mapLocation });
       console.log(res);
@@ -39,27 +38,13 @@ const AdminContact = () => {
 
   const handleUpdateAddress = async (e) => {
     e.preventDefault();
-
-    if (!addressLine1) {
-      return alert("Address line 1 is required")
-    }
-    if (!city) {
-      return alert('City is required')
-    }
-    if (!pin) {
-      return alert('Pincode is required')
-    }
-    if (!(pin && /^\d{6}$/.test(pin))) {
-      return alert("Pin can only contain numbers and should be of length 6")
-    }
-    if (!state) {
-      return alert("State is required")
-    }
-
-    const data = { addressLine1, addressLine2, city, pin, state };
+    if (!addressLine1) return alert("Address line 1 is required");
+    if (!city) return alert('City is required');
+    if (!pin || !/^\d{6}$/.test(pin)) return alert("Pin must be 6 digits");
+    if (!state) return alert("State is required");
 
     try {
-      const res = await axios.patch('/api/user/address', data);
+      const res = await axios.patch('/api/user/address', { addressLine1, addressLine2, city, pin, state });
       console.log(res);
     } catch (error) {
       console.log(error);
@@ -76,32 +61,30 @@ const AdminContact = () => {
     try {
       const receivedMessages = await axios.get('/api/user/message');
       setMessages(receivedMessages?.data?.messages);
-      console.log(receivedMessages?.data?.messages);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
     handleGetMessages();
-  }, [])
+  }, []);
 
   const handleChangeStatus = async (id) => {
     setChangingStatusIndex(id);
     try {
       const res = await axios.patch(`/api/user/message/${id}`);
-      console.log(res);
       setMessages(res?.data?.allMessage);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setChangingStatusIndex(null);
     }
   };
 
-  const handlePageSelect = (e) => {
-    setCurrentPage(Number(e.target.value));
-  };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedStatus]);
 
   return (
     <div className="container mx-auto p-6">
@@ -111,140 +94,73 @@ const AdminContact = () => {
         {/* Google Map Location Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-300">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Google Map Location</h3>
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">Google Map Embed Link</label>
-            <input
-              type="text"
-              value={mapLocation}
-              onChange={handleMapLocationChange}
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter Google Map Embed URL"
-            />
-          </div>
+          <input
+            type="text"
+            value={mapLocation}
+            onChange={(e) => setMapLocation(e.target.value)}
+            placeholder="Enter Google Map Embed URL"
+            className="w-full p-3 mb-4 border-2 rounded-md"
+          />
           <div className="flex gap-4">
-            <button
-              className="bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-800 transition"
-              onClick={handleDeleteMapLocation}
-            >
-              Delete Map Location
-            </button>
-            <button
-              className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-800 transition"
-              onClick={handleUpdateMapLocation}
-            >
-              Update Map Location
-            </button>
+            <button className="bg-red-600 text-white px-6 py-3 rounded-full" onClick={handleDeleteMapLocation}>Delete</button>
+            <button className="bg-green-600 text-white px-6 py-3 rounded-full" onClick={handleUpdateMapLocation}>Update</button>
           </div>
           {mapLocation && (
             <div className="mt-4">
-              <iframe
-                title="Google Map"
-                src={mapLocation}
-                width="100%"
-                height="250"
-                frameBorder="0"
-                style={{ border: 0 }}
-                allowFullScreen=""
-              ></iframe>
+              <iframe src={mapLocation} width="100%" height="250" frameBorder="0" allowFullScreen title="Map"></iframe>
             </div>
           )}
         </div>
 
-        {/* Address Management Section */}
+        {/* Address Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-300">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Address Management</h3>
-
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">Address Line 1<em className='text-red-500'>*</em></label>
-            <input
-              type="text"
-              value={addressLine1}
-              onChange={(e) => setAddressLine1(e.target.value)}
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter Address Line 1"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">Address Line 2</label>
-            <input
-              type="text"
-              value={addressLine2}
-              onChange={(e) => setAddressLine2(e.target.value)}
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter Address Line 2"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">City<em className='text-red-500'>*</em></label>
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter City"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">Pin Code<em className='text-red-500'>*</em></label>
-            <input
-              type="text"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter Pin Code"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-lg font-semibold">State<em className='text-red-500'>*</em></label>
-            <select
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select State</option>
-              <option>Uttar Pradesh</option>
-              <option>Maharashtra</option>
-              <option>Bihar</option>
-              <option>Delhi</option>
-              <option>Madhya Pradesh</option>
-              <option>Tamil Nadu</option>
-              <option>Punjab</option>
-              <option>West Bengal</option>
-              <option>Rajasthan</option>
-              <option>Haryana</option>
-              <option>Gujarat</option>
-              <option>Karnataka</option>
-              <option>Assam</option>
-              <option>Jharkhand</option>
-              <option>Odisha</option>
-              <option>Chhattisgarh</option>
-              <option>Kerala</option>
-              <option>Andhra Pradesh</option>
-              <option>Uttarakhand</option>
-              <option>Other</option>
-            </select>
-          </div>
-
-          <div className="flex gap-4">
-            <button
-              className="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-800 transition"
-              onClick={handleUpdateAddress}
-            >
-              Update Address
-            </button>
-          </div>
+          <input
+            type="text"
+            value={addressLine1}
+            onChange={(e) => setAddressLine1(e.target.value)}
+            placeholder="Address Line 1"
+            className="w-full p-3 mb-4 border-2 rounded-md"
+          />
+          <input
+            type="text"
+            value={addressLine2}
+            onChange={(e) => setAddressLine2(e.target.value)}
+            placeholder="Address Line 2"
+            className="w-full p-3 mb-4 border-2 rounded-md"
+          />
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="City"
+            className="w-full p-3 mb-4 border-2 rounded-md"
+          />
+          <input
+            type="text"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            placeholder="Pin Code"
+            className="w-full p-3 mb-4 border-2 rounded-md"
+          />
+          <select
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            className="w-full p-3 mb-4 border-2 rounded-md"
+          >
+            <option value="">Select State</option>
+            {["Uttar Pradesh", "Maharashtra", "Bihar", "Delhi", "Madhya Pradesh", "Tamil Nadu", "Punjab", "West Bengal", "Rajasthan", "Haryana", "Gujarat", "Karnataka", "Assam", "Jharkhand", "Odisha", "Chhattisgarh", "Kerala", "Andhra Pradesh", "Uttarakhand", "Other"].map(state => (
+              <option key={state}>{state}</option>
+            ))}
+          </select>
+          <button className="bg-green-600 text-white px-6 py-3 rounded-full" onClick={handleUpdateAddress}>Update Address</button>
         </div>
 
-        {/* Message Management Section */}
+        {/* Messages Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-300">
           <div className="mb-4">
-            <label htmlFor="statusFilter" className="mr-2 font-medium">Filter by Status:</label>
+            <label className="mr-2 font-medium">Filter by Status:</label>
             <select
-              id="statusFilter"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="border border-gray-300 rounded px-2 py-1"
@@ -254,74 +170,41 @@ const AdminContact = () => {
               <option value="Contacted">Contacted</option>
             </select>
           </div>
-          <h3 className="text-xl font-semibold mb-4 text-blue-600">Messages from Users</h3>
-          {filteredMessage.length === 0 ? (
+          <h3 className="text-xl font-semibold mb-4 text-blue-600">Messages</h3>
+          {currentMessages.length === 0 ? (
             <p>No messages to show</p>
           ) : (
-            filteredMessage.map((msg) => (
-              <div key={msg._id} className="bg-white p-4 mb-4 rounded-md shadow-sm border-2 border-gray-200">
-                <h4 className="font-semibold">Full Name: {msg.fullName}</h4>
-                <h4 className="font-semibold">Email: {msg.email}</h4>
-                <h4 className="font-semibold">Phone No.: {msg.phoneno}</h4>
-                <p className="font-semibold">Message: {msg.message}</p>
-                <h4 className="font-semibold">
-                  Date And Time: {new Date(msg.dateAndTime).toLocaleString("en-IN", {
-                    timeZone: "Asia/Kolkata"
-                  })}
-                </h4>
-                <h4 className="font-semibold">Status: <em className={msg.status === "Pending" ? "text-red-500" : "text-green-500"}>{msg.status}</em></h4>
-                {msg.status === "Pending" && <div className="flex gap-4 mt-3">
+            currentMessages.map((msg) => (
+              <div key={msg._id} className="bg-white p-4 mb-4 rounded-md border shadow-sm">
+                <h4><b>Name:</b> {msg.fullName}</h4>
+                <h4><b>Email:</b> {msg.email}</h4>
+                <h4><b>Phone:</b> {msg.phoneno}</h4>
+                <p><b>Message:</b> {msg.message}</p>
+                <p><b>Time:</b> {new Date(msg.dateAndTime).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
+                <p><b>Status:</b> <span className={msg.status === "Pending" ? "text-red-500" : "text-green-600"}>{msg.status}</span></p>
+                {msg.status === "Pending" && (
                   <button
-                    className="text-red-600 hover:text-red-800"
+                    className="mt-2 text-blue-500 hover:text-blue-800"
                     onClick={() => handleChangeStatus(msg._id)}
                   >
-                    {changingStatusIndex === msg._id ? (
-                      <svg
-                        className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                        ></path>
-                      </svg>
-                    ) : (
-                      <span>Change Status to Contacted</span>
-                    )}
+                    {changingStatusIndex === msg._id ? 'Updating...' : 'Mark as Contacted'}
                   </button>
-                </div>}
+                )}
               </div>
             ))
           )}
 
           {/* Pagination Controls */}
-          <div className="flex justify-center my-4 gap-4">
-            <button
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </button>
-            <span className="self-center">Page {currentPage} of {totalPages}</span>
-            <button
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
+          <div className="flex flex-wrap justify-center mt-4 gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1 rounded-full border ${page === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+              >
+                {page}
+              </button>
+            ))}
           </div>
         </div>
       </div>
