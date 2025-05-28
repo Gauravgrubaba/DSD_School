@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 
 const AdminContact = () => {
@@ -8,15 +8,12 @@ const AdminContact = () => {
   const [city, setCity] = useState('');
   const [pin, setPin] = useState('');
   const [state, setState] = useState('');
-  const [messages, setMessages] = useState([
-    { id: 1, name: 'John Doe', message: 'Looking for more information on admissions.' },
-    { id: 2, name: 'Jane Smith', message: 'How can I join extracurricular activities?' },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [updatedMessage, setUpdatedMessage] = useState('');
 
-  const handleMapLocationChange = (e) => {
-    setMapLocation(e.target.value);
-  };
+  const [selectedStatus, setSelectedStatus] = useState("All");
+
+  const filteredMessage = selectedStatus === 'All' ? messages : messages.filter((msg) => msg.status === selectedStatus);
 
   const handleDeleteMapLocation = () => {
     setMapLocation('');
@@ -27,7 +24,7 @@ const AdminContact = () => {
 
     console.log(mapLocation);
 
-    if(!mapLocation) {
+    if (!mapLocation) {
       return alert("Map location cannot be empty")
     }
 
@@ -42,19 +39,19 @@ const AdminContact = () => {
   const handleUpdateAddress = async (e) => {
     e.preventDefault();
 
-    if(!addressLine1) {
+    if (!addressLine1) {
       return alert("Address line 1 is required")
     }
-    if(!city) {
+    if (!city) {
       return alert('City is required')
     }
-    if(!pin) {
+    if (!pin) {
       return alert('Pincode is required')
     }
-    if(!(pin && /^\d{6}$/.test(pin))) {
+    if (!(pin && /^\d{6}$/.test(pin))) {
       return alert("Pin can only contain numbers and should be of length 6")
     }
-    if(!state) {
+    if (!state) {
       return alert("State is required")
     }
 
@@ -80,9 +77,28 @@ const AdminContact = () => {
     }
   };
 
-  const handleDeleteMessage = (id) => {
-    const updatedMessages = messages.filter((msg) => msg.id !== id);
-    setMessages(updatedMessages);
+  const handleGetMessages = async () => {
+    try {
+      const receivedMessages = await axios.get('/api/user/message');
+      setMessages(receivedMessages?.data?.messages);
+      console.log(receivedMessages?.data?.messages);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    handleGetMessages();
+  }, [])
+
+  const handleChangeStatus = async (id) => {
+    try {
+      const res = await axios.patch(`/api/user/message/${id}`);
+      console.log(res);
+      setMessages(res?.data?.allMessage);
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   const handleUpdateMessage = (id) => {
@@ -235,34 +251,43 @@ const AdminContact = () => {
 
         {/* Message Management Section */}
         <div className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-300">
+          <div className="mb-4">
+            <label htmlFor="statusFilter" className="mr-2 font-medium">Filter by Status:</label>
+            <select
+              id="statusFilter"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1"
+            >
+              <option value="All">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Contacted">Contacted</option>
+            </select>
+          </div>
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Messages from Users</h3>
-          {messages.length === 0 ? (
+          {filteredMessage.length === 0 ? (
             <p>No messages to show</p>
           ) : (
-            messages.map((msg) => (
-              <div key={msg.id} className="bg-white p-4 mb-4 rounded-md shadow-sm border-2 border-gray-200">
-                <h4 className="font-semibold">{msg.name}</h4>
-                <p>{msg.message}</p>
-                <textarea
-                  value={updatedMessage}
-                  onChange={(e) => setUpdatedMessage(e.target.value)}
-                  className="w-full p-3 border-2 border-gray-300 rounded-md mt-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Update Message"
-                ></textarea>
-                <div className="flex gap-4 mt-3">
-                  <button
-                    className="text-blue-600 hover:text-blue-800"
-                    onClick={() => handleUpdateMessage(msg.id)}
-                  >
-                    Update Message
-                  </button>
+            filteredMessage.map((msg) => (
+              <div key={msg._id} className="bg-white p-4 mb-4 rounded-md shadow-sm border-2 border-gray-200">
+                <h4 className="font-semibold">Full Name: {msg.fullName}</h4>
+                <h4 className="font-semibold">Email: {msg.email}</h4>
+                <h4 className="font-semibold">Phone No.: {msg.phoneno}</h4>
+                <p className="font-semibold">Message: {msg.message}</p>
+                <h4 className="font-semibold">
+                  Date And Time: {new Date(msg.dateAndTime).toLocaleString("en-IN", {
+                    timeZone: "Asia/Kolkata"
+                  })}
+                </h4>
+                <h4 className="font-semibold">Status: <em className={msg.status === "Pending" ? "text-red-500" : "text-green-500"}>{msg.status}</em></h4>
+                {msg.status === "Pending" && <div className="flex gap-4 mt-3">
                   <button
                     className="text-red-600 hover:text-red-800"
-                    onClick={() => handleDeleteMessage(msg.id)}
+                    onClick={() => handleChangeStatus(msg._id)}
                   >
-                    Delete Message
+                    Change Status
                   </button>
-                </div>
+                </div>}
               </div>
             ))
           )}
