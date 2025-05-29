@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from "axios";
 
 const initialWeekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -30,6 +31,10 @@ const AdminAcademics = () => {
     console.log(files);
   };
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [selectedClassData, setSelectedClassData] = useState({});
+
   // Add current hero image + text to heroSections array
   const handleAddHeroSection = () => {
     if (!heroImage) {
@@ -58,26 +63,61 @@ const AdminAcademics = () => {
   };
 
   // Save new entry
-  const handleSaveNewEntry = () => {
+  const handleSaveNewEntry = async () => {
     const { subject, time } = newEntry;
+
+    console.log(selectedClassData);
+
+    const data = {
+      day: addingDay,
+      subject: newEntry.subject,
+      time: newEntry.time
+    }
+
     if (!subject.trim() || !time.trim()) {
       alert('Please fill both subject and time');
       return;
     }
-    setTimeTables((prev) => {
-      const classData = prev[selectedClass] || {};
-      const dayData = classData[addingDay] || [];
-      return {
-        ...prev,
-        [selectedClass]: {
-          ...classData,
-          [addingDay]: [...dayData, { subject: subject.trim(), time: time.trim() }],
-        },
-      };
-    });
-    setAddingDay(null);
-    setNewEntry({ subject: '', time: '' });
+    try {
+      const res = await axios.patch(`/api/academic/class/${selectedClassData._id}`, data);
+      console.log(res?.data?.result?.timeTable);
+      setTimeTables(res?.data?.result?.timeTable);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setAddingDay(null);
+      setNewEntry({ subject: '', time: '' });
+    }
   };
+
+  useEffect(() => {
+    console.log("Entries Updated");
+  }, [timeTables])
+
+  useEffect(() => {
+    handleClassCreation(selectedClass);
+  }, [])
+
+  const handleClassCreation = async (cls) => {
+    setSelectedClass(cls);
+    setIsLoading(true);
+
+    const data = {
+      className: cls
+    }
+
+    try {
+      const res = await axios.post('/api/academic/class', data);
+      console.log(res?.data?.classData);
+      setSelectedClassData(res?.data?.classData);
+      setTimeTables(res?.data?.classData?.timeTable);
+      console.log(res?.data?.classData?.timeTable);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   // Delete Entry
   const handleDeleteEntry = (day, index) => {
@@ -176,12 +216,11 @@ const AdminAcademics = () => {
           {[1, 2, 3, 4, 5].map((cls) => (
             <button
               key={cls}
-              onClick={() => setSelectedClass(cls)}
-              className={`px-4 py-2 rounded-lg font-medium shadow-sm ${
-                selectedClass === cls
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 hover:bg-gray-300'
-              } transition`}
+              onClick={() => handleClassCreation(cls)}
+              className={`px-4 py-2 rounded-lg font-medium shadow-sm ${selectedClass === cls
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 hover:bg-gray-300'
+                } transition`}
             >
               Class {cls}
             </button>
@@ -236,8 +275,8 @@ const AdminAcademics = () => {
                   </button>
                 )}
               </div>
-              <ul className="space-y-2">
-                {(timeTables[selectedClass]?.[day] || []).map((entry, index) => {
+              {!isLoading ? <ul className="space-y-2">
+                {(timeTables?.[day] || []).map((entry, index) => {
                   const isEditing =
                     editingEntry.day === day && editingEntry.index === index;
                   return (
@@ -287,7 +326,7 @@ const AdminAcademics = () => {
                       ) : (
                         <>
                           <span>
-                            <strong>{entry.time}</strong> – {entry.subject}
+                            <strong>{entry.timing}</strong> – {entry.subjectName}
                           </span>
                           <div className="flex space-x-3">
                             <button
@@ -309,10 +348,31 @@ const AdminAcademics = () => {
                   );
                 })}
                 {/* Show message if no entries */}
-                {(timeTables[selectedClass]?.[day]?.length || 0) === 0 && addingDay !== day && (
+                {(timeTables?.[day]?.length || 0) === 0 && addingDay !== day && (
                   <p className="text-gray-400 italic">No entries added yet.</p>
                 )}
-              </ul>
+              </ul> : (
+                <svg
+                  className="animate-spin h-5 w-5 text-red-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+              )}
             </div>
           ))}
         </div>
