@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, useNavigate, Outlet } from "react-router-dom";
 import {
   FaHome,
@@ -7,98 +7,108 @@ import {
   FaPhone,
   FaUserPlus,
   FaCalendarAlt,
+  FaBars,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("user"); // optional based on your app
-    navigate("/"); // Redirect to the Home page
+    localStorage.removeItem("user");
+    navigate("/");
   };
+
+  const navItems = [
+    { to: "/dashboard/AdminHome", label: "Home", icon: <FaHome /> },
+    { to: "/dashboard/AdminAbout", label: "About", icon: <FaInfoCircle /> },
+    { to: "/dashboard/AdminAcademics", label: "Academics", icon: <FaBook /> },
+    { to: "/dashboard/AdminEvents", label: "Events", icon: <FaCalendarAlt /> },
+    { to: "/dashboard/AdminAdmission", label: "Admission", icon: <FaUserPlus /> },
+    { to: "/dashboard/AdminContacts", label: "Contacts", icon: <FaPhone /> },
+  ];
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-48 bg-gradient-to-r from-purple-600 to-indigo-700 shadow-md p-4 fixed top-0 bottom-0">
-        <div className="text-center mb-6 mt-4 flex justify-center items-center">
-          <h2 className="text-2xl font-bold text-white bg-gradient-to-r from-yellow-400 to-red-500 rounded-full p-4 text-center w-32 h-32 flex items-center justify-center">
-            DSD SCHOOL
-          </h2>
+      {/* Sidebar for desktop */}
+      <aside className="hidden md:flex w-52 bg-gradient-to-r from-purple-600 to-indigo-700 flex-col items-center shadow-md fixed top-0 bottom-0 z-10">
+        <div className="mt-6 mb-4 text-white font-bold text-xl text-center bg-gradient-to-r from-yellow-400 to-red-500 rounded-full w-32 h-32 flex items-center justify-center">
+          DSD SCHOOL
         </div>
-        <nav className="space-y-2 mt-4">
-          <NavLink
-            to="/dashboard/AdminHome"
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 transition ${isActive ? "bg-indigo-300 font-semibold" : "text-white"}`
-            }
-          >
-            <FaHome /> Home
-          </NavLink>
-
-          <NavLink
-            to="/dashboard/AdminAbout"
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 transition ${isActive ? "bg-indigo-300 font-semibold" : "text-white"}`
-            }
-          >
-            <FaInfoCircle /> About
-          </NavLink>
-
-          <NavLink
-            to="/dashboard/AdminAcademics"
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 transition ${isActive ? "bg-indigo-300 font-semibold" : "text-white"}`
-            }
-          >
-            <FaBook /> Academics
-          </NavLink>
-
-          <NavLink
-            to="/dashboard/AdminEvents"
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 transition ${isActive ? "bg-indigo-300 font-semibold" : "text-white"}`
-            }
-          >
-            <FaCalendarAlt /> Events
-          </NavLink>
-
-          <NavLink
-            to="/dashboard/AdminAdmission"
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 transition ${isActive ? "bg-indigo-300 font-semibold" : "text-white"}`
-            }
-          >
-            <FaUserPlus /> Admission
-          </NavLink>
-
-          <NavLink
-            to="/dashboard/AdminContacts"
-            className={({ isActive }) =>
-              `flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 transition ${isActive ? "bg-indigo-300 font-semibold" : "text-white"}`
-            }
-          >
-            <FaPhone /> Contacts
-          </NavLink>
+        <nav className="flex flex-col space-y-3 w-full px-4">
+          {navItems.map(({ to, label, icon }) => (
+            <NavLink
+              key={label}
+              to={to}
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-100 transition ${
+                  isActive ? "bg-indigo-300 font-semibold text-black" : "text-white"
+                }`
+              }
+            >
+              {icon} {label}
+            </NavLink>
+          ))}
         </nav>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 ml-48">
-        {/* Top Header */}
-        <header className="bg-white shadow-md px-6 py-4 flex justify-between items-center fixed top-0 left-48 right-0 z-10">
+      <div className="flex-1 md:ml-52 w-full">
+        {/* Header */}
+        <header className="bg-white shadow-md px-6 py-4 flex justify-between items-center sticky top-0 z-20">
           <h1 className="text-xl font-semibold text-gray-800">Admin Dashboard</h1>
+
+          {/* Desktop Logout Button */}
           <button
             onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+            className="hidden md:block bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
           >
             Logout
           </button>
+
+          {/* Mobile Manager Button */}
+          <div className="md:hidden relative">
+            <button
+              className="bg-gradient-to-r from-yellow-400 to-red-500 text-white px-4 py-2 rounded-full text-sm font-semibold"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              Manager
+            </button>
+
+            {mobileMenuOpen && (
+              <div className="absolute right-0 mt-2 bg-white border rounded-lg shadow-lg w-52 z-30">
+                {navItems.map(({ to, label, icon }) => (
+                  <NavLink
+                    key={label}
+                    to={to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 px-4 py-2 hover:bg-indigo-100 transition ${
+                        isActive ? "bg-indigo-200 font-semibold text-indigo-900" : "text-gray-800"
+                      }`
+                    }
+                  >
+                    {icon} {label}
+                  </NavLink>
+                ))}
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 rounded-b-lg"
+                >
+                  <FaSignOutAlt /> Logout
+                </button>
+              </div>
+            )}
+          </div>
         </header>
 
-        {/* Dynamic Page Content */}
-        <main className="mt-20 px-6 py-4 bg-gray-50 min-h-screen">
-          <Outlet /> {/* Renders nested routes here */}
+        {/* Dynamic Content */}
+        <main className="mt-4 px-6 py-4 bg-gray-50 min-h-screen">
+          <Outlet />
         </main>
       </div>
     </div>
