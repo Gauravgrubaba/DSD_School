@@ -1,65 +1,64 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 
-const initialWeekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-const AdminAcademics = () => {
-  // Hero Section States
+export default function AdminAcademics() {
   const [heroImage, setHeroImage] = useState(null);
-  const [heroText, setHeroText] = useState('');
-  const [heroSections, setHeroSections] = useState([]); // array of {image, text}
+  const [heroText, setHeroText] = useState("");
+  const [heroSections, setHeroSections] = useState([]);
 
-  // Time Table States
-  const [selectedClass, setSelectedClass] = useState(1);
-  const [timeTables, setTimeTables] = useState({});
+  const [classes, setClasses] = useState([]);
+  const [selectedClassIndex, setSelectedClassIndex] = useState(null);
 
-  // For managing "Add new entry" inputs per day
-  const [addingDay, setAddingDay] = useState(null);
-  const [newEntry, setNewEntry] = useState({ subject: '', time: '' });
+  const [selectedSectionIndex, setSelectedSectionIndex] = useState(null);
 
-  // For editing entries, store {day, index} being edited and edit values
-  const [editingEntry, setEditingEntry] = useState({ day: null, index: null });
-  const [editEntryValues, setEditEntryValues] = useState({ subject: '', time: '' });
+  // For new class, allow free text
+  const [newClassName, setNewClassName] = useState("");
 
-  // Image Handler for current image input
+  // For new section, allow free text
+  const [newSectionName, setNewSectionName] = useState("");
+
+  // Timetable entry states
+  const [newEntryDay, setNewEntryDay] = useState(weekdays[0]);
+  const [newEntrySubject, setNewEntrySubject] = useState("");
+  const [newEntryTime, setNewEntryTime] = useState("");
+  const [newEntryPeriod, setNewEntryPeriod] = useState("AM");
+
+  const [editingEntryIndex, setEditingEntryIndex] = useState(null);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setHeroImage(imageUrl);
     }
-    console.log(files);
   };
 
   const [isLoading, setIsLoading] = useState(false);
 
   const [selectedClassData, setSelectedClassData] = useState({});
-
-  // Add current hero image + text to heroSections array
+  
   const handleAddHeroSection = () => {
-    if (!heroImage) {
-      alert('Please select an image first!');
-      return;
-    }
-    if (!heroText.trim()) {
-      alert('Please enter hero text!');
-      return;
-    }
+    if (!heroImage || !heroText.trim()) return alert("Please provide image and text.");
     setHeroSections((prev) => [...prev, { image: heroImage, text: heroText }]);
     setHeroImage(null);
-    setHeroText('');
+    setHeroText("");
   };
 
-  // Start adding entry for a day
-  const handleStartAddEntry = (day) => {
-    setAddingDay(day);
-    setNewEntry({ subject: '', time: '' });
+  const handleDeleteHero = (index) => {
+    const updated = [...heroSections];
+    updated.splice(index, 1);
+    setHeroSections(updated);
   };
 
-  // Cancel adding new entry
-  const handleCancelAddEntry = () => {
-    setAddingDay(null);
-    setNewEntry({ subject: '', time: '' });
+  const handleEditHero = (index) => {
+    const selected = heroSections[index];
+    setHeroImage(selected.image);
+    setHeroText(selected.text);
+    const updated = [...heroSections];
+    updated.splice(index, 1);
+    setHeroSections(updated);
   };
 
   // Save new entry
@@ -126,90 +125,139 @@ const AdminAcademics = () => {
       updated[selectedClass][day].splice(index, 1);
       return { ...updated };
     });
+    
+  const addClass = () => {
+    const trimmedName = newClassName.trim();
+    if (!trimmedName) return alert("Enter a class name.");
+    if (classes.some((c) => c.className.toLowerCase() === trimmedName.toLowerCase()))
+      return alert("Class already exists.");
+    setClasses([...classes, { className: trimmedName, sections: [] }]);
+    setNewClassName("");
   };
 
-  // Start editing an entry
-  const handleStartEditEntry = (day, index) => {
-    const entry = timeTables[selectedClass][day][index];
-    setEditingEntry({ day, index });
-    setEditEntryValues({ subject: entry.subject, time: entry.time });
+  const deleteClass = (index) => {
+    const updated = [...classes];
+    updated.splice(index, 1);
+    setClasses(updated);
+    setSelectedClassIndex(null);
+    setSelectedSectionIndex(null);
   };
 
-  // Cancel editing
-  const handleCancelEdit = () => {
-    setEditingEntry({ day: null, index: null });
-    setEditEntryValues({ subject: '', time: '' });
-  };
-
-  // Save edited entry
-  const handleSaveEdit = () => {
-    const { subject, time } = editEntryValues;
-    if (!subject.trim() || !time.trim()) {
-      alert('Please fill both subject and time');
-      return;
-    }
-    setTimeTables((prev) => {
-      const updated = { ...prev };
-      updated[selectedClass][editingEntry.day][editingEntry.index] = {
-        subject: subject.trim(),
-        time: time.trim(),
-      };
-      return { ...updated };
+  const addSection = () => {
+    if (selectedClassIndex === null) return alert("Select class first.");
+    const trimmedName = newSectionName.trim();
+    if (!trimmedName) return alert("Enter a section name.");
+    const selectedClass = classes[selectedClassIndex];
+    if (
+      selectedClass.sections.some(
+        (s) => s.sectionName.toLowerCase() === trimmedName.toLowerCase()
+      )
+    )
+      return alert("Section exists.");
+    const updated = [...classes];
+    updated[selectedClassIndex].sections.push({
+      sectionName: trimmedName,
+      timetable: weekdays.reduce((acc, day) => {
+        acc[day] = [];
+        return acc;
+      }, {}),
     });
-    setEditingEntry({ day: null, index: null });
-    setEditEntryValues({ subject: '', time: '' });
+    setClasses(updated);
+    setNewSectionName("");
+  };
+
+  const deleteSection = (index) => {
+    const updated = [...classes];
+    updated[selectedClassIndex].sections.splice(index, 1);
+    setClasses(updated);
+    setSelectedSectionIndex(null);
+  };
+
+  const addTimetableEntry = () => {
+    if (!newEntrySubject || !newEntryTime) return alert("Enter subject and time");
+    const timeWithPeriod = `${newEntryTime} ${newEntryPeriod}`;
+    const updated = [...classes];
+    const dayEntries = updated[selectedClassIndex].sections[selectedSectionIndex].timetable[newEntryDay];
+
+    if (editingEntryIndex !== null) {
+      dayEntries[editingEntryIndex] = { subject: newEntrySubject, time: timeWithPeriod };
+      setEditingEntryIndex(null);
+    } else {
+      if (dayEntries.some((e) => e.subject === newEntrySubject && e.time === timeWithPeriod)) {
+        return alert("Duplicate entry.");
+      }
+      dayEntries.push({ subject: newEntrySubject, time: timeWithPeriod });
+    }
+
+    setClasses(updated);
+    setNewEntrySubject("");
+    setNewEntryTime("");
+    setNewEntryPeriod("AM");
+  };
+
+  const handleEditTimetableEntry = (idx) => {
+    const entry = classes[selectedClassIndex].sections[selectedSectionIndex].timetable[newEntryDay][idx];
+    const [time, period] = entry.time.split(" ");
+    setNewEntrySubject(entry.subject);
+    setNewEntryTime(time);
+    setNewEntryPeriod(period);
+    setEditingEntryIndex(idx);
+  };
+
+  const handleDeleteTimetableEntry = (idx) => {
+    const updated = [...classes];
+    updated[selectedClassIndex].sections[selectedSectionIndex].timetable[newEntryDay].splice(idx, 1);
+    setClasses(updated);
   };
 
   return (
-    <div className="p-6 space-y-12 max-w-7xl mx-auto">
-      {/* Hero Section */}
-      <div className="border rounded-xl p-6 shadow-md space-y-6">
-        <h2 className="text-2xl font-semibold mb-4">📸 Hero Section (Multiple Images)</h2>
-        <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="border rounded px-3 py-2 w-full md:w-auto"
-          />
-          <input
-            type="text"
-            placeholder="Enter hero text"
-            className="border rounded px-3 py-2 flex-grow"
-            value={heroText}
-            onChange={(e) => setHeroText(e.target.value)}
-          />
-          <button
-            onClick={handleAddHeroSection}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition whitespace-nowrap"
-          >
-            Add Hero Section
-          </button>
-        </div>
+    <div className="p-6 max-w-6xl mx-auto space-y-8">
+      <h1 className="text-3xl font-bold text-center">Admin Academics</h1>
 
-        {/* Display all added hero sections */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {heroSections.length === 0 && (
-            <p className="text-gray-500 italic col-span-full text-center">No hero sections added yet.</p>
-          )}
-          {heroSections.map((section, idx) => (
-            <div key={idx} className="relative h-52 rounded-lg overflow-hidden shadow-lg border">
-              <img
-                src={section.image}
-                alt={`Hero ${idx + 1}`}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-lg font-semibold px-4 text-center">
-                {section.text}
+      {/* Hero Section */}
+      <div className="border p-4 rounded shadow space-y-4">
+        <h2 className="text-xl font-semibold">Hero Section</h2>
+        <input type="file" accept="image/*" onChange={handleImageChange} />
+        <input
+          type="text"
+          value={heroText}
+          onChange={(e) => setHeroText(e.target.value)}
+          placeholder="Enter Text"
+          className="border p-2 w-full"
+        />
+        <button onClick={handleAddHeroSection} className="bg-blue-600 text-white px-4 py-2 rounded">
+          Add Hero Section
+        </button>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {heroSections.map((sec, i) => (
+            <div key={i} className="relative border rounded overflow-hidden">
+              <img src={sec.image} alt="Hero" className="w-full h-48 object-cover" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold">
+                {sec.text}
+              </div>
+              <div className="absolute top-2 right-2 space-x-2">
+                <button onClick={() => handleEditHero(i)} className="bg-yellow-400 px-2 py-1 rounded">Edit</button>
+                <button onClick={() => handleDeleteHero(i)} className="bg-red-500 px-2 py-1 rounded text-white">Delete</button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Time Table Section */}
-      <div className="border rounded-xl p-6 shadow-md space-y-6">
-        <h2 className="text-2xl font-semibold mb-4">📅 Timetable Manager (Class 1–5)</h2>
+      {/* Class Management */}
+      <div className="border p-4 rounded shadow space-y-4">
+        <h2 className="text-xl font-semibold">Classes</h2>
+        <input
+          type="text"
+          placeholder="Enter new class name (e.g. 7, 8, 9)"
+          value={newClassName}
+          onChange={(e) => setNewClassName(e.target.value)}
+          className="border p-2 w-48"
+        />
+        <button onClick={addClass} className="bg-green-600 text-white px-4 py-2 rounded ml-2">
+          Add Class
+        </button>
 
         {/* Class Selector */}
         <div className="flex space-x-3 mb-6 justify-center md:justify-start">
@@ -224,56 +272,49 @@ const AdminAcademics = () => {
             >
               Class {cls}
             </button>
+//         <div className="flex flex-wrap gap-2 mt-4">
+//           {classes.map((cls, i) => (
+//             <div key={i} className="flex items-center space-x-1">
+//               <button
+//                 className={`px-4 py-2 border rounded ${selectedClassIndex === i ? "bg-blue-600 text-white" : ""}`}
+//                 onClick={() => {
+//                   setSelectedClassIndex(i);
+//                   setSelectedSectionIndex(null);
+//                 }}
+//               >
+//                 Class {cls.className}
+//               </button>
+//               <button onClick={() => deleteClass(i)} className="text-red-500">✖</button>
+//             </div>
           ))}
         </div>
+      </div>
 
-        {/* Timetable Display */}
-        <div className="space-y-6 max-h-[500px] overflow-auto">
-          {initialWeekDays.map((day) => (
-            <div key={day} className="border p-4 rounded-lg bg-gray-50">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold text-lg">{day}</h3>
-                {addingDay === day ? (
-                  <div className="flex space-x-2 items-center">
-                    <input
-                      type="text"
-                      placeholder="Subject"
-                      value={newEntry.subject}
-                      onChange={(e) =>
-                        setNewEntry((prev) => ({ ...prev, subject: e.target.value }))
-                      }
-                      className="border rounded px-2 py-1 w-36"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Timing"
-                      value={newEntry.time}
-                      onChange={(e) =>
-                        setNewEntry((prev) => ({ ...prev, time: e.target.value }))
-                      }
-                      className="border rounded px-2 py-1 w-28"
-                    />
-                    <button
-                      onClick={handleSaveNewEntry}
-                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={handleCancelAddEntry}
-                      className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => handleStartAddEntry(day)}
-                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
-                  >
-                    Add
-                  </button>
-                )}
+      {/* Section Management */}
+      {selectedClassIndex !== null && (
+        <div className="border p-4 rounded shadow space-y-4">
+          <h2 className="text-xl font-semibold">Sections of Class {classes[selectedClassIndex].className}</h2>
+          <input
+            type="text"
+            placeholder="Enter new section name (e.g. A, B, C, D)"
+            value={newSectionName}
+            onChange={(e) => setNewSectionName(e.target.value)}
+            className="border p-2 w-48"
+          />
+          <button onClick={addSection} className="bg-purple-600 text-white px-4 py-2 rounded ml-2">
+            Add Section
+          </button>
+
+          <div className="flex flex-wrap gap-2 mt-4">
+            {classes[selectedClassIndex].sections.map((sec, i) => (
+              <div key={i} className="flex items-center space-x-1">
+                <button
+                  className={`px-4 py-2 border rounded ${selectedSectionIndex === i ? "bg-green-600 text-white" : ""}`}
+                  onClick={() => setSelectedSectionIndex(i)}
+                >
+                  Section {sec.sectionName}
+                </button>
+                <button onClick={() => deleteSection(i)} className="text-red-500">✖</button>
               </div>
               {!isLoading ? <ul className="space-y-2">
                 {(timeTables?.[day] || []).map((entry, index) => {
@@ -376,9 +417,7 @@ const AdminAcademics = () => {
             </div>
           ))}
         </div>
-      </div>
+      )}
     </div>
   );
-};
-
-export default AdminAcademics;
+}
