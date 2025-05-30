@@ -121,11 +121,11 @@ const AdminAcademics = () => {
 
   // Delete Entry
   const handleDeleteEntry = (day, index) => {
-    setTimeTables((prev) => {
-      const updated = { ...prev };
-      updated[selectedClass][day].splice(index, 1);
-      return { ...updated };
-    });
+    const data = {
+      className: selectedClass,
+      day: day,
+      index: index
+    }
   };
 
   // Start editing an entry
