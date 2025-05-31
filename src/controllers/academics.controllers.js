@@ -70,8 +70,30 @@ const handleGetAllTimeTable = async (req, res) => {
     }
 }
 
+const handleDeleteClass = async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        await ClassSchema.findByIdAndDelete(id);
+
+        const result = await ClassSchema.find({});
+
+        return res.status(200).json({
+            response: "success",
+            message: "Class deleted",
+            result: result
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while deleting class"
+        })
+    }
+}
+
 export {
     handleCreateClass,
     handleAddRoutine,
-    handleGetAllTimeTable
+    handleGetAllTimeTable,
+    handleDeleteClass
 }
