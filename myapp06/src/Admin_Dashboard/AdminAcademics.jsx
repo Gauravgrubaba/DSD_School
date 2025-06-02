@@ -215,7 +215,6 @@ export default function AdminAcademics() {
         <button onClick={handleAddHeroSection} className="bg-blue-600 text-white px-4 py-2 rounded">
           Add Hero Section
         </button>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {heroSections.map((sec, i) => (
             <div key={i} className="relative border rounded overflow-hidden">
@@ -242,6 +241,7 @@ export default function AdminAcademics() {
           onChange={(e) => setNewClassName(e.target.value)}
           className="border p-2 w-48"
         />
+
         <button onClick={handleCreateClass} className="bg-green-600 text-white px-4 py-2 rounded ml-2">
           Add Class
         </button>
