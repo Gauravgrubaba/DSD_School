@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -10,13 +11,8 @@ export default function AdminAcademics() {
   const [classes, setClasses] = useState([]);
   const [selectedClassIndex, setSelectedClassIndex] = useState(null);
 
-  const [selectedSectionIndex, setSelectedSectionIndex] = useState(null);
-
   // For new class, allow free text
   const [newClassName, setNewClassName] = useState("");
-
-  // For new section, allow free text
-  const [newSectionName, setNewSectionName] = useState("");
 
   // Timetable entry states
   const [newEntryDay, setNewEntryDay] = useState(weekdays[0]);
@@ -24,7 +20,8 @@ export default function AdminAcademics() {
   const [newEntryTime, setNewEntryTime] = useState("");
   const [newEntryPeriod, setNewEntryPeriod] = useState("AM");
 
-  const [editingEntryIndex, setEditingEntryIndex] = useState(null);
+  const [selectedClassData, setSelectedClassData] = useState({});
+  const [selectedClassTimeTable, setSelectedClassTimeTable] = useState({});
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -56,89 +53,176 @@ export default function AdminAcademics() {
     setHeroSections(updated);
   };
 
-  const addClass = () => {
+  const deleteClass = async (index) => {
+    const id = classes[index]?.id
+    console.log(id);
+
+    try {
+      const res = await axios.delete(`/api/academic/class/${id}`);
+      const result = res?.data?.result;
+
+      const grouped = [];
+
+      result.forEach(cls => {
+        const clsName = cls.className;
+        const timeTable = cls.timeTable;
+        const id = cls._id
+
+        grouped.push({
+          className: clsName,
+          timeTable: timeTable,
+          id: id
+        })
+      });
+
+      setClasses(grouped);
+      setSelectedClassIndex(null);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const addTimetableEntry = async () => {
+    const id = classes[selectedClassIndex]?.id;
+
+    if(!newEntrySubject) {
+      return alert("Subject name is required.")
+    }
+    if(!newEntryTime) {
+      return alert("Time is required")
+    }
+
+    const data = {
+      subject: newEntrySubject,
+      time: `${newEntryTime} ${newEntryPeriod}`,
+      day: newEntryDay
+    }
+
+    try {
+      const res = await axios.patch(`/api/academic/class/${id}`, data);
+      const updatedTimeTable = res?.data?.result?.timeTable;
+      setClasses(prev =>
+        prev.map((cls, idx) =>
+          idx === selectedClassIndex
+            ? { ...cls, timeTable: updatedTimeTable }
+            : cls
+        )
+      );
+      setSelectedClassTimeTable(res?.data?.result?.timeTable);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setNewEntrySubject("");
+      setNewEntryTime("");
+    }
+  };
+
+  useEffect(() => {
+    console.log("time table updated")
+  }, [selectedClassTimeTable])
+
+  const handleDeleteTimetableEntry = async (day, index) => {
+    const id = classes[selectedClassIndex]?.id;
+
+    const data = {
+      day: day,
+      idx: index
+    }
+
+    try {
+      const res = await axios.delete(`/api/academic/class/${id}/${data.day}/${data.idx}`);
+      console.log(res);
+
+      const grouped = {
+        className: res?.data?.result?.className,
+        timeTable: res?.data?.result?.timeTable,
+        id: res?.data?.result?._id
+      }
+
+      setClasses(prev => prev.map(classItem => {
+        if(classItem.id === grouped.id) {
+          return grouped
+        } else {
+          return classItem
+        }
+      }));
+      setSelectedClassTimeTable(grouped.timeTable);
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  const handleCreateClass = async () => {
     const trimmedName = newClassName.trim();
     if (!trimmedName) return alert("Enter a class name.");
     if (classes.some((c) => c.className.toLowerCase() === trimmedName.toLowerCase()))
       return alert("Class already exists.");
-    setClasses([...classes, { className: trimmedName, sections: [] }]);
-    setNewClassName("");
-  };
 
-  const deleteClass = (index) => {
-    const updated = [...classes];
-    updated.splice(index, 1);
-    setClasses(updated);
-    setSelectedClassIndex(null);
-    setSelectedSectionIndex(null);
-  };
+    const temp = newClassName.toUpperCase();
+    const data = `${temp}`
 
-  const addSection = () => {
-    if (selectedClassIndex === null) return alert("Select class first.");
-    const trimmedName = newSectionName.trim();
-    if (!trimmedName) return alert("Enter a section name.");
-    const selectedClass = classes[selectedClassIndex];
-    if (
-      selectedClass.sections.some(
-        (s) => s.sectionName.toLowerCase() === trimmedName.toLowerCase()
-      )
-    )
-      return alert("Section exists.");
-    const updated = [...classes];
-    updated[selectedClassIndex].sections.push({
-      sectionName: trimmedName,
-      timetable: weekdays.reduce((acc, day) => {
-        acc[day] = [];
-        return acc;
-      }, {}),
-    });
-    setClasses(updated);
-    setNewSectionName("");
-  };
-
-  const deleteSection = (index) => {
-    const updated = [...classes];
-    updated[selectedClassIndex].sections.splice(index, 1);
-    setClasses(updated);
-    setSelectedSectionIndex(null);
-  };
-
-  const addTimetableEntry = () => {
-    if (!newEntrySubject || !newEntryTime) return alert("Enter subject and time");
-    const timeWithPeriod = `${newEntryTime} ${newEntryPeriod}`;
-    const updated = [...classes];
-    const dayEntries = updated[selectedClassIndex].sections[selectedSectionIndex].timetable[newEntryDay];
-
-    if (editingEntryIndex !== null) {
-      dayEntries[editingEntryIndex] = { subject: newEntrySubject, time: timeWithPeriod };
-      setEditingEntryIndex(null);
-    } else {
-      if (dayEntries.some((e) => e.subject === newEntrySubject && e.time === timeWithPeriod)) {
-        return alert("Duplicate entry.");
-      }
-      dayEntries.push({ subject: newEntrySubject, time: timeWithPeriod });
+    const dataToSend = {
+      className: data
     }
 
-    setClasses(updated);
-    setNewEntrySubject("");
-    setNewEntryTime("");
-    setNewEntryPeriod("AM");
-  };
+    console.log(data);
 
-  const handleEditTimetableEntry = (idx) => {
-    const entry = classes[selectedClassIndex].sections[selectedSectionIndex].timetable[newEntryDay][idx];
-    const [time, period] = entry.time.split(" ");
-    setNewEntrySubject(entry.subject);
-    setNewEntryTime(time);
-    setNewEntryPeriod(period);
-    setEditingEntryIndex(idx);
-  };
+    try {
+      const res = await axios.post('/api/academic/class', dataToSend);
 
-  const handleDeleteTimetableEntry = (idx) => {
-    const updated = [...classes];
-    updated[selectedClassIndex].sections[selectedSectionIndex].timetable[newEntryDay].splice(idx, 1);
-    setClasses(updated);
-  };
+      const grouped = {
+        className: res?.data?.classData?.className,
+        timeTable: res?.data?.classData?.timeTable,
+        id: res?.data?.classData?._id
+      }
+
+      setClasses(prev => [...prev, grouped]);
+      setSelectedClassData(res?.data?.classData);
+      setNewClassName("");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    console.log(classes);
+    console.log("Classes updated")
+  }, [classes])
+
+  const handleGetClassTimeTable = async () => {
+    try {
+      const res = await axios.get('/api/academic/class');
+      const result = res?.data?.result || [];
+
+      const grouped = [];
+
+      result.forEach(cls => {
+        const clsName = cls.className;
+        const timeTable = cls.timeTable;
+        const id = cls._id
+
+        grouped.push({
+          className: clsName,
+          timeTable: timeTable,
+          id: id
+        })
+      });
+
+      setClasses(grouped);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    handleGetClassTimeTable();
+  }, [])
+
+  const handleShowClassTimeTable = (i) => {
+    setSelectedClassIndex(i);
+    setSelectedClassTimeTable(classes[i]?.timeTable);
+    console.log(classes[i]?.timeTable);
+  }
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
@@ -158,7 +242,6 @@ export default function AdminAcademics() {
         <button onClick={handleAddHeroSection} className="bg-blue-600 text-white px-4 py-2 rounded">
           Add Hero Section
         </button>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {heroSections.map((sec, i) => (
             <div key={i} className="relative border rounded overflow-hidden">
@@ -185,7 +268,8 @@ export default function AdminAcademics() {
           onChange={(e) => setNewClassName(e.target.value)}
           className="border p-2 w-48"
         />
-        <button onClick={addClass} className="bg-green-600 text-white px-4 py-2 rounded ml-2">
+
+        <button onClick={handleCreateClass} className="bg-green-600 text-white px-4 py-2 rounded ml-2">
           Add Class
         </button>
 
@@ -194,10 +278,7 @@ export default function AdminAcademics() {
             <div key={i} className="flex items-center space-x-1">
               <button
                 className={`px-4 py-2 border rounded ${selectedClassIndex === i ? "bg-blue-600 text-white" : ""}`}
-                onClick={() => {
-                  setSelectedClassIndex(i);
-                  setSelectedSectionIndex(null);
-                }}
+                onClick={() => handleShowClassTimeTable(i)}
               >
                 Class {cls.className}
               </button>
@@ -207,39 +288,8 @@ export default function AdminAcademics() {
         </div>
       </div>
 
-      {/* Section Management */}
-      {selectedClassIndex !== null && (
-        <div className="border p-4 rounded shadow space-y-4">
-          <h2 className="text-xl font-semibold">Sections of Class {classes[selectedClassIndex].className}</h2>
-          <input
-            type="text"
-            placeholder="Enter new section name (e.g. A, B, C, D)"
-            value={newSectionName}
-            onChange={(e) => setNewSectionName(e.target.value)}
-            className="border p-2 w-48"
-          />
-          <button onClick={addSection} className="bg-purple-600 text-white px-4 py-2 rounded ml-2">
-            Add Section
-          </button>
-
-          <div className="flex flex-wrap gap-2 mt-4">
-            {classes[selectedClassIndex].sections.map((sec, i) => (
-              <div key={i} className="flex items-center space-x-1">
-                <button
-                  className={`px-4 py-2 border rounded ${selectedSectionIndex === i ? "bg-green-600 text-white" : ""}`}
-                  onClick={() => setSelectedSectionIndex(i)}
-                >
-                  Section {sec.sectionName}
-                </button>
-                <button onClick={() => deleteSection(i)} className="text-red-500">✖</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Timetable */}
-      {selectedClassIndex !== null && selectedSectionIndex !== null && (
+      {selectedClassIndex !== null && (
         <div className="border p-4 rounded shadow space-y-4">
           <h2 className="text-xl font-semibold mb-4">Timetable Entry</h2>
           <div className="flex gap-2 flex-wrap">
@@ -265,7 +315,7 @@ export default function AdminAcademics() {
               <option>PM</option>
             </select>
             <button onClick={addTimetableEntry} className="bg-indigo-600 text-white px-4 py-2 rounded">
-              {editingEntryIndex !== null ? "Update" : "Add"}
+              Add
             </button>
           </div>
 
@@ -276,25 +326,28 @@ export default function AdminAcademics() {
                 <tr>
                   <th className="border p-2">Subject</th>
                   <th className="border p-2">Time</th>
-                  <th className="border p-2">Actions</th>
+                  <th className="border p-2">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {classes[selectedClassIndex].sections[selectedSectionIndex].timetable[newEntryDay].map((entry, idx) => (
-                  <tr key={idx}>
-                    <td className="border p-2">{entry.subject}</td>
-                    <td className="border p-2">{entry.time}</td>
-                    <td className="border p-2 space-x-2">
-                      <button onClick={() => handleEditTimetableEntry(idx)} className="text-yellow-600">
-                        Edit
-                      </button>
-                      <button onClick={() => handleDeleteTimetableEntry(idx)} className="text-red-600">
-                        Delete
-                      </button>
-                    </td>
+                {selectedClassTimeTable[newEntryDay]?.length > 0 ? (
+                  selectedClassTimeTable[newEntryDay].map((entry, idx) => (
+                    <tr key={`${newEntryDay}-${idx}`}>
+                      <td className="border p-2">{entry.subjectName}</td>
+                      <td className="border p-2">{entry.timing}</td>
+                      <td className="border p-2 space-x-2">
+                          <button onClick={() => handleDeleteTimetableEntry(newEntryDay, idx)} className="text-red-600 text-center">
+                            Delete
+                          </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="text-center p-4">No entries</td>
                   </tr>
-                ))}
-                {classes[selectedClassIndex].sections[selectedSectionIndex].timetable[newEntryDay].length === 0 && (
+                )}
+                {selectedClassData.timeTable?.[newEntryDay].length === 0 && (
                   <tr><td colSpan={3} className="text-center p-4">No entries</td></tr>
                 )}
               </tbody>

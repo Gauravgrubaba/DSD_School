@@ -1,101 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import axios from "axios";
 
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-const academicsData = {
-  overview:
-    "Our academic program is designed to nurture curiosity, creativity, and excellence. We offer a structured curriculum that blends modern teaching methodologies with traditional values to ensure a holistic learning experience.",
-  timetables: {
-    1: {
-      Monday: [
-        { subject: "Math", time: "9:00 AM - 10:00 AM" },
-        { subject: "English", time: "10:15 AM - 11:15 AM" },
-      ],
-      Tuesday: [
-        { subject: "Science", time: "9:00 AM - 10:00 AM" },
-        { subject: "Art", time: "10:15 AM - 11:15 AM" },
-      ],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-    2: {
-      Monday: [
-        { subject: "English", time: "9:00 AM - 10:00 AM" },
-        { subject: "Math", time: "10:15 AM - 11:15 AM" },
-      ],
-      Tuesday: [
-        { subject: "Science", time: "9:00 AM - 10:00 AM" },
-        { subject: "PE", time: "10:15 AM - 11:15 AM" },
-      ],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-    3: {
-      Monday: [
-        { subject: "Science", time: "9:00 AM - 10:00 AM" },
-        { subject: "English", time: "10:15 AM - 11:15 AM" },
-      ],
-      Tuesday: [
-        { subject: "Math", time: "9:00 AM - 10:00 AM" },
-        { subject: "Music", time: "10:15 AM - 11:15 AM" },
-      ],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-    4: {
-      Monday: [
-        { subject: "History", time: "9:00 AM - 10:00 AM" },
-        { subject: "English", time: "10:15 AM - 11:15 AM" },
-      ],
-      Tuesday: [
-        { subject: "Math", time: "9:00 AM - 10:00 AM" },
-        { subject: "Science", time: "10:15 AM - 11:15 AM" },
-      ],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-    5: {
-      Monday: [
-        { subject: "Geography", time: "9:00 AM - 10:00 AM" },
-        { subject: "Science", time: "10:15 AM - 11:15 AM" },
-      ],
-      Tuesday: [
-        { subject: "English", time: "9:00 AM - 10:00 AM" },
-        { subject: "Math", time: "10:15 AM - 11:15 AM" },
-      ],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-    },
-  },
-};
 
 const Academics = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [allClassTimeTable, setAllClassTimeTable] = useState([]);
+
+  const handleGetTimeTable = async () => {
+    try {
+      const res = await axios.get('/api/academic/class');
+      setAllClassTimeTable(res?.data?.result || []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const classNames = allClassTimeTable.map(cls => cls.className).sort();
+
+  const currentDaySchedule = selectedClass && selectedDay
+    ? allClassTimeTable.find(cls => cls.className === selectedClass)?.timeTable[selectedDay] || []
+    : [];
+
+  useEffect(() => {
+    handleGetTimeTable();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
       {/* Hero Section */}
-      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[450px] rounded-xl overflow-hidden shadow-lg mb-8">
+      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[450px] rounded-xl overflow-hidden shadow-md mb-10">
         <Swiper
           modules={[Autoplay, Pagination]}
           spaceBetween={0}
           slidesPerView={1}
-          loop={true}
+          loop
           autoplay={{ delay: 3000 }}
           pagination={{ clickable: true }}
           className="h-full"
@@ -108,7 +52,7 @@ const Academics = () => {
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-center px-4">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg leading-tight">
+                <h2 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
                   Academics
                 </h2>
               </div>
@@ -122,7 +66,7 @@ const Academics = () => {
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-center px-4">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg leading-tight">
+                <h2 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
                   Nurturing Bright Minds
                 </h2>
               </div>
@@ -132,25 +76,25 @@ const Academics = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-10">
         {/* Class & Day Selector */}
-        <div className="md:w-1/3 bg-white p-6 rounded-2xl shadow-md border">
-          <h3 className="text-2xl font-bold text-blue-700 mb-4">Select Class</h3>
-          <ul className="space-y-3 mb-6">
-            {Object.keys(academicsData.timetables).map((grade) => (
-              <li key={grade}>
+        <div className="md:w-1/3 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <h3 className="text-xl font-semibold text-slate-800 mb-4">Select Class</h3>
+          <ul className="space-y-2 mb-6">
+            {classNames.map((cls) => (
+              <li key={cls}>
                 <button
                   onClick={() => {
-                    setSelectedClass(grade);
+                    setSelectedClass(cls);
                     setSelectedDay(null);
                   }}
-                  className={`w-full py-2 px-4 rounded-xl font-medium transition-all duration-300 ${
-                    selectedClass === grade
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  className={`w-full py-2 px-4 rounded-lg font-medium transition duration-300 ${
+                    selectedClass === cls
+                      ? "bg-slate-800 text-white"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                   }`}
                 >
-                  Class {grade}
+                  Class {cls}
                 </button>
               </li>
             ))}
@@ -158,18 +102,16 @@ const Academics = () => {
 
           {selectedClass && (
             <>
-              <h4 className="text-lg font-semibold text-indigo-700 mb-2">
-                Select Weekday
-              </h4>
+              <h4 className="text-base font-medium text-slate-700 mb-2">Select Weekday</h4>
               <ul className="grid grid-cols-2 gap-3">
                 {weekdays.map((day) => (
                   <li key={day}>
                     <button
                       onClick={() => setSelectedDay(day)}
-                      className={`w-full py-2 px-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                      className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition duration-300 ${
                         selectedDay === day
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          ? "bg-teal-600 text-white"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                       }`}
                     >
                       {day}
@@ -182,31 +124,26 @@ const Academics = () => {
         </div>
 
         {/* Timetable Display */}
-        <div className="md:w-2/3 bg-white p-6 rounded-2xl shadow-md border">
-          <p className="text-base text-gray-700 leading-relaxed mb-6 text-justify">
-            {academicsData.overview}
-          </p>
-
+        <div className="md:w-2/3 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           {selectedClass && selectedDay && (
             <div>
-              <h4 className="text-2xl font-semibold text-indigo-600 mb-4">
+              <h4 className="text-xl font-semibold text-slate-800 mb-4">
                 Class {selectedClass} - {selectedDay} Timetable
               </h4>
-              {academicsData.timetables[selectedClass][selectedDay] &&
-              academicsData.timetables[selectedClass][selectedDay].length > 0 ? (
+              {currentDaySchedule.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {academicsData.timetables[selectedClass][selectedDay].map((session, index) => (
+                  {currentDaySchedule.map((session, index) => (
                     <div
                       key={index}
-                      className="p-4 bg-indigo-50 rounded-xl shadow-sm border border-indigo-100"
+                      className="p-4 bg-slate-50 rounded-lg shadow-sm border border-slate-200"
                     >
-                      <h5 className="font-bold text-gray-800">{session.subject}</h5>
-                      <p className="text-sm text-gray-600">{session.time}</p>
+                      <h5 className="font-medium text-slate-900">{session.subjectName}</h5>
+                      <p className="text-sm text-slate-600 mt-1">{session.timing}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500">No classes scheduled for {selectedDay}.</p>
+                <p className="text-slate-500">No classes scheduled for {selectedDay}.</p>
               )}
             </div>
           )}
