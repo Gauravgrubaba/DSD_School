@@ -1,384 +1,336 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const initialWeekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-const AdminAcademics = () => {
-  // Hero Section States
+export default function AdminAcademics() {
   const [heroImage, setHeroImage] = useState(null);
-  const [heroText, setHeroText] = useState('');
-  const [heroSections, setHeroSections] = useState([]); // array of {image, text}
+  const [heroText, setHeroText] = useState("");
+  const [heroSections, setHeroSections] = useState([]);
 
-  // Time Table States
-  const [selectedClass, setSelectedClass] = useState(1);
-  const [timeTables, setTimeTables] = useState({});
+  const [classes, setClasses] = useState([]);
+  const [selectedClassIndex, setSelectedClassIndex] = useState(null);
 
-  // For managing "Add new entry" inputs per day
-  const [addingDay, setAddingDay] = useState(null);
-  const [newEntry, setNewEntry] = useState({ subject: '', time: '' });
+  const [selectedSectionIndex, setSelectedSectionIndex] = useState(null);
 
-  // For editing entries, store {day, index} being edited and edit values
-  const [editingEntry, setEditingEntry] = useState({ day: null, index: null });
-  const [editEntryValues, setEditEntryValues] = useState({ subject: '', time: '' });
+  // For new class, allow free text
+  const [newClassName, setNewClassName] = useState("");
 
-  // Image Handler for current image input
+  // For new section, allow free text
+  const [newSectionName, setNewSectionName] = useState("");
+
+  // Timetable entry states
+  const [newEntryDay, setNewEntryDay] = useState(weekdays[0]);
+  const [newEntrySubject, setNewEntrySubject] = useState("");
+  const [newEntryTime, setNewEntryTime] = useState("");
+  const [newEntryPeriod, setNewEntryPeriod] = useState("AM");
+
+  const [editingEntryIndex, setEditingEntryIndex] = useState(null);
+
+  const [selectedClassData, setSelectedClassData] = useState({});
+  const [selectedClassTimeTable, setSelectedClassTimeTable] = useState({});
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setHeroImage(imageUrl);
     }
-    console.log(files);
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [selectedClassData, setSelectedClassData] = useState({});
-
-  // Add current hero image + text to heroSections array
   const handleAddHeroSection = () => {
-    if (!heroImage) {
-      alert('Please select an image first!');
-      return;
-    }
-    if (!heroText.trim()) {
-      alert('Please enter hero text!');
-      return;
-    }
+    if (!heroImage || !heroText.trim()) return alert("Please provide image and text.");
     setHeroSections((prev) => [...prev, { image: heroImage, text: heroText }]);
     setHeroImage(null);
-    setHeroText('');
+    setHeroText("");
   };
 
-  // Start adding entry for a day
-  const handleStartAddEntry = (day) => {
-    setAddingDay(day);
-    setNewEntry({ subject: '', time: '' });
+  const handleDeleteHero = (index) => {
+    const updated = [...heroSections];
+    updated.splice(index, 1);
+    setHeroSections(updated);
   };
 
-  // Cancel adding new entry
-  const handleCancelAddEntry = () => {
-    setAddingDay(null);
-    setNewEntry({ subject: '', time: '' });
+  const handleEditHero = (index) => {
+    const selected = heroSections[index];
+    setHeroImage(selected.image);
+    setHeroText(selected.text);
+    const updated = [...heroSections];
+    updated.splice(index, 1);
+    setHeroSections(updated);
   };
 
-  // Save new entry
-  const handleSaveNewEntry = async () => {
-    const { subject, time } = newEntry;
+  const deleteClass = async (index) => {
+    const id = classes[index]?.id
+    console.log(id);
 
-    console.log(selectedClassData);
-
-    const data = {
-      day: addingDay,
-      subject: newEntry.subject,
-      time: newEntry.time
-    }
-
-    if (!subject.trim() || !time.trim()) {
-      alert('Please fill both subject and time');
-      return;
-    }
     try {
-      const res = await axios.patch(`/api/academic/class/${selectedClassData._id}`, data);
-      console.log(res?.data?.result?.timeTable);
-      setTimeTables(res?.data?.result?.timeTable);
+      const res = await axios.delete(`/api/academic/class/${id}`);
+      const result = res?.data?.result;
+
+      const grouped = [];
+
+      result.forEach(cls => {
+        const clsName = cls.className;
+        const timeTable = cls.timeTable;
+        const id = cls._id
+
+        grouped.push({
+          className: clsName,
+          timeTable: timeTable,
+          id: id
+        })
+      });
+
+      setClasses(grouped);
+      setSelectedClassIndex(null);
     } catch (error) {
       console.log(error);
-    } finally {
-      setAddingDay(null);
-      setNewEntry({ subject: '', time: '' });
+    }
+  };
+
+  const addTimetableEntry = async () => {
+    const id = classes[selectedClassIndex]?.id;
+
+    const data = {
+      subject: newEntrySubject,
+      time: `${newEntryTime} ${newEntryPeriod}`,
+      day: newEntryDay
+    }
+
+    try {
+      const res = await axios.patch(`/api/academic/class/${id}`, data);
+      const updatedTimeTable = res?.data?.result?.timeTable;
+      setClasses(prev =>
+        prev.map((cls, idx) =>
+          idx === selectedClassIndex
+            ? { ...cls, timeTable: updatedTimeTable }
+            : cls
+        )
+      );
+      setSelectedClassTimeTable(classes[i]?.timeTable);
+    } catch (error) {
+      console.log(error);
     }
   };
 
   useEffect(() => {
-    console.log("Entries Updated");
-  }, [timeTables])
+    console.log("time table updated")
+  }, [selectedClassTimeTable])
 
-  useEffect(() => {
-    handleClassCreation(selectedClass);
-  }, [])
+  const handleEditTimetableEntry = (idx) => {
 
-  const handleClassCreation = async (cls) => {
-    setSelectedClass(cls);
-    setIsLoading(true);
+  };
 
-    const data = {
-      className: cls
+  const handleDeleteTimetableEntry = (idx) => {
+
+  };
+
+  const handleCreateClass = async () => {
+    const trimmedName = newClassName.trim();
+    if (!trimmedName) return alert("Enter a class name.");
+    if (classes.some((c) => c.className.toLowerCase() === trimmedName.toLowerCase()))
+      return alert("Class already exists.");
+
+    const data = `${newClassName}`
+
+    const dataToSend = {
+      className: data
     }
 
+    console.log(data);
+
     try {
-      const res = await axios.post('/api/academic/class', data);
-      console.log(res?.data?.classData);
+      const res = await axios.post('/api/academic/class', dataToSend);
+
+      const grouped = {
+        className: res?.data?.classData?.className,
+        timeTable: res?.data?.classData?.timeTable,
+        id: res?.data?.classData?._id
+      }
+
+      setClasses(prev => [...prev, grouped]);
       setSelectedClassData(res?.data?.classData);
-      setTimeTables(res?.data?.classData?.timeTable);
-      console.log(res?.data?.classData?.timeTable);
+      setNewClassName("");
     } catch (error) {
       console.log(error);
-    } finally {
-      setIsLoading(false);
     }
   }
 
-  // Delete Entry
-  const handleDeleteEntry = (day, index) => {
-    const data = {
-      className: selectedClass,
-      day: day,
-      index: index
+  useEffect(() => {
+    console.log(classes);
+    console.log("Classes updated")
+  }, [classes])
+
+  const handleGetClassTimeTable = async () => {
+    try {
+      const res = await axios.get('/api/academic/class');
+      const result = res?.data?.result || [];
+
+      const grouped = [];
+
+      result.forEach(cls => {
+        const clsName = cls.className;
+        const timeTable = cls.timeTable;
+        const id = cls._id
+
+        grouped.push({
+          className: clsName,
+          timeTable: timeTable,
+          id: id
+        })
+      });
+
+      setClasses(grouped);
+    } catch (error) {
+      console.log(error);
     }
-  };
+  }
 
-  // Start editing an entry
-  const handleStartEditEntry = (day, index) => {
-    const entry = timeTables[selectedClass][day][index];
-    setEditingEntry({ day, index });
-    setEditEntryValues({ subject: entry.subject, time: entry.time });
-  };
+  useEffect(() => {
+    handleGetClassTimeTable();
+  }, [])
 
-  // Cancel editing
-  const handleCancelEdit = () => {
-    setEditingEntry({ day: null, index: null });
-    setEditEntryValues({ subject: '', time: '' });
-  };
-
-  // Save edited entry
-  const handleSaveEdit = () => {
-    const { subject, time } = editEntryValues;
-    if (!subject.trim() || !time.trim()) {
-      alert('Please fill both subject and time');
-      return;
-    }
-    setTimeTables((prev) => {
-      const updated = { ...prev };
-      updated[selectedClass][editingEntry.day][editingEntry.index] = {
-        subject: subject.trim(),
-        time: time.trim(),
-      };
-      return { ...updated };
-    });
-    setEditingEntry({ day: null, index: null });
-    setEditEntryValues({ subject: '', time: '' });
-  };
+  const handleShowClassTimeTable = (i) => {
+    setSelectedClassIndex(i);
+    setSelectedClassTimeTable(classes[i]?.timeTable);
+    console.log(classes[i]?.timeTable);
+  }
 
   return (
-    <div className="p-6 space-y-12 max-w-7xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto space-y-8">
+      <h1 className="text-3xl font-bold text-center">Admin Academics</h1>
+
       {/* Hero Section */}
-      <div className="border rounded-xl p-6 shadow-md space-y-6">
-        <h2 className="text-2xl font-semibold mb-4">📸 Hero Section (Multiple Images)</h2>
-        <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="border rounded px-3 py-2 w-full md:w-auto"
-          />
-          <input
-            type="text"
-            placeholder="Enter hero text"
-            className="border rounded px-3 py-2 flex-grow"
-            value={heroText}
-            onChange={(e) => setHeroText(e.target.value)}
-          />
-          <button
-            onClick={handleAddHeroSection}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition whitespace-nowrap"
-          >
-            Add Hero Section
-          </button>
-        </div>
+      <div className="border p-4 rounded shadow space-y-4">
+        <h2 className="text-xl font-semibold">Hero Section</h2>
+        <input type="file" accept="image/*" onChange={handleImageChange} />
+        <input
+          type="text"
+          value={heroText}
+          onChange={(e) => setHeroText(e.target.value)}
+          placeholder="Enter Text"
+          className="border p-2 w-full"
+        />
+        <button onClick={handleAddHeroSection} className="bg-blue-600 text-white px-4 py-2 rounded">
+          Add Hero Section
+        </button>
 
-        {/* Display all added hero sections */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {heroSections.length === 0 && (
-            <p className="text-gray-500 italic col-span-full text-center">No hero sections added yet.</p>
-          )}
-          {heroSections.map((section, idx) => (
-            <div key={idx} className="relative h-52 rounded-lg overflow-hidden shadow-lg border">
-              <img
-                src={section.image}
-                alt={`Hero ${idx + 1}`}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-lg font-semibold px-4 text-center">
-                {section.text}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {heroSections.map((sec, i) => (
+            <div key={i} className="relative border rounded overflow-hidden">
+              <img src={sec.image} alt="Hero" className="w-full h-48 object-cover" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold">
+                {sec.text}
+              </div>
+              <div className="absolute top-2 right-2 space-x-2">
+                <button onClick={() => handleEditHero(i)} className="bg-yellow-400 px-2 py-1 rounded">Edit</button>
+                <button onClick={() => handleDeleteHero(i)} className="bg-red-500 px-2 py-1 rounded text-white">Delete</button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Time Table Section */}
-      <div className="border rounded-xl p-6 shadow-md space-y-6">
-        <h2 className="text-2xl font-semibold mb-4">📅 Timetable Manager (Class 1–5)</h2>
+      {/* Class Management */}
+      <div className="border p-4 rounded shadow space-y-4">
+        <h2 className="text-xl font-semibold">Classes</h2>
+        <input
+          type="text"
+          placeholder="Enter new class name (e.g. 7, 8, 9)"
+          value={newClassName}
+          onChange={(e) => setNewClassName(e.target.value)}
+          className="border p-2 w-48"
+        />
+        <button onClick={handleCreateClass} className="bg-green-600 text-white px-4 py-2 rounded ml-2">
+          Add Class
+        </button>
 
-        {/* Class Selector */}
-        <div className="flex space-x-3 mb-6 justify-center md:justify-start">
-          {[1, 2, 3, 4, 5].map((cls) => (
-            <button
-              key={cls}
-              onClick={() => handleClassCreation(cls)}
-              className={`px-4 py-2 rounded-lg font-medium shadow-sm ${selectedClass === cls
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 hover:bg-gray-300'
-                } transition`}
-            >
-              Class {cls}
+        <div className="flex flex-wrap gap-2 mt-4">
+          {classes.map((cls, i) => (
+            <div key={i} className="flex items-center space-x-1">
+              <button
+                className={`px-4 py-2 border rounded ${selectedClassIndex === i ? "bg-blue-600 text-white" : ""}`}
+                onClick={() => handleShowClassTimeTable(i)}
+              >
+                Class {cls.className}
+              </button>
+              <button onClick={() => deleteClass(i)} className="text-red-500">✖</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Timetable */}
+      {selectedClassIndex !== null && (
+        <div className="border p-4 rounded shadow space-y-4">
+          <h2 className="text-xl font-semibold mb-4">Timetable Entry</h2>
+          <div className="flex gap-2 flex-wrap">
+            <select value={newEntryDay} onChange={(e) => setNewEntryDay(e.target.value)} className="border p-2">
+              {weekdays.map((day) => (
+                <option key={day}>{day}</option>
+              ))}
+            </select>
+            <input
+              value={newEntrySubject}
+              onChange={(e) => setNewEntrySubject(e.target.value)}
+              placeholder="Subject"
+              className="border p-2"
+            />
+            <input
+              type="time"
+              value={newEntryTime}
+              onChange={(e) => setNewEntryTime(e.target.value)}
+              className="border p-2"
+            />
+            <select value={newEntryPeriod} onChange={(e) => setNewEntryPeriod(e.target.value)} className="border p-2">
+              <option>AM</option>
+              <option>PM</option>
+            </select>
+            <button onClick={addTimetableEntry} className="bg-indigo-600 text-white px-4 py-2 rounded">
+              {editingEntryIndex !== null ? "Update" : "Add"}
             </button>
-          ))}
-        </div>
+          </div>
 
-        {/* Timetable Display */}
-        <div className="space-y-6 max-h-[500px] overflow-auto">
-          {initialWeekDays.map((day) => (
-            <div key={day} className="border p-4 rounded-lg bg-gray-50">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold text-lg">{day}</h3>
-                {addingDay === day ? (
-                  <div className="flex space-x-2 items-center">
-                    <input
-                      type="text"
-                      placeholder="Subject"
-                      value={newEntry.subject}
-                      onChange={(e) =>
-                        setNewEntry((prev) => ({ ...prev, subject: e.target.value }))
-                      }
-                      className="border rounded px-2 py-1 w-36"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Timing"
-                      value={newEntry.time}
-                      onChange={(e) =>
-                        setNewEntry((prev) => ({ ...prev, time: e.target.value }))
-                      }
-                      className="border rounded px-2 py-1 w-28"
-                    />
-                    <button
-                      onClick={handleSaveNewEntry}
-                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={handleCancelAddEntry}
-                      className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">Timetable for {newEntryDay}</h3>
+            <table className="w-full table-auto border border-gray-300">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border p-2">Subject</th>
+                  <th className="border p-2">Time</th>
+                  <th className="border p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedClassTimeTable[newEntryDay]?.length > 0 ? (
+                  selectedClassTimeTable[newEntryDay].map((entry, idx) => (
+                    <tr key={`${newEntryDay}-${idx}`}>
+                      <td className="border p-2">{entry.subjectName}</td>
+                      <td className="border p-2">{entry.timing}</td>
+                      <td className="border p-2 space-x-2">
+                        <button onClick={() => handleEditTimetableEntry(newEntryDay, idx)} className="text-yellow-600">
+                          Edit
+                        </button>
+                        <button onClick={() => handleDeleteTimetableEntry(newEntryDay, idx)} className="text-red-600">
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
-                  <button
-                    onClick={() => handleStartAddEntry(day)}
-                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
-                  >
-                    Add
-                  </button>
+                  <tr>
+                    <td colSpan={3} className="text-center p-4">No entries</td>
+                  </tr>
                 )}
-              </div>
-              {!isLoading ? <ul className="space-y-2">
-                {(timeTables?.[day] || []).map((entry, index) => {
-                  const isEditing =
-                    editingEntry.day === day && editingEntry.index === index;
-                  return (
-                    <li
-                      key={index}
-                      className="flex justify-between items-center bg-white p-3 rounded shadow"
-                    >
-                      {isEditing ? (
-                        <>
-                          <input
-                            type="text"
-                            value={editEntryValues.subject}
-                            onChange={(e) =>
-                              setEditEntryValues((prev) => ({
-                                ...prev,
-                                subject: e.target.value,
-                              }))
-                            }
-                            className="border rounded px-2 py-1 w-36"
-                          />
-                          <input
-                            type="text"
-                            value={editEntryValues.time}
-                            onChange={(e) =>
-                              setEditEntryValues((prev) => ({
-                                ...prev,
-                                time: e.target.value,
-                              }))
-                            }
-                            className="border rounded px-2 py-1 w-28 mx-2"
-                          />
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={handleSaveEdit}
-                              className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <span>
-                            <strong>{entry.timing}</strong> – {entry.subjectName}
-                          </span>
-                          <div className="flex space-x-3">
-                            <button
-                              onClick={() => handleStartEditEntry(day, index)}
-                              className="text-blue-600 hover:text-blue-800 font-semibold"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteEntry(day, index)}
-                              className="text-red-600 hover:text-red-800 font-semibold"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </li>
-                  );
-                })}
-                {/* Show message if no entries */}
-                {(timeTables?.[day]?.length || 0) === 0 && addingDay !== day && (
-                  <p className="text-gray-400 italic">No entries added yet.</p>
+                {selectedClassData.timeTable?.[newEntryDay].length === 0 && (
+                  <tr><td colSpan={3} className="text-center p-4">No entries</td></tr>
                 )}
-              </ul> : (
-                <svg
-                  className="animate-spin h-5 w-5 text-red-600"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  />
-                </svg>
-              )}
-            </div>
-          ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
-};
-
-export default AdminAcademics;
+}
