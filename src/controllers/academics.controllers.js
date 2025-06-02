@@ -91,9 +91,54 @@ const handleDeleteClass = async (req, res) => {
     }
 }
 
+const handleDeleteTimeTable = async (req, res) => {
+    const { id, day, idx } = req.params;
+
+    try {
+        const existingClass = await ClassSchema.findById({ _id: id })
+
+        if(!existingClass) {
+            return res.status(404).json({
+                response: "error",
+                message: "Class doesn't exist"
+            })
+        }
+
+        if(!existingClass.timeTable || !existingClass.timeTable[day]) {
+            return res.status(404).json({
+                response: "error",
+                message: `Time Table for ${day} not exists.`
+            })
+        }
+
+        if(idx >= existingClass.timeTable[day].length) {
+            return res.status(404).json({
+                response: "error",
+                message: "Index out of bound"
+            })
+        }
+
+        existingClass.timeTable[day].splice(idx, 1);
+        existingClass.markModified('timeTable');
+
+        const updatedData = await existingClass.save();
+
+        return res.status(200).json({
+            response: "success",
+            result: updatedData
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while deleting entry."
+        })
+    }
+}
+
 export {
     handleCreateClass,
     handleAddRoutine,
     handleGetAllTimeTable,
-    handleDeleteClass
+    handleDeleteClass,
+    handleDeleteTimeTable
 }

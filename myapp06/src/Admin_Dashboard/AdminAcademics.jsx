@@ -92,6 +92,13 @@ export default function AdminAcademics() {
   const addTimetableEntry = async () => {
     const id = classes[selectedClassIndex]?.id;
 
+    if(!newEntrySubject) {
+      return alert("Subject name is required.")
+    }
+    if(!newEntryTime) {
+      return alert("Time is required")
+    }
+
     const data = {
       subject: newEntrySubject,
       time: `${newEntryTime} ${newEntryPeriod}`,
@@ -108,9 +115,12 @@ export default function AdminAcademics() {
             : cls
         )
       );
-      setSelectedClassTimeTable(classes[i]?.timeTable);
+      setSelectedClassTimeTable(res?.data?.result?.timeTable);
     } catch (error) {
       console.log(error);
+    } finally {
+      setNewEntrySubject("");
+      setNewEntryTime("");
     }
   };
 
@@ -118,12 +128,35 @@ export default function AdminAcademics() {
     console.log("time table updated")
   }, [selectedClassTimeTable])
 
-  const handleEditTimetableEntry = (idx) => {
+  const handleDeleteTimetableEntry = async (day, index) => {
+    const id = classes[selectedClassIndex]?.id;
 
-  };
+    const data = {
+      day: day,
+      idx: index
+    }
 
-  const handleDeleteTimetableEntry = (idx) => {
+    try {
+      const res = await axios.delete(`/api/academic/class/${id}/${data.day}/${data.idx}`);
+      console.log(res);
 
+      const grouped = {
+        className: res?.data?.result?.className,
+        timeTable: res?.data?.result?.timeTable,
+        id: res?.data?.result?._id
+      }
+
+      setClasses(prev => prev.map(classItem => {
+        if(classItem.id === grouped.id) {
+          return grouped
+        } else {
+          return classItem
+        }
+      }));
+      setSelectedClassTimeTable(grouped.timeTable);
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   const handleCreateClass = async () => {
@@ -132,7 +165,8 @@ export default function AdminAcademics() {
     if (classes.some((c) => c.className.toLowerCase() === trimmedName.toLowerCase()))
       return alert("Class already exists.");
 
-    const data = `${newClassName}`
+    const temp = newClassName.toUpperCase();
+    const data = `${temp}`
 
     const dataToSend = {
       className: data
@@ -299,7 +333,7 @@ export default function AdminAcademics() {
                 <tr>
                   <th className="border p-2">Subject</th>
                   <th className="border p-2">Time</th>
-                  <th className="border p-2">Actions</th>
+                  <th className="border p-2">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -309,12 +343,9 @@ export default function AdminAcademics() {
                       <td className="border p-2">{entry.subjectName}</td>
                       <td className="border p-2">{entry.timing}</td>
                       <td className="border p-2 space-x-2">
-                        <button onClick={() => handleEditTimetableEntry(newEntryDay, idx)} className="text-yellow-600">
-                          Edit
-                        </button>
-                        <button onClick={() => handleDeleteTimetableEntry(newEntryDay, idx)} className="text-red-600">
-                          Delete
-                        </button>
+                          <button onClick={() => handleDeleteTimetableEntry(newEntryDay, idx)} className="text-red-600 text-center">
+                            Delete
+                          </button>
                       </td>
                     </tr>
                   ))
