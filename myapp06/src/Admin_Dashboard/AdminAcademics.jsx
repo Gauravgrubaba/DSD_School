@@ -11,21 +11,14 @@ export default function AdminAcademics() {
   const [classes, setClasses] = useState([]);
   const [selectedClassIndex, setSelectedClassIndex] = useState(null);
 
-  const [selectedSectionIndex, setSelectedSectionIndex] = useState(null);
-
   // For new class, allow free text
   const [newClassName, setNewClassName] = useState("");
-
-  // For new section, allow free text
-  const [newSectionName, setNewSectionName] = useState("");
 
   // Timetable entry states
   const [newEntryDay, setNewEntryDay] = useState(weekdays[0]);
   const [newEntrySubject, setNewEntrySubject] = useState("");
   const [newEntryTime, setNewEntryTime] = useState("");
   const [newEntryPeriod, setNewEntryPeriod] = useState("AM");
-
-  const [editingEntryIndex, setEditingEntryIndex] = useState(null);
 
   const [selectedClassData, setSelectedClassData] = useState({});
   const [selectedClassTimeTable, setSelectedClassTimeTable] = useState({});
@@ -322,7 +315,7 @@ export default function AdminAcademics() {
               <option>PM</option>
             </select>
             <button onClick={addTimetableEntry} className="bg-indigo-600 text-white px-4 py-2 rounded">
-              {editingEntryIndex !== null ? "Update" : "Add"}
+              Add
             </button>
           </div>
 
