@@ -29,6 +29,10 @@ export default function AdminAcademics() {
   const handleAddHeroSection = async () => {
     if (!heroImage || !heroText.trim()) return alert("Please provide image and text.");
 
+    if(heroSections.images.length >= 3) {
+      return alert("Maximum 3 images are allowed");
+    }
+
     const data = new FormData();
     data.append("text", heroText);
     data.append("heroSectionImage", heroImage);
