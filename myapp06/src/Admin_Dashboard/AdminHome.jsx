@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useEffect } from "react";
 
 const AdminHome = () => {
-  const [heroTitle, setHeroTitle] = useState("Empowering Young Minds");
-  const [heroSubTitle, setHeroSubTitle] = useState("Your Child’s Bright Future Begins Here");
+  const [heroTitle, setHeroTitle] = useState("");
+  const [heroSubTitle, setHeroSubTitle] = useState("");
   const [heroBgImage, setHeroBgImage] = useState(null);
   const [aboutText, setAboutText] = useState(
     "We are committed to providing high-quality education with a focus on personal growth, critical thinking, and creativity..."
@@ -26,16 +28,53 @@ const AdminHome = () => {
     { name: "", designation: "", image: null },
   ]);
 
-  const handleHeroImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setHeroBgImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+  const [heroSectionData, setHeroSectionData] = useState({});
+
+  const handleHeroSection = async (e) => {
+    e.preventDefault();
+
+    if(!heroBgImage && !heroSubTitle && !heroTitle) {
+      return alert("Need atleast some data to update")
+    }
+
+    const data = new FormData();
+    data.append("homeHeroImage", heroBgImage);
+    data.append("subtitle", heroSubTitle);
+    data.append("title", heroTitle);
+
+    try {
+      const res = await axios.post('/api/home/herosection', data, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      })
+      console.log(res?.data?.result);
+      setHeroSectionData(res?.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setHeroBgImage(null);
+      setHeroSubTitle("");
+      setHeroTitle("");
     }
   };
+
+  const handleGetHeroSection = async () => {
+    try {
+      const res = await axios.get('/api/home/herosection');
+      setHeroSectionData(res?.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    handleGetHeroSection();
+  }, [])
+
+  useEffect(() => {
+    console.log("Hero section data updated")
+  }, [heroSectionData]);
 
   const handleAboutVideoUpload = (e) => {
     const file = e.target.files[0];
@@ -95,30 +134,24 @@ const AdminHome = () => {
         <input
           type="file"
           accept="image/*"
-          id="heroImageInput"
-          onChange={handleHeroImageUpload}
-          className="hidden"
+          id="homeHeroImage"
+          name="homeHeroImage"
+          onChange={(e) => setHeroBgImage(e.target.files[0])}
+          className="mb-4"
         />
-        <button
-          type="button"
-          onClick={() => document.getElementById("heroImageInput").click()}
-          className="mb-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-        >
-          Choose Background Image
-        </button>
 
         <div
           className="relative w-full min-h-screen rounded-lg overflow-hidden shadow-lg mb-6"
           style={{
-            backgroundImage: `url(${heroBgImage || "/default-hero.jpg"})`,
+            backgroundImage: `url(${heroSectionData.image})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
         >
           <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center px-6 text-center">
-            <h3 className="text-white text-lg md:text-xl mb-2 tracking-wide font-light">{heroSubTitle}</h3>
-            <h1 className="text-white text-3xl md:text-5xl font-bold leading-tight max-w-3xl">{heroTitle}</h1>
+            <h3 className="text-white text-lg md:text-xl mb-2 tracking-wide font-light">{heroSectionData.subtitle}</h3>
+            <h1 className="text-white text-3xl md:text-5xl font-bold leading-tight max-w-3xl">{heroSectionData.title}</h1>
           </div>
         </div>
 
@@ -136,6 +169,15 @@ const AdminHome = () => {
           onChange={(e) => setHeroTitle(e.target.value)}
           placeholder="Main Title"
         />
+        <div>
+          <button
+            type="submit"
+            onClick={handleHeroSection}
+            className="mt-4 mb-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            Submit
+          </button>
+        </div>
       </div>
 
       {/* About Section */}

@@ -54,6 +54,17 @@ const schoolSchema = new mongoose.Schema(
         },
         heroImageText: {
             type: [String]
+        },
+        homeHeroSection: {
+            heroImage: {
+                type: String
+            },
+            heroSubtitle: {
+                type: String
+            },
+            heroTitle: {
+                type: String
+            }
         }
     }, {
         timestamps: true

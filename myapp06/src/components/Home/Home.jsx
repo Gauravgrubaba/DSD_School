@@ -5,6 +5,7 @@ import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Link } from 'react-router-dom';
+import axios from "axios";
 
 const Home = () => {
   const [index, setIndex] = useState(0);
@@ -15,6 +16,8 @@ const Home = () => {
     { title: "AI Hackathon", description: "Show your coding skills and win prizes.", image: "/coding-hackathon.jpg" },
     { title: "Tech Conference", description: "Explore AI, ML, and cloud computing.", image: "/tech-conference.jpg" },
   ];
+
+  const [heroSectionData, setHeroSectionData] = useState({});
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,13 +30,26 @@ const Home = () => {
     setIndex((prevIndex) => (prevIndex + 1) % 5);
   };
 
+  const handleGetHeroSection = async () => {
+    try {
+      const res = await axios.get('/api/home/herosection');
+      setHeroSectionData(res?.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    handleGetHeroSection();
+  }, [])
+
   return (
     <div className="mx-auto w-full max-w-6xl pt-12">
       
       {/* 🔹 Hero Section */}
       <header
         className="relative w-full h-[100vh] bg-cover bg-center flex items-center justify-center px-6 md:px-20 text-white mt-16" // Reduced height and added top margin
-        style={{ backgroundImage: "url('dsd2.jpg')" }}
+        style={{ backgroundImage: `url(${heroSectionData.image})` }}
       >
         {/* Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -41,10 +57,10 @@ const Home = () => {
         {/* Centered Content */}
         <div className="relative text-center">
           <h2 className="text-2xl md:text-4xl text-yellow-400 mb-4">
-            Your Child’s Bright Future Begins Here
+            {heroSectionData.subtitle}
           </h2>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight text-yellow-300 mb-6">
-            Empowering Young Minds
+            {heroSectionData.title}
           </h1>
 
           {/* Buttons */}
