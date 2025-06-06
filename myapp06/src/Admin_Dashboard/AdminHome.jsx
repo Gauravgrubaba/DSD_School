@@ -11,10 +11,13 @@ const AdminHome = () => {
   );
   const [aboutText2, setAboutText2] = useState("");
   const [aboutVideo, setAboutVideo] = useState(null);
-  const [notices, setNotices] = useState([
-    "Orientation Session for STD VIII & IX",
-    "Bus Facility Registration 2025-26",
-  ]);
+
+  //Notices
+  const [notices, setNotices] = useState([]);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [newNotice, setNewNotice] = useState("");
+  const [editNotice, seteditNotice] = useState("");
+
   const [achievements, setAchievements] = useState([
     "1st Place in National Anuvrat Nyas",
     "The Kalam Project",
@@ -29,11 +32,13 @@ const AdminHome = () => {
   ]);
 
   const [heroSectionData, setHeroSectionData] = useState({});
+  const [editableNotices, setEditableNotices] = useState([]);
+
 
   const handleHeroSection = async (e) => {
     e.preventDefault();
 
-    if(!heroBgImage && !heroSubTitle && !heroTitle) {
+    if (!heroBgImage && !heroSubTitle && !heroTitle) {
       return alert("Need atleast some data to update")
     }
 
@@ -100,7 +105,6 @@ const AdminHome = () => {
     }
   };
 
-  const addNotice = () => setNotices([...notices, ""]);
   const addAchievement = () => setAchievements([...achievements, ""]);
   const addNews = () => setNews([...news, ""]);
   const addManagementMember = () =>
@@ -122,6 +126,84 @@ const AdminHome = () => {
     });
     alert("Changes saved (simulated)");
   };
+
+  const handleAddNotice = async (e) => {
+    e.preventDefault();
+
+    if(notices.length >= 5) {
+      return alert("Maximum 5 notices are allowed");
+    }
+
+    if(!newNotice) {
+      return alert("Empty box cannot be added as Notice.")
+    }
+
+    const data = {
+      notice: newNotice
+    }
+
+    try {
+      const res = await axios.post('/api/home/notice', data);
+      setNotices(res?.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setNewNotice("");
+    }
+  }
+
+  const handleGetAllNotices = async () => {
+    try {
+      const res = await axios.get('/api/home/notice');
+      setNotices(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleDeleteNotice = async (idx) => {
+    try {
+      const res = await axios.delete(`/api/home/notice/${idx}`);
+      console.log(res);
+      setNotices(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleEditNotice = async (idx) => {
+    setEditingIndex(idx);
+    seteditNotice(notices[idx]);
+  }
+
+  const handleSaveEditedNotice = async (e) => {
+    e.preventDefault();
+
+    const data = {
+      notice: editNotice
+    }
+
+    const idx = editingIndex;
+
+    try {
+      const res = await axios.patch(`/api/home/notice/${idx}`, data);
+      console.log(res);
+      setNotices(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setEditingIndex(null);
+      seteditNotice("");
+    }
+  }
+
+  useEffect(() => {
+    handleGetAllNotices();
+  }, [])
+
+  useEffect(() => {
+    console.log("Notices updated");
+  }, [notices])
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
@@ -219,27 +301,70 @@ const AdminHome = () => {
 
       {/* Notices */}
       <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2 text-blue-600">📌 Notices</h2>
-        {notices.map((notice, idx) => (
+        <h2 className="text-xl font-semibold mb-4 text-blue-600">📌 Notices</h2>
+
+        {/* Input box to add new notice */}
+        <div className="flex items-center space-x-2 mb-4">
           <input
-            key={idx}
             type="text"
-            className="border p-2 w-full mb-2"
-            value={notice}
-            onChange={(e) => {
-              const updated = [...notices];
-              updated[idx] = e.target.value;
-              setNotices(updated);
-            }}
+            placeholder="Enter a new notice..."
+            className="border border-gray-300 p-2 rounded w-full"
+            onChange={(e) => setNewNotice(e.target.value)}
+            value={newNotice}
           />
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            onClick={handleAddNotice}
+          >
+            Add
+          </button>
+        </div>
+
+        {/* Render each notice */}
+        {notices.map((notice, idx) => (
+          <div key={idx} className="flex items-center justify-between mb-3 p-3 border rounded">
+            {editingIndex === idx ? (
+              <input
+                type="text"
+                className="border border-blue-500 p-2 rounded w-full mr-2"
+                value={editNotice}
+                onChange={(e) => seteditNotice(e.target.value)}
+              />
+            ) : (
+              <span className="text-gray-800">{notice}</span>
+            )}
+
+            <div className="flex items-center space-x-2 ml-2">
+              {editingIndex === idx ? (
+                <button 
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                  onClick={handleSaveEditedNotice}
+                >
+                  Save
+                </button>
+              ) : (
+                <button 
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                  onClick={() => handleEditNotice(idx)}
+                >
+                  Edit
+                </button>
+              )}
+              <button 
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                onClick={() => handleDeleteNotice(idx)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         ))}
-        <button
-          onClick={addNotice}
-          className="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-        >
-          + Add Notice
-        </button>
       </div>
+
+
+
 
       {/* Achievements */}
       <div className="bg-white p-6 rounded-xl shadow">

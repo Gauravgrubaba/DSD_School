@@ -65,6 +65,9 @@ const schoolSchema = new mongoose.Schema(
             heroTitle: {
                 type: String
             }
+        },
+        notice: {
+            type: [String]
         }
     }, {
         timestamps: true
