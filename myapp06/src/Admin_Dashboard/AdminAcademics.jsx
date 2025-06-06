@@ -6,7 +6,10 @@ const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satur
 export default function AdminAcademics() {
   const [heroImage, setHeroImage] = useState(null);
   const [heroText, setHeroText] = useState("");
-  const [heroSections, setHeroSections] = useState([]);
+  const [heroSections, setHeroSections] = useState({
+    images: [],
+    texts: []
+  });
 
   const [classes, setClasses] = useState([]);
   const [selectedClassIndex, setSelectedClassIndex] = useState(null);
@@ -23,34 +26,59 @@ export default function AdminAcademics() {
   const [selectedClassData, setSelectedClassData] = useState({});
   const [selectedClassTimeTable, setSelectedClassTimeTable] = useState({});
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setHeroImage(imageUrl);
+  const handleAddHeroSection = async () => {
+    if (!heroImage || !heroText.trim()) return alert("Please provide image and text.");
+
+    if(heroSections.images.length >= 3) {
+      return alert("Maximum 3 images are allowed");
+    }
+
+    const data = new FormData();
+    data.append("text", heroText);
+    data.append("heroSectionImage", heroImage);
+
+    try {
+      const res = await axios.post('/api/academic/herosection', data, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      })
+      console.log(res?.data?.result);
+      setHeroSections(res?.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setHeroText("");
+      setHeroImage(null);
     }
   };
 
-  const handleAddHeroSection = () => {
-    if (!heroImage || !heroText.trim()) return alert("Please provide image and text.");
-    setHeroSections((prev) => [...prev, { image: heroImage, text: heroText }]);
-    setHeroImage(null);
-    setHeroText("");
-  };
+  const handleGetHeroSection = async () => {
+    try {
+      const res = await axios.get('/api/academic/herosection');
+      console.log(res);
+      setHeroSections(res?.data?.result);
+    } catch (error) {
+      console.log("Error getting hero section images", error);
+    }
+  }
 
-  const handleDeleteHero = (index) => {
-    const updated = [...heroSections];
-    updated.splice(index, 1);
-    setHeroSections(updated);
-  };
+  useEffect(() => {
+    handleGetHeroSection();
+  }, [])
 
-  const handleEditHero = (index) => {
-    const selected = heroSections[index];
-    setHeroImage(selected.image);
-    setHeroText(selected.text);
-    const updated = [...heroSections];
-    updated.splice(index, 1);
-    setHeroSections(updated);
+  useEffect(() => {
+    console.log("Hero section updated.")
+  }, [heroSections])
+
+  const handleDeleteHero = async (index) => {
+    try {
+      const res = await axios.delete(`/api/academic/herosection/${index}`);
+      console.log(res);
+      setHeroSections(res?.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const deleteClass = async (index) => {
@@ -231,7 +259,13 @@ export default function AdminAcademics() {
       {/* Hero Section */}
       <div className="border p-4 rounded shadow space-y-4">
         <h2 className="text-xl font-semibold">Hero Section</h2>
-        <input type="file" accept="image/*" onChange={handleImageChange} />
+        <input 
+          id="heroSectionImage"
+          type="file" 
+          name="heroSectionImage"
+          accept="image/*"
+          onChange={(e) => setHeroImage(e.target.files[0])} 
+        />
         <input
           type="text"
           value={heroText}
@@ -243,14 +277,13 @@ export default function AdminAcademics() {
           Add Hero Section
         </button>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {heroSections.map((sec, i) => (
+          {heroSections?.images.map((img, i) => (
             <div key={i} className="relative border rounded overflow-hidden">
-              <img src={sec.image} alt="Hero" className="w-full h-48 object-cover" />
+              <img src={img} alt="Hero" className="w-full h-48 object-cover" />
               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold">
-                {sec.text}
+                {heroSections?.texts?.[i] || ""}
               </div>
               <div className="absolute top-2 right-2 space-x-2">
-                <button onClick={() => handleEditHero(i)} className="bg-yellow-400 px-2 py-1 rounded">Edit</button>
                 <button onClick={() => handleDeleteHero(i)} className="bg-red-500 px-2 py-1 rounded text-white">Delete</button>
               </div>
             </div>

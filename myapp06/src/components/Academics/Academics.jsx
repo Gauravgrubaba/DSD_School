@@ -11,6 +11,20 @@ const Academics = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [allClassTimeTable, setAllClassTimeTable] = useState([]);
+  const [heroSections, setHeroSections] = useState({
+    images: [],
+    texts: []
+  });
+
+  const handleGetHeroSection = async () => {
+    try {
+      const res = await axios.get('/api/academic/herosection');
+      console.log(res?.data?.result);
+      setHeroSections(res?.data?.result);
+    } catch (error) {
+      console.log("Error getting hero section images", error);
+    }
+  }
 
   const handleGetTimeTable = async () => {
     try {
@@ -28,6 +42,7 @@ const Academics = () => {
     : [];
 
   useEffect(() => {
+    handleGetHeroSection()
     handleGetTimeTable();
   }, []);
 
@@ -35,45 +50,40 @@ const Academics = () => {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
       {/* Hero Section */}
       <div className="relative w-full h-[400px] sm:h-[500px] md:h-[450px] rounded-xl overflow-hidden shadow-md mb-10">
-        <Swiper
-          modules={[Autoplay, Pagination]}
-          spaceBetween={0}
-          slidesPerView={1}
-          loop
-          autoplay={{ delay: 3000 }}
-          pagination={{ clickable: true }}
-          className="h-full"
-        >
-          <SwiperSlide>
-            <div className="relative w-full h-full">
-              <img
-                src="https://via.placeholder.com/1200x400/1e3a8a/ffffff?text=Slide+1"
-                alt="Slide 1"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-center px-4">
-                <h2 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
-                  Academics
-                </h2>
-              </div>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="relative w-full h-full">
-              <img
-                src="https://via.placeholder.com/1200x400/047857/ffffff?text=Slide+2"
-                alt="Slide 2"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-center px-4">
-                <h2 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
-                  Nurturing Bright Minds
-                </h2>
-              </div>
-            </div>
-          </SwiperSlide>
-        </Swiper>
+        {heroSections.images.length > 0 ? (
+          <Swiper
+            modules={[Autoplay, Pagination]}
+            spaceBetween={0}
+            slidesPerView={1}
+            loop
+            autoplay={{ delay: 3000 }}
+            pagination={{ clickable: true }}
+            className="h-full"
+          >
+            {heroSections.images.map((img, i) => (
+              <SwiperSlide key={i}>
+                <div className="relative w-full h-full">
+                  <img
+                    src={img}
+                    alt={`Slide ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-center px-4">
+                    <h2 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
+                      {heroSections.texts?.[i] || ""}
+                    </h2>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        ) : (
+          <div className="flex items-center justify-center h-full bg-slate-100 text-slate-500 text-xl">
+            No images available.
+          </div>
+        )}
       </div>
+
 
       {/* Main Content */}
       <div className="flex flex-col md:flex-row gap-6 md:gap-10">
@@ -88,11 +98,10 @@ const Academics = () => {
                     setSelectedClass(cls);
                     setSelectedDay(null);
                   }}
-                  className={`w-full py-2 px-4 rounded-lg font-medium transition duration-300 ${
-                    selectedClass === cls
-                      ? "bg-slate-800 text-white"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
+                  className={`w-full py-2 px-4 rounded-lg font-medium transition duration-300 ${selectedClass === cls
+                    ? "bg-slate-800 text-white"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    }`}
                 >
                   Class {cls}
                 </button>
@@ -108,11 +117,10 @@ const Academics = () => {
                   <li key={day}>
                     <button
                       onClick={() => setSelectedDay(day)}
-                      className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition duration-300 ${
-                        selectedDay === day
-                          ? "bg-teal-600 text-white"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                      }`}
+                      className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition duration-300 ${selectedDay === day
+                        ? "bg-teal-600 text-white"
+                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                        }`}
                     >
                       {day}
                     </button>

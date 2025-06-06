@@ -1,4 +1,7 @@
 import ClassSchema from "../models/class.models.js";
+import SchoolSchema from "../models/school.models.js";
+import uploadOnCloudinary from "../utils/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const handleAddRoutine = async (req, res) => {
     const { id } = req.params;
@@ -135,10 +138,119 @@ const handleDeleteTimeTable = async (req, res) => {
     }
 }
 
+const handleAddHeroSection = async (req, res) => {
+    const { text } = req.body;
+    const file = req.file;
+
+    try {
+        let imgUrl = "";
+
+        if(file) {
+            const uploadResult = await uploadOnCloudinary(file.path);
+            imgUrl = uploadResult?.secure_url || "";
+        }
+
+        const heroImageUpload = await SchoolSchema.findOneAndUpdate({ schoolName: "DSD" }, {
+            $push: {
+                heroSectionImage: imgUrl,
+                heroImageText: text
+            }
+        }, {
+            new: true
+        })
+
+        const dataToSend = {
+            images: heroImageUpload.heroSectionImage,
+            texts: heroImageUpload.heroImageText
+        }
+
+        return res.status(200).json({
+            response: "success",
+            result: dataToSend
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            response: "error",
+            message: "Adding hero section image failed!"
+        })
+    }
+}
+
+const handleGetHeroSection = async (req, res) => {
+    try {
+        const heroSection = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        const dataToSend = {
+            images: heroSection.heroSectionImage,
+            texts: heroSection.heroImageText
+        }
+
+        console.log(dataToSend);
+
+        return res.status(200).json({
+            response: "success",
+            result: dataToSend
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while fetching hero section"
+        })
+    }
+}
+
+const handleDeleteHeroSectionImage = async (req, res) => {
+    const { index } = req.params;
+    
+    try {
+        const school = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if(index >= school?.heroSectionImage.length) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid index"
+            })
+        }
+
+        const image = school?.heroSectionImage[index];
+        
+        if(image) {
+            const segment = image.split('/');
+            console.log(segment);
+            const fileNameWithExtension = segment[segment.length - 1];
+            const publicId = fileNameWithExtension.split('.')[0];
+            const result = await cloudinary.uploader.destroy(publicId, { invalidate: true });
+            console.log(result);
+        }
+
+        school?.heroSectionImage?.splice(index, 1);
+        school?.heroImageText?.splice(index, 1);
+        school.markModified('heroSectionImage', 'heroImageText');
+
+        const updatedData = await school.save();
+
+        const dataToSend = {
+            images: updatedData.heroSectionImage,
+            texts: updatedData.heroImageText
+        }
+
+        return res.status(200).json({
+            response: "success",
+            result: dataToSend
+        })   
+    } catch (error) {
+        
+    }
+}
+
 export {
     handleCreateClass,
     handleAddRoutine,
     handleGetAllTimeTable,
     handleDeleteClass,
-    handleDeleteTimeTable
+    handleDeleteTimeTable,
+    handleAddHeroSection,
+    handleGetHeroSection,
+    handleDeleteHeroSectionImage
 }
