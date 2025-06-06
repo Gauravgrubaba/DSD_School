@@ -68,6 +68,9 @@ const schoolSchema = new mongoose.Schema(
         },
         notice: {
             type: [String]
+        },
+        achievement: {
+            type: [String]
         }
     }, {
         timestamps: true

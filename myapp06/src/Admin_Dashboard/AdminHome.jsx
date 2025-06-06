@@ -3,9 +3,11 @@ import axios from "axios";
 import { useEffect } from "react";
 
 const AdminHome = () => {
+  //Hero Section
   const [heroTitle, setHeroTitle] = useState("");
   const [heroSubTitle, setHeroSubTitle] = useState("");
   const [heroBgImage, setHeroBgImage] = useState(null);
+
   const [aboutText, setAboutText] = useState(
     "We are committed to providing high-quality education with a focus on personal growth, critical thinking, and creativity..."
   );
@@ -18,10 +20,12 @@ const AdminHome = () => {
   const [newNotice, setNewNotice] = useState("");
   const [editNotice, seteditNotice] = useState("");
 
-  const [achievements, setAchievements] = useState([
-    "1st Place in National Anuvrat Nyas",
-    "The Kalam Project",
-  ]);
+  //Achievements
+  const [newAchievement, setNewAchievement] = useState("");
+  const [achievements, setAchievements] = useState([]);
+  const [achievementEditIndex, setAchievementEditIndex] = useState(null);
+  const [editAchievement, setEditAchievement] = useState("");
+
   const [news, setNews] = useState(["18 Dec: News for October 2024"]);
   const [quotations, setQuotations] = useState([
     "The only way to do great work is to love what you do. — Steve Jobs",
@@ -179,6 +183,10 @@ const AdminHome = () => {
   const handleSaveEditedNotice = async (e) => {
     e.preventDefault();
 
+    if(!editNotice) {
+      return alert("Notice field cannot be empty!")
+    }
+
     const data = {
       notice: editNotice
     }
@@ -199,11 +207,86 @@ const AdminHome = () => {
 
   useEffect(() => {
     handleGetAllNotices();
+    handleGetAllAchievements();
   }, [])
 
   useEffect(() => {
     console.log("Notices updated");
   }, [notices])
+
+  const handleAddNewAchievement = async (e) => {
+    e.preventDefault();
+
+    if(!newAchievement) {
+      return alert("Empty field! Type something to add in achievement")
+    }
+
+    const data = {
+      achievement: newAchievement
+    }
+
+    try {
+      const res = await axios.post('/api/home/achievement', data);
+      console.log(res);
+      setAchievements(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally { 
+      setNewAchievement("");
+    }
+  }
+
+  const handleGetAllAchievements = async () => {
+    try {
+      const res = await axios.get('/api/home/achievement');
+      console.log(res);
+      setAchievements(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleUpdateAchievement = async (idx) => {
+    setAchievementEditIndex(idx);
+    setEditAchievement(achievements[idx]);
+  }
+
+  const handleSaveEditedAchievement = async () => {
+    const idx = achievementEditIndex;
+
+    if(!editAchievement) {
+      return alert("Achievement field cannot be empty!")
+    }
+
+    const data = {
+      achievement: editAchievement
+    }
+
+    try {
+      const res = await axios.patch(`/api/home/achievement/${idx}`, data);
+      console.log(res);
+      setAchievements(res.data?.result)
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setAchievementEditIndex(null);
+      setEditAchievement("");
+    }
+  }
+
+  const handleDeleteAchievement = async (idx) => {
+    try {
+      const res = await axios.delete(`/api/home/achievement/${idx}`);
+      console.log(res);
+      setAchievements(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    console.log("Achievements updated")
+  }, [achievements])
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
@@ -369,25 +452,63 @@ const AdminHome = () => {
       {/* Achievements */}
       <div className="bg-white p-6 rounded-xl shadow">
         <h2 className="text-xl font-semibold mb-2 text-green-600">🏅 Achievements</h2>
-        {achievements.map((item, idx) => (
+
+        <div className="flex items-center space-x-2 mb-4">
           <input
-            key={idx}
             type="text"
-            className="border p-2 w-full mb-2"
-            value={item}
-            onChange={(e) => {
-              const updated = [...achievements];
-              updated[idx] = e.target.value;
-              setAchievements(updated);
-            }}
+            placeholder="Enter a new achievement..."
+            className="border border-gray-300 p-2 rounded w-full"
+            onChange={(e) => setNewAchievement(e.target.value)}
+            value={newAchievement}
           />
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            onClick={handleAddNewAchievement}
+          >
+            Add
+          </button>
+        </div>
+
+        {achievements.map((achievement, idx) => (
+          <div key={idx} className="flex items-center justify-between mb-3 p-3 border rounded">
+            {achievementEditIndex === idx ? (
+              <input
+                type="text"
+                className="border border-blue-500 p-2 rounded w-full mr-2"
+                value={editAchievement}
+                onChange={(e) => setEditAchievement(e.target.value)}
+              />
+            ) : (
+              <span className="text-gray-800">{achievement}</span>
+            )}
+
+            <div className="flex items-center space-x-2 ml-2">
+              {achievementEditIndex === idx ? (
+                <button 
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                  onClick={handleSaveEditedAchievement}
+                >
+                  Save
+                </button>
+              ) : (
+                <button 
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                  onClick={() => handleUpdateAchievement(idx)}
+                >
+                  Edit
+                </button>
+              )}
+              <button 
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                onClick={() => handleDeleteAchievement(idx)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         ))}
-        <button
-          onClick={addAchievement}
-          className="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-        >
-          + Add Achievement
-        </button>
       </div>
 
       {/* News */}

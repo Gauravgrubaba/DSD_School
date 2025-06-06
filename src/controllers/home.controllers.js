@@ -214,11 +214,165 @@ const handleDeleteNotice = async (req, res) => {
     }
 }
 
+const handleAddNewAchievement = async (req, res) => {
+    const { achievement } = req.body;
+
+    if(!achievement) {
+        return res.status(404).json({
+            response: "error",
+            message: "Empty field! Type something to add in achievement"
+        })
+    }
+    
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if(!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        schoolData.achievement.push(achievement);
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allAchievements = updatedSchoolData.achievement;
+
+        return res.status(200).json({
+            response: "success",
+            result: allAchievements
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while adding achievement"
+        })
+    }
+}
+
+const handleGetAllAchievements = async (req, res) => {
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if(!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+        
+        const allAchievements = schoolData.achievement;
+
+        return res.status(200).json({
+            response: "success",
+            result: allAchievements
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error fetching all achievements"
+        })
+    }
+}
+
+const handleUpdateAchievement = async (req, res) => {
+    const { idx } = req.params;
+    const { achievement } = req.body;
+
+    if(!achievement) {
+        return res.status(404).json({
+            response: "error",
+            message: "Achievement field cannot be empty!"
+        })
+    }
+
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if(!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        const index = parseInt(idx);
+        if(isNaN(index) || index < 0 || index >= schoolData.achievement.length) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid Index"
+            })
+        }
+
+        schoolData.achievement[index] = achievement;
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allAchievements = updatedSchoolData.achievement;
+
+        return res.status(200).json({
+            response: "success",
+            result: allAchievements
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error updating achievement"
+        })
+    }
+}
+
+const handleDeleteAchievement = async (req, res) => {
+    const { idx } = req.params;
+    
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if(!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid school"
+            })
+        }
+
+        const index = parseInt(idx);
+        if(isNaN(index) || index < 0 || index >= schoolData.achievement.length) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid index"
+            })
+        }
+
+        schoolData.achievement.splice(index, 1);
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allAchievements = updatedSchoolData.achievement;
+
+        return res.status(200).json({
+            response: "success",
+            message: "Notice deleted",
+            result: allAchievements
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error deleting achievement"
+        })
+    }
+}
+
 export {
     handleHeroSection,
     handleGetHomeHeroSection,
     handleAddNotice,
     handleUpdateNotice,
     handleGetNotices,
-    handleDeleteNotice
+    handleDeleteNotice,
+    handleAddNewAchievement,
+    handleGetAllAchievements,
+    handleUpdateAchievement,
+    handleDeleteAchievement
 }

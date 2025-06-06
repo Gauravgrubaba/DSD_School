@@ -19,6 +19,7 @@ const Home = () => {
 
   const [heroSectionData, setHeroSectionData] = useState({});
   const [notices, setNotices] = useState([]);
+  const [achievements, setAchievements] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -49,9 +50,20 @@ const Home = () => {
     }
   }
 
+  const handleGetAllAchievements = async () => {
+    try {
+      const res = await axios.get('/api/home/achievement');
+      console.log(res);
+      setAchievements(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     handleGetHeroSection();
     handleGetAllNotices();
+    handleGetAllAchievements();
   }, [])
 
 
@@ -172,10 +184,11 @@ const Home = () => {
           {/* 🏅 Achievements */}
           <div className="bg-white p-8 rounded-xl shadow-md border w-full">
             <h2 className="text-2xl font-semibold flex items-center text-green-600">🏅 Achievements</h2>
-            <ul className="mt-4 text-gray-700 text-lg">
-              <li>🏆 1st Place in National Anuvrat Nyas</li>
-              <li className="mt-2">🚀 The Kalam Project</li>
-            </ul>
+            {achievements.map((achievement, idx) => (
+              <ul className="mt-4 text-gray-700 text-lg">
+                <li>🏆 {achievement}</li>
+              </ul>
+            ))}
           </div>
 
           {/* 📰 News */}
