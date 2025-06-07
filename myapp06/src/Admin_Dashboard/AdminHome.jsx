@@ -32,10 +32,12 @@ const AdminHome = () => {
   const [newsEditIndex, setNewsEditIndex] = useState(null);
   const [editNews, setEditNews] = useState("");
 
-  const [quotations, setQuotations] = useState([
-    "The only way to do great work is to love what you do. — Steve Jobs",
-    "Success is not final, failure is not fatal: it is the courage to continue that counts. — Winston Churchill",
-  ]);
+  //Quotation
+  const [quotations, setQuotations] = useState([]);
+  const [newQuotation, setNewQuotation] = useState("");
+  const [quoteEditIndex, setQuoteEditIndex] = useState(null);
+  const [editQuote, setEditQuote] = useState("");
+
   const [management, setManagement] = useState([
     { name: "", designation: "", image: null },
   ]);
@@ -207,6 +209,7 @@ const AdminHome = () => {
     handleGetAllNotices();
     handleGetAllAchievements();
     handleGetNews();
+    handleGetQuotation();
   }, [])
 
   useEffect(() => {
@@ -286,11 +289,11 @@ const AdminHome = () => {
   const handleAddNewNews = async (e) => {
     e.preventDefault();
 
-    if(!newNews) {
+    if (!newNews) {
       return alert("News field cannot be empty");
     }
 
-    if(news.length >= 10) {
+    if (news.length >= 10) {
       return alert("Maximum 10 news are allowed.")
     }
 
@@ -364,6 +367,84 @@ const AdminHome = () => {
   useEffect(() => {
     console.log("News updated")
   }, [news]);
+
+  const handleAddNewQuote = async (e) => {
+    e.preventDefault();
+
+    if (!newQuotation) {
+      return alert("Quotation field cannot be empty");
+    }
+
+    if (quotations.length >= 2) {
+      return alert("Maximum 2 quotes are allowed.")
+    }
+
+    const data = {
+      quote: newQuotation
+    }
+
+    try {
+      const res = await axios.post('/api/home/quote', data);
+      console.log(res);
+      setQuotations(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setNewQuotation("");
+    }
+  }
+
+  const handleGetQuotation = async () => {
+    try {
+      const res = await axios.get('/api/home/quote');
+      console.log(res);
+      setQuotations(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleDeleteQuotation = async (idx) => {
+    try {
+      const res = await axios.delete(`/api/home/quote/${idx}`);
+      console.log(res);
+      setQuotations(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleEditQuote = (idx) => {
+    setQuoteEditIndex(idx);
+    setEditQuote(quotations[idx]);
+  }
+
+  const handleSaveEditedQuotation = async () => {
+    const idx = quoteEditIndex;
+
+    if (!editQuote) {
+      return alert("Quotation field cannot be empty!")
+    }
+
+    const data = {
+      quote: editQuote
+    }
+
+    try {
+      const res = await axios.patch(`/api/home/quote/${idx}`, data);
+      console.log(res);
+      setQuotations(res.data?.result)
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setEditQuote("");
+      setQuoteEditIndex(null);
+    }
+  }
+
+  useEffect(() => {
+    console.log("Quotation updated")
+  }, [quotations])
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
@@ -650,17 +731,62 @@ const AdminHome = () => {
       {/* Quotations */}
       <div className="bg-white p-6 rounded-xl shadow">
         <h2 className="text-xl font-semibold mb-2 text-purple-600">🌟 Quotations</h2>
-        {quotations.map((q, idx) => (
-          <textarea
-            key={idx}
-            className="border p-2 w-full mb-2"
-            value={q}
-            onChange={(e) => {
-              const updated = [...quotations];
-              updated[idx] = e.target.value;
-              setQuotations(updated);
-            }}
+
+        <div className="flex items-center space-x-2 mb-4">
+          <input
+            type="text"
+            placeholder="Enter a new quote..."
+            className="border border-gray-300 p-2 rounded w-full"
+            onChange={(e) => setNewQuotation(e.target.value)}
+            value={newQuotation}
           />
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            onClick={handleAddNewQuote}
+          >
+            Add
+          </button>
+        </div>
+
+        {quotations.map((quote, idx) => (
+          <div key={idx} className="flex items-center justify-between mb-3 p-3 border rounded">
+            {quoteEditIndex === idx ? (
+              <input
+                type="text"
+                className="border border-blue-500 p-2 rounded w-full mr-2"
+                value={editQuote}
+                onChange={(e) => setEditQuote(e.target.value)}
+              />
+            ) : (
+              <span className="text-gray-800">{quote}</span>
+            )}
+
+            <div className="flex items-center space-x-2 ml-2">
+              {quoteEditIndex === idx ? (
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                  onClick={handleSaveEditedQuotation}
+                >
+                  Save
+                </button>
+              ) : (
+                <button
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                  onClick={() => handleEditQuote(idx)}
+                >
+                  Edit
+                </button>
+              )}
+              <button
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                onClick={() => handleDeleteQuotation(idx)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         ))}
       </div>
 

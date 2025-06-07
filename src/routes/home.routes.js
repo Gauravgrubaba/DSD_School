@@ -1,19 +1,23 @@
 import express from "express";
 import { 
     handleAddNewAchievement,
+    handleAddNewQuotation,
     handleAddNews,
     handleAddNotice,
     handleDeleteAchievement,
     handleDeleteNews,
     handleDeleteNotice,
+    handleDeleteQuotation,
     handleGetAllAchievements,
     handleGetAllNews,
+    handleGetAllQuotation,
     handleGetHomeHeroSection,
     handleGetNotices,
     handleHeroSection,
     handleUpdateAchievement,
     handleUpdateNews,
-    handleUpdateNotice
+    handleUpdateNotice,
+    handleUpdateQuotation
 } from "../controllers/home.controllers.js";
 import upload from "../middlewares/multer.middlewares.js";
 
@@ -40,5 +44,11 @@ router.post('/news', handleAddNews);
 router.get('/news', handleGetAllNews);
 router.patch('/news/:idx', handleUpdateNews);
 router.delete('/news/:idx', handleDeleteNews);
+
+//Quotation
+router.post('/quote', handleAddNewQuotation);
+router.get('/quote', handleGetAllQuotation);
+router.patch('/quote/:idx', handleUpdateQuotation);
+router.delete('/quote/:idx', handleDeleteQuotation);
 
 export default router;

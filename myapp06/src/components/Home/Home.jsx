@@ -21,6 +21,7 @@ const Home = () => {
   const [notices, setNotices] = useState([]);
   const [achievements, setAchievements] = useState([]);
   const [news, setNews] = useState([]);
+  const [quotations, setQuotations] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,11 +72,22 @@ const Home = () => {
     }
   }
 
+  const handleGetQuotation = async () => {
+    try {
+      const res = await axios.get('/api/home/quote');
+      console.log(res);
+      setQuotations(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     handleGetHeroSection();
     handleGetAllNotices();
     handleGetAllAchievements();
     handleGetNews();
+    handleGetQuotation();
   }, [])
 
 
@@ -219,12 +231,11 @@ const Home = () => {
       <div className="bg-white p-8 rounded-xl shadow-md border mx-4 mt-6 mb-6 text-center">
         <h2 className="text-2xl font-semibold text-purple-600">🌟 Greetings & Quotations</h2>
         <div className="mt-4">
-          <p className="italic text-gray-600 text-lg">
-            “The only way to do great work is to love what you do.” — Steve Jobs
-          </p>
-          <p className="mt-2 italic text-gray-600 text-lg">
-            “Success is not final, failure is not fatal: it is the courage to continue that counts.” — Winston Churchill
-          </p>
+          {quotations.map((quote, idx) => (
+            <p className="italic text-gray-600 text-lg">
+              {quote}
+            </p>
+          ))}
         </div>
       </div>
 

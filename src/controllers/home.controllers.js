@@ -479,7 +479,6 @@ const handleUpdateNews = async (req, res) => {
             message: "Error updating news"
         })
     }
-
 }
 
 const handleDeleteNews = async (req, res) => {
@@ -522,6 +521,163 @@ const handleDeleteNews = async (req, res) => {
     }
 }
 
+const handleAddNewQuotation = async (req, res) => {
+    const { quote } = req.body;
+
+    if (!quote) {
+        return res.status(404).json({
+            response: "error",
+            message: "Quotation field cannot be empty"
+        })
+    }
+
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        if (schoolData.quotation.length >= 2) {
+            return res.status(404).json({
+                response: "error",
+                message: "Maximum 2 quotations are allowed."
+            })
+        }
+
+        schoolData.quotation.push(quote);
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allQuotation = updatedSchoolData.quotation;
+
+        return res.status(200).json({
+            response: "success",
+            result: allQuotation
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Quotation adding failed!!"
+        })
+    }
+}
+
+const handleGetAllQuotation = async (req, res) => {
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        const allQuotation = schoolData.quotation;
+
+        return res.status(200).json({
+            response: "success",
+            result: allQuotation
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error fetching all quotation"
+        })
+    }
+}
+
+const handleUpdateQuotation = async (req, res) => {
+    const { idx } = req.params;
+    const { quote } = req.body;
+
+    if (!quote) {
+        return res.status(404).json({
+            response: "error",
+            message: "Quotation field cannot be empty!"
+        })
+    }
+
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        const index = parseInt(idx);
+        if (isNaN(index) || index < 0 || index >= schoolData.quotation.length) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid Index"
+            })
+        }
+
+        schoolData.quotation[index] = quote;
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allQuotation = updatedSchoolData.quotation;
+
+        return res.status(200).json({
+            response: "success",
+            result: allQuotation
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error updating quotation"
+        })
+    }
+}
+
+const handleDeleteQuotation = async (req, res) => {
+    const { idx } = req.params;
+
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid school"
+            })
+        }
+
+        const index = parseInt(idx);
+        if (isNaN(index) || index < 0 || index >= schoolData.quotation.length) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid index"
+            })
+        }
+
+        schoolData.quotation.splice(index, 1);
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allQuotation = updatedSchoolData.quotation;
+
+        return res.status(200).json({
+            response: "success",
+            message: "Quotation deleted",
+            result: allQuotation
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error deleting quotation"
+        })
+    }
+}
+
 export {
     handleHeroSection,
     handleGetHomeHeroSection,
@@ -536,5 +692,9 @@ export {
     handleAddNews,
     handleGetAllNews,
     handleUpdateNews,
-    handleDeleteNews
+    handleDeleteNews,
+    handleAddNewQuotation,
+    handleGetAllQuotation,
+    handleUpdateQuotation,
+    handleDeleteQuotation
 }
