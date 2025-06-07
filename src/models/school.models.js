@@ -71,6 +71,9 @@ const schoolSchema = new mongoose.Schema(
         },
         achievement: {
             type: [String]
+        },
+        news: {
+            type: [String]
         }
     }, {
         timestamps: true

@@ -11,7 +11,7 @@ const handleHeroSection = async (req, res) => {
 
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
 
-        if(!schoolData) {
+        if (!schoolData) {
             return res.status(400).json({
                 response: "error",
                 message: "School does not exist"
@@ -20,7 +20,7 @@ const handleHeroSection = async (req, res) => {
 
         const images = schoolData.homeHeroSection?.heroImage;
 
-        if(file && images) {
+        if (file && images) {
             const segment = images.split('/');
             const fileNameWithExtension = segment[segment.length - 1];
             const publicId = fileNameWithExtension.split('.')[0];
@@ -28,17 +28,17 @@ const handleHeroSection = async (req, res) => {
             console.log("Deleted image: ", result);
         }
 
-        if(file) {
+        if (file) {
             const uploadResult = await uploadOnCloudinary(file.path);
             imgUrl = uploadResult.secure_url || "";
             schoolData.homeHeroSection.heroImage = imgUrl;
         }
 
-        if(subtitle) {
+        if (subtitle) {
             schoolData.homeHeroSection.heroSubtitle = subtitle;
         }
 
-        if(title) {
+        if (title) {
             schoolData.homeHeroSection.heroTitle = title;
         }
 
@@ -65,7 +65,7 @@ const handleHeroSection = async (req, res) => {
 const handleGetHomeHeroSection = async (req, res) => {
     try {
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
-        
+
         const dataToSend = {
             image: schoolData.homeHeroSection?.heroImage,
             title: schoolData.homeHeroSection?.heroTitle,
@@ -86,11 +86,11 @@ const handleGetHomeHeroSection = async (req, res) => {
 
 const handleAddNotice = async (req, res) => {
     const { notice } = req.body;
-    
+
     try {
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
 
-        if(!schoolData) {
+        if (!schoolData) {
             return res.status(404).json({
                 response: "error",
                 message: "School not found"
@@ -122,7 +122,7 @@ const handleUpdateNotice = async (req, res) => {
     try {
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
 
-        if(!schoolData) {
+        if (!schoolData) {
             return res.status(404).json({
                 response: "error",
                 message: "School not exist"
@@ -130,13 +130,13 @@ const handleUpdateNotice = async (req, res) => {
         }
 
         const index = parseInt(idx);
-        if(isNaN(index) || index < 0 || index >= schoolData.notice.length) {
+        if (isNaN(index) || index < 0 || index >= schoolData.notice.length) {
             return res.status(404).json({
                 response: "error",
                 message: "Invalid Index"
             })
         }
-        
+
         schoolData.notice[index] = notice;
         await schoolData.save();
 
@@ -176,11 +176,11 @@ const handleGetNotices = async (req, res) => {
 
 const handleDeleteNotice = async (req, res) => {
     const { idx } = req.params;
-    
+
     try {
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
 
-        if(!schoolData) {
+        if (!schoolData) {
             return res.status(404).json({
                 response: "error",
                 message: "School not found"
@@ -188,7 +188,7 @@ const handleDeleteNotice = async (req, res) => {
         }
 
         const index = parseInt(idx);
-        if(isNaN(index) || index < 0 || index >= schoolData.notice.length) {
+        if (isNaN(index) || index < 0 || index >= schoolData.notice.length) {
             return res.status(404).json({
                 response: "error",
                 message: "Invalid index"
@@ -217,17 +217,17 @@ const handleDeleteNotice = async (req, res) => {
 const handleAddNewAchievement = async (req, res) => {
     const { achievement } = req.body;
 
-    if(!achievement) {
+    if (!achievement) {
         return res.status(404).json({
             response: "error",
             message: "Empty field! Type something to add in achievement"
         })
     }
-    
+
     try {
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
 
-        if(!schoolData) {
+        if (!schoolData) {
             return res.status(404).json({
                 response: "error",
                 message: "School not found"
@@ -256,13 +256,13 @@ const handleGetAllAchievements = async (req, res) => {
     try {
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
 
-        if(!schoolData) {
+        if (!schoolData) {
             return res.status(404).json({
                 response: "error",
                 message: "School not found"
             })
         }
-        
+
         const allAchievements = schoolData.achievement;
 
         return res.status(200).json({
@@ -281,7 +281,7 @@ const handleUpdateAchievement = async (req, res) => {
     const { idx } = req.params;
     const { achievement } = req.body;
 
-    if(!achievement) {
+    if (!achievement) {
         return res.status(404).json({
             response: "error",
             message: "Achievement field cannot be empty!"
@@ -291,7 +291,7 @@ const handleUpdateAchievement = async (req, res) => {
     try {
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
 
-        if(!schoolData) {
+        if (!schoolData) {
             return res.status(404).json({
                 response: "error",
                 message: "School not found"
@@ -299,7 +299,7 @@ const handleUpdateAchievement = async (req, res) => {
         }
 
         const index = parseInt(idx);
-        if(isNaN(index) || index < 0 || index >= schoolData.achievement.length) {
+        if (isNaN(index) || index < 0 || index >= schoolData.achievement.length) {
             return res.status(404).json({
                 response: "error",
                 message: "Invalid Index"
@@ -326,11 +326,11 @@ const handleUpdateAchievement = async (req, res) => {
 
 const handleDeleteAchievement = async (req, res) => {
     const { idx } = req.params;
-    
+
     try {
         const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
 
-        if(!schoolData) {
+        if (!schoolData) {
             return res.status(404).json({
                 response: "error",
                 message: "Invalid school"
@@ -338,7 +338,7 @@ const handleDeleteAchievement = async (req, res) => {
         }
 
         const index = parseInt(idx);
-        if(isNaN(index) || index < 0 || index >= schoolData.achievement.length) {
+        if (isNaN(index) || index < 0 || index >= schoolData.achievement.length) {
             return res.status(404).json({
                 response: "error",
                 message: "Invalid index"
@@ -353,13 +353,171 @@ const handleDeleteAchievement = async (req, res) => {
 
         return res.status(200).json({
             response: "success",
-            message: "Notice deleted",
+            message: "Achievement deleted",
             result: allAchievements
         })
     } catch (error) {
         return res.status(500).json({
             response: "error",
             message: "Error deleting achievement"
+        })
+    }
+}
+
+const handleAddNews = async (req, res) => {
+    const { news } = req.body;
+
+    if (!news) {
+        return res.status(404).json({
+            response: "error",
+            message: "News field cannot be empty"
+        })
+    }
+
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        if (schoolData.news.length >= 10) {
+            return res.status(404).json({
+                response: "error",
+                message: "Maximum 10 news are allowed."
+            })
+        }
+
+        schoolData.news.push(news);
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allNews = updatedSchoolData.news;
+
+        return res.status(200).json({
+            response: "success",
+            result: allNews
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "News adding failed!!"
+        })
+    }
+}
+
+const handleGetAllNews = async (req, res) => {
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        const allNews = schoolData.news;
+
+        return res.status(200).json({
+            response: "success",
+            result: allNews
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error fetching all news"
+        })
+    }
+}
+
+const handleUpdateNews = async (req, res) => {
+    const { idx } = req.params;
+    const { news } = req.body;
+
+    if (!news) {
+        return res.status(404).json({
+            response: "error",
+            message: "News field cannot be empty!"
+        })
+    }
+
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        const index = parseInt(idx);
+        if (isNaN(index) || index < 0 || index >= schoolData.news.length) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid Index"
+            })
+        }
+
+        schoolData.news[index] = news;
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allNews = updatedSchoolData.news;
+
+        return res.status(200).json({
+            response: "success",
+            result: allNews
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error updating news"
+        })
+    }
+
+}
+
+const handleDeleteNews = async (req, res) => {
+    const { idx } = req.params;
+
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid school"
+            })
+        }
+
+        const index = parseInt(idx);
+        if (isNaN(index) || index < 0 || index >= schoolData.news.length) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid index"
+            })
+        }
+
+        schoolData.news.splice(index, 1);
+        await schoolData.save();
+
+        const updatedSchoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+        const allNews = updatedSchoolData.news;
+
+        return res.status(200).json({
+            response: "success",
+            message: "News deleted",
+            result: allNews
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error deleting news"
         })
     }
 }
@@ -374,5 +532,9 @@ export {
     handleAddNewAchievement,
     handleGetAllAchievements,
     handleUpdateAchievement,
-    handleDeleteAchievement
+    handleDeleteAchievement,
+    handleAddNews,
+    handleGetAllNews,
+    handleUpdateNews,
+    handleDeleteNews
 }

@@ -20,6 +20,7 @@ const Home = () => {
   const [heroSectionData, setHeroSectionData] = useState({});
   const [notices, setNotices] = useState([]);
   const [achievements, setAchievements] = useState([]);
+  const [news, setNews] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,10 +61,21 @@ const Home = () => {
     }
   }
 
+  const handleGetNews = async () => {
+    try {
+      const res = await axios.get('/api/home/news');
+      console.log(res);
+      setNews(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     handleGetHeroSection();
     handleGetAllNotices();
     handleGetAllAchievements();
+    handleGetNews();
   }, [])
 
 
@@ -194,15 +206,17 @@ const Home = () => {
           {/* 📰 News */}
           <div className="bg-white p-8 rounded-xl shadow-md border w-full">
             <h2 className="text-2xl font-semibold flex items-center text-red-600">📰 News</h2>
-            <p className="mt-4 text-gray-700 text-lg">
-              <strong>18 Dec:</strong> News for October 2024
-            </p>
+            {news.map((n, idx) => (
+              <p className="mt-4 text-gray-700 text-lg">
+                {n}
+              </p>
+            ))}
           </div>
         </div>
       </div>
 
       {/* 🔹 Greetings & Quotations */}
-      <div className="bg-white p-8 rounded-xl shadow-md border mx-4 mt-6 text-center">
+      <div className="bg-white p-8 rounded-xl shadow-md border mx-4 mt-6 mb-6 text-center">
         <h2 className="text-2xl font-semibold text-purple-600">🌟 Greetings & Quotations</h2>
         <div className="mt-4">
           <p className="italic text-gray-600 text-lg">

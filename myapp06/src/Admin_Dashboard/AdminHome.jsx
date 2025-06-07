@@ -26,7 +26,12 @@ const AdminHome = () => {
   const [achievementEditIndex, setAchievementEditIndex] = useState(null);
   const [editAchievement, setEditAchievement] = useState("");
 
-  const [news, setNews] = useState(["18 Dec: News for October 2024"]);
+  //News
+  const [news, setNews] = useState([]);
+  const [newNews, setNewNews] = useState("");
+  const [newsEditIndex, setNewsEditIndex] = useState(null);
+  const [editNews, setEditNews] = useState("");
+
   const [quotations, setQuotations] = useState([
     "The only way to do great work is to love what you do. — Steve Jobs",
     "Success is not final, failure is not fatal: it is the courage to continue that counts. — Winston Churchill",
@@ -36,8 +41,6 @@ const AdminHome = () => {
   ]);
 
   const [heroSectionData, setHeroSectionData] = useState({});
-  const [editableNotices, setEditableNotices] = useState([]);
-
 
   const handleHeroSection = async (e) => {
     e.preventDefault();
@@ -78,10 +81,6 @@ const AdminHome = () => {
   }
 
   useEffect(() => {
-    handleGetHeroSection();
-  }, [])
-
-  useEffect(() => {
     console.log("Hero section data updated")
   }, [heroSectionData]);
 
@@ -109,8 +108,6 @@ const AdminHome = () => {
     }
   };
 
-  const addAchievement = () => setAchievements([...achievements, ""]);
-  const addNews = () => setNews([...news, ""]);
   const addManagementMember = () =>
     setManagement([...management, { name: "", designation: "", image: null }]);
 
@@ -134,11 +131,11 @@ const AdminHome = () => {
   const handleAddNotice = async (e) => {
     e.preventDefault();
 
-    if(notices.length >= 5) {
+    if (notices.length >= 5) {
       return alert("Maximum 5 notices are allowed");
     }
 
-    if(!newNotice) {
+    if (!newNotice) {
       return alert("Empty box cannot be added as Notice.")
     }
 
@@ -183,7 +180,7 @@ const AdminHome = () => {
   const handleSaveEditedNotice = async (e) => {
     e.preventDefault();
 
-    if(!editNotice) {
+    if (!editNotice) {
       return alert("Notice field cannot be empty!")
     }
 
@@ -206,8 +203,10 @@ const AdminHome = () => {
   }
 
   useEffect(() => {
+    handleGetHeroSection();
     handleGetAllNotices();
     handleGetAllAchievements();
+    handleGetNews();
   }, [])
 
   useEffect(() => {
@@ -217,7 +216,7 @@ const AdminHome = () => {
   const handleAddNewAchievement = async (e) => {
     e.preventDefault();
 
-    if(!newAchievement) {
+    if (!newAchievement) {
       return alert("Empty field! Type something to add in achievement")
     }
 
@@ -231,7 +230,7 @@ const AdminHome = () => {
       setAchievements(res.data?.result);
     } catch (error) {
       console.log(error);
-    } finally { 
+    } finally {
       setNewAchievement("");
     }
   }
@@ -254,7 +253,7 @@ const AdminHome = () => {
   const handleSaveEditedAchievement = async () => {
     const idx = achievementEditIndex;
 
-    if(!editAchievement) {
+    if (!editAchievement) {
       return alert("Achievement field cannot be empty!")
     }
 
@@ -284,9 +283,87 @@ const AdminHome = () => {
     }
   }
 
+  const handleAddNewNews = async (e) => {
+    e.preventDefault();
+
+    if(!newNews) {
+      return alert("News field cannot be empty");
+    }
+
+    if(news.length >= 10) {
+      return alert("Maximum 10 news are allowed.")
+    }
+
+    const data = {
+      news: newNews
+    }
+
+    try {
+      const res = await axios.post('/api/home/news', data);
+      console.log(res);
+      setNews(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setNewNews("");
+    }
+  }
+
+  const handleGetNews = async () => {
+    try {
+      const res = await axios.get('/api/home/news');
+      console.log(res);
+      setNews(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleEditNews = (idx) => {
+    setNewsEditIndex(idx);
+    setEditNews(news[idx]);
+  }
+
+  const handleSaveEditedNews = async () => {
+    const idx = newsEditIndex;
+
+    if (!editNews) {
+      return alert("News field cannot be empty!")
+    }
+
+    const data = {
+      news: editNews
+    }
+
+    try {
+      const res = await axios.patch(`/api/home/news/${idx}`, data);
+      console.log(res);
+      setNews(res.data?.result)
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setNewsEditIndex(null);
+      setEditNews("");
+    }
+  }
+
+  const handleDeleteNews = async (idx) => {
+    try {
+      const res = await axios.delete(`/api/home/news/${idx}`);
+      console.log(res);
+      setNews(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     console.log("Achievements updated")
   }, [achievements])
+
+  useEffect(() => {
+    console.log("News updated")
+  }, [news]);
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
@@ -420,7 +497,7 @@ const AdminHome = () => {
 
             <div className="flex items-center space-x-2 ml-2">
               {editingIndex === idx ? (
-                <button 
+                <button
                   type="submit"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
                   onClick={handleSaveEditedNotice}
@@ -428,14 +505,14 @@ const AdminHome = () => {
                   Save
                 </button>
               ) : (
-                <button 
+                <button
                   className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
                   onClick={() => handleEditNotice(idx)}
                 >
                   Edit
                 </button>
               )}
-              <button 
+              <button
                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                 onClick={() => handleDeleteNotice(idx)}
               >
@@ -445,9 +522,6 @@ const AdminHome = () => {
           </div>
         ))}
       </div>
-
-
-
 
       {/* Achievements */}
       <div className="bg-white p-6 rounded-xl shadow">
@@ -485,7 +559,7 @@ const AdminHome = () => {
 
             <div className="flex items-center space-x-2 ml-2">
               {achievementEditIndex === idx ? (
-                <button 
+                <button
                   type="submit"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
                   onClick={handleSaveEditedAchievement}
@@ -493,14 +567,14 @@ const AdminHome = () => {
                   Save
                 </button>
               ) : (
-                <button 
+                <button
                   className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
                   onClick={() => handleUpdateAchievement(idx)}
                 >
                   Edit
                 </button>
               )}
-              <button 
+              <button
                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                 onClick={() => handleDeleteAchievement(idx)}
               >
@@ -514,24 +588,63 @@ const AdminHome = () => {
       {/* News */}
       <div className="bg-white p-6 rounded-xl shadow">
         <h2 className="text-xl font-semibold mb-2 text-red-600">📰 News</h2>
-        {news.map((item, idx) => (
-          <textarea
-            key={idx}
-            className="border p-2 w-full mb-2"
-            value={item}
-            onChange={(e) => {
-              const updated = [...news];
-              updated[idx] = e.target.value;
-              setNews(updated);
-            }}
+
+        <div className="flex items-center space-x-2 mb-4">
+          <input
+            type="text"
+            placeholder="Enter a new news..."
+            className="border border-gray-300 p-2 rounded w-full"
+            onChange={(e) => setNewNews(e.target.value)}
+            value={newNews}
           />
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            onClick={handleAddNewNews}
+          >
+            Add
+          </button>
+        </div>
+
+        {news.map((n, idx) => (
+          <div key={idx} className="flex items-center justify-between mb-3 p-3 border rounded">
+            {newsEditIndex === idx ? (
+              <input
+                type="text"
+                className="border border-blue-500 p-2 rounded w-full mr-2"
+                value={editNews}
+                onChange={(e) => setEditNews(e.target.value)}
+              />
+            ) : (
+              <span className="text-gray-800">{n}</span>
+            )}
+
+            <div className="flex items-center space-x-2 ml-2">
+              {newsEditIndex === idx ? (
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                  onClick={handleSaveEditedNews}
+                >
+                  Save
+                </button>
+              ) : (
+                <button
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                  onClick={() => handleEditNews(idx)}
+                >
+                  Edit
+                </button>
+              )}
+              <button
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                onClick={() => handleDeleteNews(idx)}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         ))}
-        <button
-          onClick={addNews}
-          className="mt-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-        >
-          + Add News
-        </button>
       </div>
 
       {/* Quotations */}
