@@ -77,7 +77,20 @@ const schoolSchema = new mongoose.Schema(
         },
         quotation: {
             type: [String]
-        }
+        },
+        events: [
+            {
+                title: {
+                    type: String
+                },
+                description: {
+                    type: String
+                },
+                image: {
+                    type: String
+                }
+            }
+        ]
     }, {
         timestamps: true
     }

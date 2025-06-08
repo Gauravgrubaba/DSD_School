@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useEffect } from "react";
 
 const EventSection = () => {
   // Tagline state (only one tagline)
@@ -27,32 +29,69 @@ const EventSection = () => {
   };
 
   // Event handlers
-  const handleAddEvent = () => {
-    if (!eventTitle.trim() || !eventDescription.trim()) return;
+  const handleAddEvent = async () => {
+    if(events.length >= 10) {
+      return alert("Maximum 10 events are allowed");
+    }
 
-    const newEvent = {
-      id: Date.now(),
-      title: eventTitle.trim(),
-      description: eventDescription.trim(),
-      image: eventImage ? URL.createObjectURL(eventImage) : null,
-    };
+    if (!eventTitle.trim() || !eventDescription.trim()) {
+      return alert("Event tile and Description cannot be empty");
+    }
 
-    setEvents([...events, newEvent]);
-    setEventTitle("");
-    setEventDescription("");
-    setEventImage(null);
-    document.getElementById("event-image-input").value = "";
-  };
+    if(!eventImage) {
+      return alert("Event image is required");
+    }
 
-  const handleDeleteEvent = (id) => {
-    setEvents(events.filter((e) => e.id !== id));
-  };
+    const data = new FormData();
+    data.append("title", eventTitle);
+    data.append("description", eventDescription);
+    data.append("event-image", eventImage);
+    
 
-  const handleEventImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setEventImage(e.target.files[0]);
+    try {
+      const res = await axios.post('/api/events/event', data, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      console.log(res);
+      setEvents(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setEventTitle("");
+      setEventDescription("");
+      setEventImage(null);
     }
   };
+
+  const handleGetAllEvents = async () => {
+    try {
+      const res = await axios.get('/api/events/event');
+      console.log(res);
+      setEvents(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    handleGetAllEvents();
+  }, [])
+
+  const handleDeleteEvent = async (idx) => {
+    try {
+      const res = await axios.delete(`/api/events/event/${idx}`);
+      console.log(res);
+      setEvents(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Events updated")
+  }, [events])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-10 max-w-7xl mx-auto">
@@ -124,10 +163,11 @@ const EventSection = () => {
               required
             />
             <input
-              id="event-image-input"
+              id="event-image"
+              name="event-image"
               type="file"
               accept="image/*"
-              onChange={handleEventImageChange}
+              onChange={(e) => setEventImage(e.target.files[0])}
               className="text-indigo-700"
             />
             <button
@@ -142,9 +182,9 @@ const EventSection = () => {
             {events.length === 0 ? (
               <p className="text-gray-400 text-center italic">No events added yet.</p>
             ) : (
-              events.map(({ id, title, description, image }) => (
+              events.map(({title, description, image }, idx) => (
                 <div
-                  key={id}
+                  key={idx}
                   className="flex items-center bg-indigo-50 rounded-lg p-4 shadow-md hover:shadow-indigo-300 transition-shadow"
                 >
                   {image && (
@@ -159,7 +199,7 @@ const EventSection = () => {
                     <p className="text-indigo-800">{description}</p>
                   </div>
                   <button
-                    onClick={() => handleDeleteEvent(id)}
+                    onClick={() => handleDeleteEvent(idx)}
                     className="ml-6 text-red-500 font-semibold hover:text-red-700 transition-colors"
                     aria-label="Delete event"
                   >

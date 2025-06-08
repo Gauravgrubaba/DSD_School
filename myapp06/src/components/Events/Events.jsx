@@ -1,24 +1,33 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import axios from "axios";
 
 const Events = () => {
-  const events = [
-    { title: "Music Festival", description: "Enjoy live performances by top artists.", image: "/music-festival.jpg" },
-    { title: "Startup Meetup", description: "Connect with investors and entrepreneurs.", image: "/startup-meetup.jpg" },
-    { title: "National Sports Day", description: "Watch thrilling sports competitions.", image: "/sports-day.jpg" },
-    { title: "AI Hackathon", description: "Show your coding skills and win prizes.", image: "/coding-hackathon.jpg" },
-    { title: "Tech Conference", description: "Explore AI, ML, and cloud computing.", image: "/tech-conference.jpg" },
-  ];
+  const [events, setEvents] = useState([]);
+
+  const handleGetAllEvents = async () => {
+    try {
+      const res = await axios.get('/api/events/event');
+      console.log(res);
+      setEvents(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    handleGetAllEvents();
+  }, [])
 
   return (
     <section className="relative text-center py-16 bg-gray-100">
       <div className="max-w-7xl mx-auto px-4">
         {/* Centered Title with Extra Padding */}
         <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-700 text-center uppercase tracking-wide pt-16 pb-4">
-        Events
+          Events
         </h2>
         <p className="text-lg sm:text-xl text-gray-700 text-center mb-6">
           We Manage Events in a Smart Way to Ensure a Bright Future

@@ -113,23 +113,6 @@ const AdminHome = () => {
   const addManagementMember = () =>
     setManagement([...management, { name: "", designation: "", image: null }]);
 
-  const handleSave = () => {
-    console.log({
-      heroTitle,
-      heroSubTitle,
-      heroBgImage,
-      aboutText,
-      aboutText2,
-      aboutVideo,
-      notices,
-      achievements,
-      news,
-      quotations,
-      management,
-    });
-    alert("Changes saved (simulated)");
-  };
-
   const handleAddNotice = async (e) => {
     e.preventDefault();
 
@@ -838,24 +821,13 @@ const AdminHome = () => {
                 className="w-24 h-24 object-cover rounded-md border"
               />
             )}
+            <button
+              className="mb-2 mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"  
+            >
+              Add
+            </button>
           </div>
         ))}
-        <button
-          onClick={addManagementMember}
-          className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded"
-        >
-          + Add Management Member
-        </button>
-      </div>
-
-      {/* Save Button */}
-      <div className="text-center">
-        <button
-          className="bg-indigo-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-indigo-700"
-          onClick={handleSave}
-        >
-          💾 Save All Changes
-        </button>
       </div>
     </div>
   );
