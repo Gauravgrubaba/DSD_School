@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node index.js",
+    "server": "nodemon index.js",
+    "client": "npm run dev --prefix myapp06",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +17,7 @@
     "@mui/material": "^7.1.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.6.1",
+    "concurrently": "^9.1.2",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "html2canvas": "^1.4.1",
@@ -22,5 +26,6 @@
     "multer": "^1.4.5-lts.2",
     "nodemon": "^3.1.10",
     "react-easy-crop": "^5.4.2"
-  }
+  },
+  "type": "module"
 }
