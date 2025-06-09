@@ -18,6 +18,10 @@ const Home = () => {
   ];
 
   const [heroSectionData, setHeroSectionData] = useState({});
+  const [notices, setNotices] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [news, setNews] = useState([]);
+  const [quotations, setQuotations] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -39,13 +43,58 @@ const Home = () => {
     }
   }
 
+  const handleGetAllNotices = async () => {
+    try {
+      const res = await axios.get('/api/home/notice');
+      setNotices(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleGetAllAchievements = async () => {
+    try {
+      const res = await axios.get('/api/home/achievement');
+      console.log(res);
+      setAchievements(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleGetNews = async () => {
+    try {
+      const res = await axios.get('/api/home/news');
+      console.log(res);
+      setNews(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleGetQuotation = async () => {
+    try {
+      const res = await axios.get('/api/home/quote');
+      console.log(res);
+      setQuotations(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     handleGetHeroSection();
+    handleGetAllNotices();
+    handleGetAllAchievements();
+    handleGetNews();
+    handleGetQuotation();
   }, [])
+
+
 
   return (
     <div className="mx-auto w-full max-w-6xl pt-12">
-      
+
       {/* 🔹 Hero Section */}
       <header
         className="relative w-full h-[100vh] bg-cover bg-center flex items-center justify-center px-6 md:px-20 text-white mt-16" // Reduced height and added top margin
@@ -65,18 +114,18 @@ const Home = () => {
 
           {/* Buttons */}
           <div className="mt-6 flex flex-col md:flex-row justify-center space-y-3 md:space-y-0 md:space-x-4">
-          <Link
-            to="/admission"  // Navigate to /admission
-            className="bg-yellow-500 text-white px-6 md:px-8 py-3 rounded-full text-lg font-semibold shadow-lg hover:bg-white hover:text-yellow-500 transition"
-          >
-            Admission
-          </Link>
-          <Link
-  to="/contact" // This links to the contacts section directly
-  className="border-2 border-yellow-500 text-yellow-500 px-6 md:px-8 py-3 rounded-full text-lg font-semibold hover:bg-yellow-500 hover:text-white transition"
->
-  Contact
-</Link>
+            <Link
+              to="/admission"  // Navigate to /admission
+              className="bg-yellow-500 text-white px-6 md:px-8 py-3 rounded-full text-lg font-semibold shadow-lg hover:bg-white hover:text-yellow-500 transition"
+            >
+              Admission
+            </Link>
+            <Link
+              to="/contact" // This links to the contacts section directly
+              className="border-2 border-yellow-500 text-yellow-500 px-6 md:px-8 py-3 rounded-full text-lg font-semibold hover:bg-yellow-500 hover:text-white transition"
+            >
+              Contact
+            </Link>
           </div>
         </div>
       </header>
@@ -90,7 +139,7 @@ const Home = () => {
 
         {/* 🔹 About Us Container */}
         <div className="about-container flex flex-col md:flex-row items-center justify-center px-4 md:px-6 bg-gray-50 py-10 md:py-20 max-w-6xl mx-auto">
-          
+
           {/* Video Section */}
           <div className="relative w-full md:w-1/2 text-center mb-6 md:mb-0">
             <video
@@ -113,8 +162,8 @@ const Home = () => {
               We Learn the Smart Way to Build a Bright Future
             </h1>
             <p className="text-gray-600 mt-4 text-base md:text-lg leading-relaxed">
-              We are committed to providing high-quality education with a focus on personal growth, 
-              critical thinking, and creativity. Our goal is to create a safe, engaging, and inspiring 
+              We are committed to providing high-quality education with a focus on personal growth,
+              critical thinking, and creativity. Our goal is to create a safe, engaging, and inspiring
               learning environment where students can develop skills for a successful future.
             </p>
             <div className="about-list grid grid-cols-2 md:grid-cols-3 gap-4 mt-6 text-sm md:text-base">
@@ -137,7 +186,7 @@ const Home = () => {
                 <FaCheckCircle className="text-indigo-600 mr-2" /> Qualified Teachers
               </div>
             </div>
-           
+
           </div>
         </div>
       </div>
@@ -145,45 +194,48 @@ const Home = () => {
       {/* 🔹 Notices, Achievements, News Section */}
       <div className="bg-gray-100 py-10 px-4">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
+
           {/* 📝 Notices */}
           <div className="bg-white p-8 rounded-xl shadow-md border w-full">
             <h2 className="text-2xl font-semibold flex items-center text-blue-600">📝 Notices</h2>
-            <ul className="mt-4 text-gray-700 text-lg">
-              <li className="flex items-center">📌 Orientation Session for STD VIII & IX</li>
-              <li className="flex items-center mt-2">📌 Bus Facility Registration 2025-26</li>
-            </ul>
+            {notices.map((notice, idx) => (
+              <ul className="mt-4 text-gray-700 text-lg">
+                <li className="flex items-center">📌 {notice}</li>
+              </ul>
+            ))}
           </div>
 
           {/* 🏅 Achievements */}
           <div className="bg-white p-8 rounded-xl shadow-md border w-full">
             <h2 className="text-2xl font-semibold flex items-center text-green-600">🏅 Achievements</h2>
-            <ul className="mt-4 text-gray-700 text-lg">
-              <li>🏆 1st Place in National Anuvrat Nyas</li>
-              <li className="mt-2">🚀 The Kalam Project</li>
-            </ul>
+            {achievements.map((achievement, idx) => (
+              <ul className="mt-4 text-gray-700 text-lg">
+                <li>🏆 {achievement}</li>
+              </ul>
+            ))}
           </div>
 
           {/* 📰 News */}
           <div className="bg-white p-8 rounded-xl shadow-md border w-full">
             <h2 className="text-2xl font-semibold flex items-center text-red-600">📰 News</h2>
-            <p className="mt-4 text-gray-700 text-lg">
-              <strong>18 Dec:</strong> News for October 2024
-            </p>
+            {news.map((n, idx) => (
+              <p className="mt-4 text-gray-700 text-lg">
+                {n}
+              </p>
+            ))}
           </div>
         </div>
       </div>
 
       {/* 🔹 Greetings & Quotations */}
-      <div className="bg-white p-8 rounded-xl shadow-md border mx-4 mt-6 text-center">
+      <div className="bg-white p-8 rounded-xl shadow-md border mx-4 mt-6 mb-6 text-center">
         <h2 className="text-2xl font-semibold text-purple-600">🌟 Greetings & Quotations</h2>
         <div className="mt-4">
-          <p className="italic text-gray-600 text-lg">
-            “The only way to do great work is to love what you do.” — Steve Jobs
-          </p>
-          <p className="mt-2 italic text-gray-600 text-lg">
-            “Success is not final, failure is not fatal: it is the courage to continue that counts.” — Winston Churchill
-          </p>
+          {quotations.map((quote, idx) => (
+            <p className="italic text-gray-600 text-lg">
+              {quote}
+            </p>
+          ))}
         </div>
       </div>
 
