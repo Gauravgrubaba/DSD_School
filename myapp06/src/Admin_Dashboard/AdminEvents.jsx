@@ -1,19 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useEffect } from "react";
 
 const EventSection = () => {
-  // Tagline state (only one tagline)
   const [tagline, setTagline] = useState({
     id: 1,
     text: "Empowering your vision every day.",
   });
 
-  // Events state
   const [events, setEvents] = useState([]);
   const [eventTitle, setEventTitle] = useState("");
   const [eventDescription, setEventDescription] = useState("");
   const [eventImage, setEventImage] = useState(null);
+
+  const [isAdding, setIsAdding] = useState(false);
+  const [deletingIdx, setDeletingIdx] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const handleDeleteTagline = (id) => {
     if (tagline && tagline.id === id) {
@@ -28,17 +29,16 @@ const EventSection = () => {
     }
   };
 
-  // Event handlers
   const handleAddEvent = async () => {
-    if(events.length >= 10) {
+    if (events.length >= 10) {
       return alert("Maximum 10 events are allowed");
     }
 
     if (!eventTitle.trim() || !eventDescription.trim()) {
-      return alert("Event tile and Description cannot be empty");
+      return alert("Event title and description cannot be empty");
     }
 
-    if(!eventImage) {
+    if (!eventImage) {
       return alert("Event image is required");
     }
 
@@ -46,56 +46,60 @@ const EventSection = () => {
     data.append("title", eventTitle);
     data.append("description", eventDescription);
     data.append("event-image", eventImage);
-    
 
     try {
-      const res = await axios.post('/api/events/event', data, {
+      setIsAdding(true);
+      const res = await axios.post("/api/events/event", data, {
         headers: {
-          "Content-Type": "multipart/form-data"
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
-      console.log(res);
       setEvents(res.data?.result);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setEventTitle("");
       setEventDescription("");
       setEventImage(null);
+      setIsAdding(false);
     }
   };
 
   const handleGetAllEvents = async () => {
     try {
-      const res = await axios.get('/api/events/event');
-      console.log(res);
+      const res = await axios.get("/api/events/event");
       setEvents(res.data?.result);
     } catch (error) {
-      console.log(error);
-    }
-  }
-
-  useEffect(() => {
-    handleGetAllEvents();
-  }, [])
-
-  const handleDeleteEvent = async (idx) => {
-    try {
-      const res = await axios.delete(`/api/events/event/${idx}`);
-      console.log(res);
-      setEvents(res.data?.result);
-    } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
+  const handleDeleteEvent = async (idx) => {
+    try {
+      setDeletingIdx(idx);
+      const res = await axios.delete(`/api/events/event/${idx}`);
+      setEvents(res.data?.result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeletingIdx(null);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    setIsUploadingImage(true);
+    setTimeout(() => {
+      setEventImage(e.target.files[0]);
+      setIsUploadingImage(false);
+    }, 600); // simulate short delay for UX
+  };
+
   useEffect(() => {
-    console.log("Events updated")
-  }, [events])
+    handleGetAllEvents();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-10 max-w-7xl mx-auto">
-      {/* Main Heading */}
       <h1 className="text-5xl font-extrabold text-indigo-700 text-center mb-12">
         Admin Events
       </h1>
@@ -106,7 +110,6 @@ const EventSection = () => {
           <h2 className="text-3xl font-extrabold text-indigo-700 mb-6 border-b-4 border-indigo-300 pb-2 w-full text-center">
             Tagline
           </h2>
-
           {!tagline ? (
             <p className="text-gray-400 italic text-center">No tagline available.</p>
           ) : (
@@ -114,7 +117,6 @@ const EventSection = () => {
               <p className="text-xl italic text-indigo-900 mb-6 text-center">
                 “{tagline.text}”
               </p>
-
               <div className="flex space-x-6">
                 <button
                   onClick={() => handleUpdateTagline(tagline.id, tagline.text)}
@@ -167,14 +169,20 @@ const EventSection = () => {
               name="event-image"
               type="file"
               accept="image/*"
-              onChange={(e) => setEventImage(e.target.files[0])}
+              onChange={handleImageChange}
               className="text-indigo-700"
             />
+            {isUploadingImage && (
+              <p className="text-sm text-indigo-600">Uploading image...</p>
+            )}
             <button
               type="submit"
-              className="bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition"
+              disabled={isAdding}
+              className={`${
+                isAdding ? "bg-indigo-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+              } text-white font-semibold py-3 rounded-lg transition`}
             >
-              Add Event
+              {isAdding ? "Adding..." : "Add Event"}
             </button>
           </form>
 
@@ -182,7 +190,7 @@ const EventSection = () => {
             {events.length === 0 ? (
               <p className="text-gray-400 text-center italic">No events added yet.</p>
             ) : (
-              events.map(({title, description, image }, idx) => (
+              events.map(({ title, description, image }, idx) => (
                 <div
                   key={idx}
                   className="flex items-center bg-indigo-50 rounded-lg p-4 shadow-md hover:shadow-indigo-300 transition-shadow"
@@ -200,10 +208,15 @@ const EventSection = () => {
                   </div>
                   <button
                     onClick={() => handleDeleteEvent(idx)}
-                    className="ml-6 text-red-500 font-semibold hover:text-red-700 transition-colors"
+                    disabled={deletingIdx === idx}
+                    className={`ml-6 font-semibold transition-colors ${
+                      deletingIdx === idx
+                        ? "text-red-300 cursor-not-allowed"
+                        : "text-red-500 hover:text-red-700"
+                    }`}
                     aria-label="Delete event"
                   >
-                    Delete
+                    {deletingIdx === idx ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               ))
