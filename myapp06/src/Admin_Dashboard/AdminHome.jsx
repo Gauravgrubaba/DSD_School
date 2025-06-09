@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const AdminHome = () => {
   //Hero Section
@@ -9,11 +9,13 @@ const AdminHome = () => {
   const [heroBgImage, setHeroBgImage] = useState(null);
   const [heroSectionData, setHeroSectionData] = useState({});
 
-  const [aboutText, setAboutText] = useState(
-    "We are committed to providing high-quality education with a focus on personal growth, critical thinking, and creativity..."
-  );
-  const [aboutText2, setAboutText2] = useState("");
-  const [aboutVideo, setAboutVideo] = useState(null);
+  //About
+  const [aboutUsVideo, setAboutUsVideo] = useState(null);
+  const [aboutTitle, setAboutTitle] = useState("");
+  const [aboutDetails, setAboutDetails] = useState("");
+  const fileInputRef = useRef(null);
+  const [aboutUsData, setAboutUsData] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
 
   //Notices
   const [notices, setNotices] = useState([]);
@@ -45,8 +47,6 @@ const AdminHome = () => {
   const [newManagementImage, setNewManagementImage] = useState(null);
   const [management, setManagement] = useState([]);
   const [deletingIndex, setDeletingIndex] = useState(null);
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleHeroSection = async (e) => {
     e.preventDefault();
@@ -90,16 +90,50 @@ const AdminHome = () => {
     console.log("Hero section data updated")
   }, [heroSectionData]);
 
-  const handleAboutVideoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAboutVideo(reader.result);
-      };
-      reader.readAsDataURL(file);
+  const handleAddAboutUs = async (e) => {
+    e.preventDefault();
+
+    if (!(aboutDetails.trim()) && !(aboutTitle.trim()) && !aboutUsVideo) {
+      return alert("Need atleast some data to update about us")
+    }
+
+    if (aboutUsVideo && (aboutUsVideo.size < 5242880 || aboutUsVideo.size >= 26214400)) {
+      return alert("File size must be between 5MB and 15MB")
+    }
+
+    setIsUploading(true);
+
+    const data = new FormData();
+    data.append("title", aboutTitle);
+    data.append("details", aboutDetails);
+    data.append("aboutVideo", aboutUsVideo);
+
+    try {
+      const res = await axios.post("/api/home/about", data);
+      console.log(res);
+      setAboutUsData(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setAboutTitle("");
+      setAboutDetails("");
+      setAboutUsVideo(null);
+      setIsUploading(false);
     }
   };
+
+  useEffect(() => {
+    console.log("About us updated")
+  }, [aboutUsData])
+
+  const handleGetAboutUsData = async () => {
+    try {
+      const res = await axios.get('/api/home/about');
+      setAboutUsData(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleAddNotice = async (e) => {
     e.preventDefault();
@@ -182,6 +216,7 @@ const AdminHome = () => {
     handleGetNews();
     handleGetQuotation();
     handleGetAllManagement();
+    handleGetAboutUsData();
   }, [])
 
   useEffect(() => {
@@ -461,20 +496,18 @@ const AdminHome = () => {
 
     setDeletingIndex(index);
 
-    setIsLoading(true);
     try {
       const res = await axios.delete(`/api/home/management/${id}`);
       setManagement(res.data?.result);
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoading(false);
       setDeletingIndex(null);
     }
   }
 
   const handleEditManagement = async (index) => {
-    console.log(index); 
+    console.log(index);
   }
 
   useEffect(() => {
@@ -540,39 +573,80 @@ const AdminHome = () => {
 
       {/* About Section */}
       <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-4 text-blue-600">📘 About Us</h2>
-        <textarea
-          className="border p-2 w-full h-24 mb-4"
-          value={aboutText}
-          onChange={(e) => setAboutText(e.target.value)}
-          placeholder="Write about the school's vision or mission..."
-        />
-        <textarea
-          className="border p-2 w-full h-24 mb-4"
-          value={aboutText2}
-          onChange={(e) => setAboutText2(e.target.value)}
-          placeholder="Write about the school's journey or achievements..."
-        />
-        <input
-          type="file"
-          accept="video/*"
-          id="aboutVideoInput"
-          onChange={(e) => handleAboutVideoUpload(e)}
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => document.getElementById("aboutVideoInput").click()}
-          className="mb-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-        >
-          Upload About Section Video
-        </button>
-        {aboutVideo && (
-          <video controls className="w-full rounded-lg">
-            <source src={aboutVideo} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-blue-600">📘 About Us</h2>
+          <textarea
+            className="border p-2 w-full h-24 mb-4"
+            value={aboutTitle}
+            onChange={(e) => setAboutTitle(e.target.value)}
+            placeholder="Write about the school's vision or mission..."
+          />
+          <textarea
+            className="border p-2 w-full h-24 mb-4"
+            value={aboutDetails}
+            onChange={(e) => setAboutDetails(e.target.value)}
+            placeholder="Write about the school's journey or achievements..."
+          />
+          <input
+            type="file"
+            accept="video/*"
+            id="aboutVideo"
+            name="aboutVideo"
+            onChange={(e) => setAboutUsVideo(e.target.files[0])}
+            ref={fileInputRef}
+          />
+        </div>
+        <div>
+          <button
+            type="submit"
+            onClick={handleAddAboutUs}
+            disabled={isUploading}
+            className="mb-4 mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center justify-center min-w-[110px]"
+          >
+            <span className={`${isUploading ? "hidden" : "block"}`}>Submit</span>
+            {isUploading && (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+            )}
+          </button>
+        </div>
+        {aboutUsData && (
+          <div className="bg-white p-6 rounded-xl shadow-md mt-6">
+
+            <p className="text-lg font-medium text-gray-800 mb-2">{aboutUsData.title}</p>
+            <p className="text-gray-600 leading-relaxed mb-4">{aboutUsData.details}</p>
+
+            {aboutUsData.video && (
+              <video
+                controls
+                className="w-full max-h-[400px] rounded-md border"
+              >
+                <source src={aboutUsData.video} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
         )}
+
+
       </div>
 
       {/* Notices */}

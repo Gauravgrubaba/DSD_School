@@ -90,7 +90,18 @@ const schoolSchema = new mongoose.Schema(
                     type: String
                 }
             }
-        ]
+        ],
+        homeAboutUs: {
+            title: {
+                type: String
+            },
+            details: {
+                type: String
+            },
+            video: {
+                type: String
+            }
+        }
     }, {
         timestamps: true
     }
