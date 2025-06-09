@@ -1,6 +1,7 @@
 import SchoolSchema from "../models/school.models.js";
 import { v2 as cloudinary } from "cloudinary";
 import uploadOnCloudinary from "../utils/cloudinary.js";
+import Management from "../models/management.models.js";
 
 const handleHeroSection = async (req, res) => {
     const { subtitle, title } = req.body;
@@ -678,6 +679,90 @@ const handleDeleteQuotation = async (req, res) => {
     }
 }
 
+const handleAddManagement = async (req, res) => {
+    const { name, designation } = req.body;
+    const file = req.file;
+
+    if (!name || !designation) {
+        return res.status(404).json({
+            response: "error",
+            message: "Name and Designation are required"
+        })
+    }
+
+    if (!file) {
+        return res.status(404).json({
+            response: "error",
+            message: "Image is required"
+        })
+    }
+
+    try {
+        let imgUrl = "";
+
+        if (file) {
+            const imgupload = await uploadOnCloudinary(file.path);
+            imgUrl = imgupload.secure_url || "";
+        }
+
+        const addedManagement = await Management.create({ name: name, designation: designation, profileImage: imgUrl })
+
+        return res.status(200).json({
+            response: "success",
+            result: addedManagement
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while adding data"
+        })
+    }
+}
+
+const handleGetAllManagement = async (req, res) => {
+    try {
+        const allManagement = await Management.find({});
+        return res.status(200).json({
+            response: "success",
+            result: allManagement
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error fetching all management staff"
+        })
+    }
+}
+
+const handleDeleteManagement = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const management = await Management.findById({ _id: id });
+
+        if (management.profileImage) {
+            const segment = management.profileImage.split('/');
+            console.log(segment);
+            const fileNameWithExtension = segment[segment.length - 1];
+            const publicId = fileNameWithExtension.split('.')[0];
+            const result = await cloudinary.uploader.destroy(publicId, { invalidate: true });
+            console.log(result);
+        }
+        await Management.findByIdAndDelete({ _id: id });
+        const allManagement = await Management.find({});
+        return res.status(200).json({
+            response: "success",
+            message: "Staff Deleted",
+            result: allManagement
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while deleting staff details"
+        })
+    }
+}
+
 export {
     handleHeroSection,
     handleGetHomeHeroSection,
@@ -696,5 +781,8 @@ export {
     handleAddNewQuotation,
     handleGetAllQuotation,
     handleUpdateQuotation,
-    handleDeleteQuotation
+    handleDeleteQuotation,
+    handleAddManagement,
+    handleGetAllManagement,
+    handleDeleteManagement
 }

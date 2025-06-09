@@ -1,14 +1,17 @@
 import express from "express";
 import { 
+    handleAddManagement,
     handleAddNewAchievement,
     handleAddNewQuotation,
     handleAddNews,
     handleAddNotice,
     handleDeleteAchievement,
+    handleDeleteManagement,
     handleDeleteNews,
     handleDeleteNotice,
     handleDeleteQuotation,
     handleGetAllAchievements,
+    handleGetAllManagement,
     handleGetAllNews,
     handleGetAllQuotation,
     handleGetHomeHeroSection,
@@ -50,5 +53,10 @@ router.post('/quote', handleAddNewQuotation);
 router.get('/quote', handleGetAllQuotation);
 router.patch('/quote/:idx', handleUpdateQuotation);
 router.delete('/quote/:idx', handleDeleteQuotation);
+
+//Management
+router.post('/management', upload.single("managementImage"), handleAddManagement);
+router.get('/management', handleGetAllManagement);
+router.delete('/management/:id', handleDeleteManagement);
 
 export default router;
