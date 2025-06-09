@@ -1,5 +1,6 @@
 import express from "express";
 import { 
+    handleAddAboutUs,
     handleAddManagement,
     handleAddNewAchievement,
     handleAddNewQuotation,
@@ -10,6 +11,7 @@ import {
     handleDeleteNews,
     handleDeleteNotice,
     handleDeleteQuotation,
+    handleGetAboutUs,
     handleGetAllAchievements,
     handleGetAllManagement,
     handleGetAllNews,
@@ -29,6 +31,10 @@ const router = express.Router();
 //Hero-section
 router.post('/herosection', upload.single("homeHeroImage"), handleHeroSection);
 router.get('/herosection', handleGetHomeHeroSection);
+
+//About
+router.post('/about', upload.single("aboutVideo"), handleAddAboutUs);
+router.get('/about', handleGetAboutUs);
 
 //Notices
 router.post('/notice', handleAddNotice);

@@ -2,6 +2,7 @@ import SchoolSchema from "../models/school.models.js";
 import { v2 as cloudinary } from "cloudinary";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import Management from "../models/management.models.js";
+import { uploadVideoOnCloudinary } from "../utils/cloudinary.js";
 
 const handleHeroSection = async (req, res) => {
     const { subtitle, title } = req.body;
@@ -81,6 +82,133 @@ const handleGetHomeHeroSection = async (req, res) => {
         return res.status(500).json({
             response: "error",
             message: "Something went wrong while fetching hero section"
+        })
+    }
+}
+
+const handleAddAboutUs = async (req, res) => {
+    const { title, details } = req.body;
+    const file = req.file; // The video file from multer
+
+    // --- 1. Validation ---
+    // This size validation is good practice to prevent large uploads before they hit Cloudinary.
+    // The logic correctly rejects files smaller than 5MB or larger/equal to 15MB.
+    if (file && (file.size < 5242880 || file.size >= 26214400)) {
+        return res.status(400).json({ // Use 400 for bad request
+            response: "error",
+            message: "File size must be between 5MB and 15MB"
+        });
+    }
+
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            });
+        }
+
+        // --- 2. Delete Old Video (if a new one is uploaded) ---
+        const oldVideoUrl = schoolData.homeAboutUs?.video;
+
+        if (file && oldVideoUrl) {
+            // 💡 BEST PRACTICE: It's more reliable to store the 'public_id' in your database.
+            // However, this logic will work for simple Cloudinary URLs.
+            const segments = oldVideoUrl.split('/');
+            const publicIdWithFormat = segments[segments.length - 1];
+            const publicId = publicIdWithFormat.split('.')[0];
+
+            // 🐛 FIX: You MUST specify the resource_type when deleting videos.
+            await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
+            console.log("Old video deletion initiated for publicId:", publicId);
+        }
+
+        let newVideoUrl = schoolData.homeAboutUs?.video; // Default to old URL
+
+        // --- 3. Upload New Video (if it exists) ---
+        if (file) {
+            // ✨ CHANGE: Call the new dedicated video upload function.
+            const uploadResult = await uploadVideoOnCloudinary(file.path);
+
+            if (!uploadResult) {
+                return res.status(500).json({
+                    response: "error",
+                    message: "Failed to upload video to Cloudinary."
+                });
+            }
+
+            // ✨ CHANGE: Get the URL from the 'eager' transformation result.
+            // This URL will be for the converted .mp4 file.
+            // We'll wait a few seconds to give Cloudinary time to process the eager transformation.
+            // In a production app, a webhook is the best solution.
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+
+            const refreshedAsset = await cloudinary.api.resource(uploadResult.public_id, { resource_type: "video" });
+
+            if (refreshedAsset.eager && refreshedAsset.eager[0]) {
+                newVideoUrl = refreshedAsset.eager[0].secure_url;
+            } else {
+                // Fallback if eager transformation is not ready
+                console.warn("Eager transformation not ready, falling back to original URL with .mp4 format change.");
+                newVideoUrl = uploadResult.secure_url.replace(/\.\w+$/, ".mp4");
+            }
+        }
+
+        // --- 4. Update Database ---
+        schoolData.homeAboutUs.video = newVideoUrl;
+        if (details) schoolData.homeAboutUs.details = details;
+        if (title) schoolData.homeAboutUs.title = title;
+
+        const result = await schoolData.save();
+
+        // --- 5. Send Success Response ---
+        const dataToSend = {
+            video: result.homeAboutUs?.video,
+            title: result.homeAboutUs?.title,
+            details: result.homeAboutUs?.details // 🐛 FIX: Changed subtitle to details for consistency
+        };
+
+        return res.status(200).json({
+            response: "success",
+            result: dataToSend
+        });
+
+    } catch (error) {
+        console.error("Error in handleAddAboutUs:", error);
+        return res.status(500).json({
+            response: "error",
+            message: "Something went wrong while updating About Us section"
+        });
+    }
+};
+
+const handleGetAboutUs = async (req, res) => {
+    try {
+        const schoolData = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if (!schoolData) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        const dataToSend = {
+            video: schoolData.homeAboutUs?.video,
+            title: schoolData.homeAboutUs?.title,
+            details: schoolData.homeAboutUs?.details
+        }
+
+        return res.status(200).json({
+            response: "success",
+            result: dataToSend
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error fetching about us"
         })
     }
 }
@@ -784,5 +912,7 @@ export {
     handleDeleteQuotation,
     handleAddManagement,
     handleGetAllManagement,
-    handleDeleteManagement
+    handleDeleteManagement,
+    handleAddAboutUs,
+    handleGetAboutUs
 }
