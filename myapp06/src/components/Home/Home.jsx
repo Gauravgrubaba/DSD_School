@@ -9,19 +9,13 @@ import axios from "axios";
 
 const Home = () => {
   const [index, setIndex] = useState(0);
-  const events = [
-    { title: "Music Festival", description: "Enjoy live performances by top artists.", image: "/music-festival.jpg" },
-    { title: "Startup Meetup", description: "Connect with investors and entrepreneurs.", image: "/startup-meetup.jpg" },
-    { title: "National Sports Day", description: "Watch thrilling sports competitions.", image: "/sports-day.jpg" },
-    { title: "AI Hackathon", description: "Show your coding skills and win prizes.", image: "/coding-hackathon.jpg" },
-    { title: "Tech Conference", description: "Explore AI, ML, and cloud computing.", image: "/tech-conference.jpg" },
-  ];
 
   const [heroSectionData, setHeroSectionData] = useState({});
   const [notices, setNotices] = useState([]);
   const [achievements, setAchievements] = useState([]);
   const [news, setNews] = useState([]);
   const [quotations, setQuotations] = useState([]);
+  const [management, setManagement] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -82,12 +76,23 @@ const Home = () => {
     }
   }
 
+  const handleGetAllManagement = async () => {
+    try {
+      const res = await axios.get('/api/home/management');
+      console.log(res);
+      setManagement(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     handleGetHeroSection();
     handleGetAllNotices();
     handleGetAllAchievements();
     handleGetNews();
     handleGetQuotation();
+    handleGetAllManagement();
   }, [])
 
 
@@ -262,12 +267,12 @@ const Home = () => {
             }}
             className="mt-10"
           >
-            {events.map((event, index) => (
+            {management.map((manage, index) => (
               <SwiperSlide key={index}>
                 <div className="bg-white p-6 rounded-2xl shadow-lg w-80 md:w-[350px] h-[400px] mx-auto">
-                  <img src={event.image} alt={event.title} className="w-full h-48 object-cover rounded-lg" />
-                  <h3 className="text-xl font-semibold text-gray-800 mt-4">{event.title}</h3>
-                  <p className="text-lg text-gray-600 mt-2">{event.description}</p>
+                  <img src={manage.profileImage} alt={manage.name} className="w-full h-48 object-cover rounded-lg" />
+                  <h3 className="text-xl font-semibold text-gray-800 mt-4">{manage.name}</h3>
+                  <p className="text-lg text-gray-600 mt-2">{manage.designation}</p>
                 </div>
               </SwiperSlide>
             ))}
