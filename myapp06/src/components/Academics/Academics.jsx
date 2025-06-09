@@ -62,11 +62,15 @@ const Academics = () => {
             {heroSections.images.map((img, i) => (
               <SwiperSlide key={i}>
                 <div className="relative w-full h-full">
-                  <img
-                    src={img}
-                    alt={`Slide ${i + 1}`}
-                    className="absolute inset-0 w-full h-full object-cover object-center"
-                  />
+                
+                 <div className="relative w-full h-[500px] overflow-hidden">
+  <img
+    src={img}
+    alt={`Slide ${i + 1}`}
+    className="absolute inset-0 w-full h-full object-cover object-center"
+  />
+</div>
+
                   <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-center px-4">
                     <h2 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
                       {heroSections.texts?.[i] || ""}

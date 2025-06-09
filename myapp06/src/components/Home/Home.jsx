@@ -245,9 +245,7 @@ const Home = () => {
           <h2 className="text-3xl font-extrabold text-blue-700 uppercase tracking-wide">
             MANAGEMENTS
           </h2>
-          <p className="text-lg text-gray-700 mt-4">
-            We Manage Events in a Smart Way to Ensure a Bright Future
-          </p>
+          
 
           {/* Swiper Slider */}
           <Swiper
