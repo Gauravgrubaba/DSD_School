@@ -7,6 +7,7 @@ const AdminHome = () => {
   const [heroTitle, setHeroTitle] = useState("");
   const [heroSubTitle, setHeroSubTitle] = useState("");
   const [heroBgImage, setHeroBgImage] = useState(null);
+  const [heroSectionData, setHeroSectionData] = useState({});
 
   const [aboutText, setAboutText] = useState(
     "We are committed to providing high-quality education with a focus on personal growth, critical thinking, and creativity..."
@@ -38,11 +39,14 @@ const AdminHome = () => {
   const [quoteEditIndex, setQuoteEditIndex] = useState(null);
   const [editQuote, setEditQuote] = useState("");
 
-  const [management, setManagement] = useState([
-    { name: "", designation: "", image: null },
-  ]);
+  //Management
+  const [newManagementName, setNewManagementName] = useState("");
+  const [newManagementDesignation, setNewManagementDesignation] = useState("");
+  const [newManagementImage, setNewManagementImage] = useState(null);
+  const [management, setManagement] = useState([]);
+  const [deletingIndex, setDeletingIndex] = useState(null);
 
-  const [heroSectionData, setHeroSectionData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleHeroSection = async (e) => {
     e.preventDefault();
@@ -96,22 +100,6 @@ const AdminHome = () => {
       reader.readAsDataURL(file);
     }
   };
-
-  const handleManagementImageUpload = (e, idx) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const updated = [...management];
-        updated[idx].image = reader.result;
-        setManagement(updated);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const addManagementMember = () =>
-    setManagement([...management, { name: "", designation: "", image: null }]);
 
   const handleAddNotice = async (e) => {
     e.preventDefault();
@@ -193,6 +181,7 @@ const AdminHome = () => {
     handleGetAllAchievements();
     handleGetNews();
     handleGetQuotation();
+    handleGetAllManagement();
   }, [])
 
   useEffect(() => {
@@ -201,6 +190,10 @@ const AdminHome = () => {
 
   const handleAddNewAchievement = async (e) => {
     e.preventDefault();
+
+    if (achievements.length >= 5) {
+      return alert("Maximum 5 achievements are allowed")
+    }
 
     if (!newAchievement) {
       return alert("Empty field! Type something to add in achievement")
@@ -276,8 +269,8 @@ const AdminHome = () => {
       return alert("News field cannot be empty");
     }
 
-    if (news.length >= 10) {
-      return alert("Maximum 10 news are allowed.")
+    if (news.length >= 5) {
+      return alert("Maximum 5 news are allowed.")
     }
 
     const data = {
@@ -428,6 +421,65 @@ const AdminHome = () => {
   useEffect(() => {
     console.log("Quotation updated")
   }, [quotations])
+
+  const handleAddNewManagement = async (e) => {
+    e.preventDefault();
+
+    const data = new FormData();
+    data.append("name", newManagementName);
+    data.append("designation", newManagementDesignation);
+    data.append("managementImage", newManagementImage);
+
+    try {
+      const res = await axios.post('/api/home/management', data, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      })
+      setManagement((prev) => [...prev, res.data?.result]);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setNewManagementName("");
+      setNewManagementDesignation("");
+      setNewManagementImage(null);
+    }
+  }
+
+  const handleGetAllManagement = async () => {
+    try {
+      const res = await axios.get('/api/home/management');
+      console.log(res);
+      setManagement(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleDeleteManagement = async (index) => {
+    const id = management[index]._id;
+
+    setDeletingIndex(index);
+
+    setIsLoading(true);
+    try {
+      const res = await axios.delete(`/api/home/management/${id}`);
+      setManagement(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+      setDeletingIndex(null);
+    }
+  }
+
+  const handleEditManagement = async (index) => {
+    console.log(index); 
+  }
+
+  useEffect(() => {
+    console.log("Management updated")
+  }, [management])
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
@@ -776,58 +828,94 @@ const AdminHome = () => {
       {/* Management */}
       <div className="bg-white p-6 rounded-xl shadow">
         <h2 className="text-xl font-semibold mb-2 text-yellow-600">👔 Management</h2>
-        {management.map((member, idx) => (
-          <div key={idx} className="mb-6 border p-4 rounded-md">
-            <input
-              type="text"
-              placeholder="Name"
-              className="border p-2 w-full mb-2"
-              value={member.name}
-              onChange={(e) => {
-                const updated = [...management];
-                updated[idx].name = e.target.value;
-                setManagement(updated);
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Designation"
-              className="border p-2 w-full mb-2"
-              value={member.designation}
-              onChange={(e) => {
-                const updated = [...management];
-                updated[idx].designation = e.target.value;
-                setManagement(updated);
-              }}
-            />
-            <input
-              type="file"
-              accept="image/*"
-              id={`managementImageInput${idx}`}
-              onChange={(e) => handleManagementImageUpload(e, idx)}
-              className="hidden"
-            />
+        <div className="mb-6 border p-4 rounded-md">
+          <input
+            type="text"
+            placeholder="Name"
+            className="border p-2 w-full mb-2"
+            value={newManagementName}
+            onChange={(e) => setNewManagementName(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Designation"
+            className="border p-2 w-full mb-2"
+            value={newManagementDesignation}
+            onChange={(e) => setNewManagementDesignation(e.target.value)}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            id="managementImage"
+            name="managementImage"
+            onChange={(e) => setNewManagementImage(e.target.files[0])}
+          />
+          <div>
             <button
-              type="button"
-              onClick={() => document.getElementById(`managementImageInput${idx}`).click()}
-              className="mb-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              {member.image ? "Change Image" : "Upload Image"}
-            </button>
-            {member.image && (
-              <img
-                src={member.image}
-                alt={`${member.name} preview`}
-                className="w-24 h-24 object-cover rounded-md border"
-              />
-            )}
-            <button
-              className="mb-2 mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"  
+              onClick={handleAddNewManagement}
+              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
             >
               Add
             </button>
           </div>
-        ))}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {management.map((manage, index) => (
+            <div
+              key={index}
+              className="bg-white shadow-2xl rounded-lg p-6 text-center transform transition-transform hover:scale-105"
+            >
+              <img
+                src={manage.profileImage}
+                alt={manage.name}
+                className="mx-auto w-full h-48 sm:h-56 md:h-64 object-cover rounded-md shadow-2xl"
+              />
+              <h4 className="text-lg sm:text-xl font-semibold mt-5 text-gray-900">
+                {manage.name}
+              </h4>
+              <p className="text-gray-600 text-base sm:text-lg">{manage.designation}</p>
+              <div className="mt-4 flex justify-center gap-6">
+                <button
+                  onClick={() => handleEditManagement(index)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteManagement(index)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  {deletingIndex === index ? (
+                    <svg
+                      className="animate-spin h-5 w-5 text-red-600 mx-auto"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    "Delete"
+                  )}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
   );
