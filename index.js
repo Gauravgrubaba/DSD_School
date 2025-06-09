@@ -6,7 +6,6 @@ import userRouter from "./src/routes/user.routes.js";
 import academicRoute from "./src/routes/academics.routes.js";
 import homeRouter from "./src/routes/home.routes.js";
 import eventsRouter from "./src/routes/events.routes.js";
-
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -18,25 +17,33 @@ const app = express();
 
 const PORT = process.env.PORT || 8000;
 
+// --- Database Connection ---
 connectDB(`${process.env.MONGODB_URI}${DB_NAME}`);
 
+// --- Middlewares ---
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true })); // Use extended: true as a good practice
+
+// --- API Routes ---
+// These should come BEFORE the frontend serving logic
 app.use('/api/user', userRouter);
 app.use('/api/academic', academicRoute);
 app.use('/api/home', homeRouter);
 app.use('/api/events', eventsRouter);
 
-// Required for ES modules
+// --- Static Frontend Serving ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static files from Vite build
+// This line serves the built React app from the 'dist' directory
 app.use(express.static(path.join(__dirname, "myapp06", "dist")));
 
-// Fallback to index.html for SPA routes
+// This is the fallback for SPA routing. Any request that doesn't match an API route
+// will be sent the index.html file.
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "myapp06", "dist", "index.html"));
 });
 
+
+// --- Server Listener ---
 app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
