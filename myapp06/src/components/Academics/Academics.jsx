@@ -106,7 +106,7 @@ const Academics = () => {
                       : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                   }`}
                 >
-                  Class {cls}
+                  {cls}
                 </button>
               </li>
             ))}
