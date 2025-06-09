@@ -28,9 +28,9 @@ const Header = () => {
           </small>
         </div>
         <div className="flex gap-3">
-          <a href="#" className="w-10 h-10 flex items-center justify-center bg-white text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
-          <a href="#" className="w-10 h-10 flex items-center justify-center bg-white text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
-          <a href="#" className="w-10 h-10 flex items-center justify-center bg-white text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
         </div>
       </div>
 

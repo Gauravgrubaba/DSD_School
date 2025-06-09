@@ -19,12 +19,11 @@ const Academics = () => {
   const handleGetHeroSection = async () => {
     try {
       const res = await axios.get('/api/academic/herosection');
-      console.log(res?.data?.result);
       setHeroSections(res?.data?.result);
     } catch (error) {
       console.log("Error getting hero section images", error);
     }
-  }
+  };
 
   const handleGetTimeTable = async () => {
     try {
@@ -42,7 +41,7 @@ const Academics = () => {
     : [];
 
   useEffect(() => {
-    handleGetHeroSection()
+    handleGetHeroSection();
     handleGetTimeTable();
   }, []);
 
@@ -66,7 +65,7 @@ const Academics = () => {
                   <img
                     src={img}
                     alt={`Slide ${i + 1}`}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover object-center"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-center px-4">
                     <h2 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
@@ -84,7 +83,6 @@ const Academics = () => {
         )}
       </div>
 
-
       {/* Main Content */}
       <div className="flex flex-col md:flex-row gap-6 md:gap-10">
         {/* Class & Day Selector */}
@@ -98,10 +96,11 @@ const Academics = () => {
                     setSelectedClass(cls);
                     setSelectedDay(null);
                   }}
-                  className={`w-full py-2 px-4 rounded-lg font-medium transition duration-300 ${selectedClass === cls
-                    ? "bg-slate-800 text-white"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                    }`}
+                  className={`w-full py-2 px-4 rounded-lg font-medium transition duration-300 ${
+                    selectedClass === cls
+                      ? "bg-slate-800 text-white"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  }`}
                 >
                   Class {cls}
                 </button>
@@ -117,10 +116,11 @@ const Academics = () => {
                   <li key={day}>
                     <button
                       onClick={() => setSelectedDay(day)}
-                      className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition duration-300 ${selectedDay === day
-                        ? "bg-teal-600 text-white"
-                        : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                        }`}
+                      className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition duration-300 ${
+                        selectedDay === day
+                          ? "bg-teal-600 text-white"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                      }`}
                     >
                       {day}
                     </button>
