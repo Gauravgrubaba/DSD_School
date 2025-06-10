@@ -27,10 +27,10 @@ const Header = () => {
             info@example.com
           </small>
         </div>
-        <div className="flex gap-3">
-          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
-          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
-          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
+        <div className="flex ">
+          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition "></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition "></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition "></a>
         </div>
       </div>
 
@@ -40,9 +40,9 @@ const Header = () => {
           +91 12345 67890
         </small>
         <div className="flex gap-2">
-          <a href="#" className="w-7 h-7 flex items-center justify-center bg-white text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
-          <a href="#" className="w-7 h-7 flex items-center justify-center bg-white text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
-          <a href="#" className="w-7 h-7 flex items-center justify-center bg-white text-blue-700 rounded-full transition hover:bg-yellow-300 hover:text-gray-700"></a>
+          <a href="#" className="w-7 h-7 flex items-center justify-center  text-blue-700  transition  "></a>
+          <a href="#" className="w-7 h-7 flex items-center justify-center  text-blue-700  transition "></a>
+          <a href="#" className="w-7 h-7 flex items-center justify-center text-blue-700  transition "></a>
         </div>
       </div>
 

@@ -297,45 +297,46 @@ const AdminAdmissionDashboard = () => {
             </div>
 
             {/* Buttons */}
-            <div className="mt-6 text-center flex gap-4 justify-center no-print">
-              {editingId === form.id ? (
-                <>
-                  <button
-                    onClick={() => handleSaveClick(form.id)}
-                    className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700"
-                  >
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => handleEditClick(form)}
-                    className="bg-yellow-600 text-white px-4 py-2 rounded shadow hover:bg-yellow-700"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDownload(form.id)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
-                  >
-                    Download PDF
-                  </button>
-                  <button
-                    onClick={() => handleDeleteForm(form.id)}
-                    className="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center text-center no-print">
+  {editingId === form.id ? (
+    <>
+      <button
+        onClick={() => handleSaveClick(form.id)}
+        className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition"
+      >
+        Save
+      </button>
+      <button
+        onClick={() => setEditingId(null)}
+        className="w-full sm:w-auto bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700 transition"
+      >
+        Cancel
+      </button>
+    </>
+  ) : (
+    <>
+      <button
+        onClick={() => handleEditClick(form)}
+        className="w-full sm:w-auto bg-yellow-600 text-white px-4 py-2 rounded shadow hover:bg-yellow-700 transition"
+      >
+        Edit
+      </button>
+      <button
+        onClick={() => handleDownload(form.id)}
+        className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"
+      >
+        Download PDF
+      </button>
+      <button
+        onClick={() => handleDeleteForm(form.id)}
+        className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700 transition"
+      >
+        Delete
+      </button>
+    </>
+  )}
+</div>
+
           </div>
         ))
       )}

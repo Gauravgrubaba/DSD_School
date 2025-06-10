@@ -124,7 +124,7 @@ const Home = () => {
 
       {/* 🔹 Hero Section */}
       <header
-        className="relative w-full h-[100vh] bg-cover bg-center flex items-center justify-center px-6 md:px-20 text-white mt-16"
+        className="relative w-full h-full min-h-[300px] md:min-h-[600px] lg:h-screen bg-no-repeat bg-center bg-cover flex items-center justify-center px-4 md:px-20 text-white mt-16"
         style={{ backgroundImage: `url(${heroSectionData.image})` }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -236,36 +236,51 @@ const Home = () => {
 
       {/* 🔹 Events Carousel */}
       <section className="text-center py-10 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-extrabold text-blue-700 uppercase tracking-wide">
-            MANAGEMENTS
-          </h2>
-          <Swiper
-            modules={[Pagination, Autoplay]}
-            slidesPerView={1}
-            spaceBetween={20}
-            loop={true}
-            autoplay={{ delay: 2500, disableOnInteraction: false }}
-            pagination={{ clickable: true }}
-            breakpoints={{
-              640: { slidesPerView: 1 },
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-            }}
-            className="mt-10"
-          >
-            {management.map((manage, index) => (
-              <SwiperSlide key={index}>
-                <div className="bg-white p-6 rounded-2xl shadow-lg w-80 md:w-[350px] h-[400px] mx-auto">
-                  <img src={manage.profileImage} alt={manage.name} className="w-full h-48 object-cover rounded-lg" />
-                  <h3 className="text-xl font-semibold text-gray-800 mt-4">{manage.name}</h3>
-                  <p className="text-lg text-gray-600 mt-2">{manage.designation}</p>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-      </section>
+  <div className="max-w-7xl mx-auto px-4 md:px-12">
+    <h2 className="text-3xl font-extrabold text-blue-700 uppercase tracking-wide">
+      MANAGEMENTS
+    </h2>
+
+    <Swiper
+      modules={[Pagination, Autoplay]}
+      slidesPerView={1}
+      spaceBetween={20}
+      loop={true}
+      autoplay={{ delay: 2500, disableOnInteraction: false }}
+      pagination={{ clickable: true }}
+      breakpoints={{
+        640: { slidesPerView: 1 },
+        768: { slidesPerView: 2 },
+        1024: { slidesPerView: 3 },
+      }}
+      className="mt-10"
+    >
+      {management.map((manage, index) => (
+        <SwiperSlide key={index}>
+          <div className="bg-white mb-12 rounded-2xl shadow-lg overflow-hidden w-72 md:w-[300px] mx-auto flex flex-col items-center">
+            {/* Full-length image */}
+            <img
+              src={manage.profileImage}
+              alt={manage.name}
+              className="w-full h-[320px] object-cover"
+            />
+            
+            {/* Name and Designation */}
+            <div className="py-4">
+              <h3 className="text-lg font-semibold text-gray-800 capitalize">
+                {manage.name}
+              </h3>
+              <p className="text-gray-600 text-sm">{manage.designation}</p>
+            </div>
+          </div>
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  </div>
+</section>
+
+
+       
     </div>
   );
 };
