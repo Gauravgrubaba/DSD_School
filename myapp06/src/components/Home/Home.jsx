@@ -267,7 +267,7 @@ const Home = () => {
   </h2>
   <div className="space-y-3 text-gray-600 text-base sm:text-lg italic leading-relaxed">
     {quotations.map((quote, idx) => (
-      <p key={idx}>“{quote}”</p>
+      <p key={idx}>{quote}</p>
     ))}
   </div>
 </div>
