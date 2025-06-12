@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -12,7 +12,6 @@ const Events = () => {
   const handleGetAllEvents = async () => {
     try {
       const res = await axios.get('/api/events/event');
-      console.log(res);
       setEvents(res.data?.result);
     } catch (error) {
       console.log(error);

@@ -66,7 +66,6 @@ const AdminHome = () => {
           "Content-Type": "multipart/form-data"
         }
       })
-      console.log(res?.data?.result);
       setHeroSectionData(res?.data?.result);
     } catch (error) {
       console.log(error);
@@ -86,9 +85,7 @@ const AdminHome = () => {
     }
   }
 
-  useEffect(() => {
-    console.log("Hero section data updated")
-  }, [heroSectionData]);
+  useEffect(() => {}, [heroSectionData]);
 
   const handleAddAboutUs = async (e) => {
     e.preventDefault();
@@ -110,7 +107,6 @@ const AdminHome = () => {
 
     try {
       const res = await axios.post("/api/home/about", data);
-      console.log(res);
       setAboutUsData(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -122,9 +118,7 @@ const AdminHome = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("About us updated")
-  }, [aboutUsData])
+  useEffect(() => {}, [aboutUsData])
 
   const handleGetAboutUsData = async () => {
     try {
@@ -172,7 +166,6 @@ const AdminHome = () => {
   const handleDeleteNotice = async (idx) => {
     try {
       const res = await axios.delete(`/api/home/notice/${idx}`);
-      console.log(res);
       setNotices(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -199,7 +192,6 @@ const AdminHome = () => {
 
     try {
       const res = await axios.patch(`/api/home/notice/${idx}`, data);
-      console.log(res);
       setNotices(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -219,9 +211,7 @@ const AdminHome = () => {
     handleGetAboutUsData();
   }, [])
 
-  useEffect(() => {
-    console.log("Notices updated");
-  }, [notices])
+  useEffect(() => {}, [notices])
 
   const handleAddNewAchievement = async (e) => {
     e.preventDefault();
@@ -240,7 +230,6 @@ const AdminHome = () => {
 
     try {
       const res = await axios.post('/api/home/achievement', data);
-      console.log(res);
       setAchievements(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -252,7 +241,6 @@ const AdminHome = () => {
   const handleGetAllAchievements = async () => {
     try {
       const res = await axios.get('/api/home/achievement');
-      console.log(res);
       setAchievements(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -277,7 +265,6 @@ const AdminHome = () => {
 
     try {
       const res = await axios.patch(`/api/home/achievement/${idx}`, data);
-      console.log(res);
       setAchievements(res.data?.result)
     } catch (error) {
       console.log(error);
@@ -290,7 +277,6 @@ const AdminHome = () => {
   const handleDeleteAchievement = async (idx) => {
     try {
       const res = await axios.delete(`/api/home/achievement/${idx}`);
-      console.log(res);
       setAchievements(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -314,7 +300,6 @@ const AdminHome = () => {
 
     try {
       const res = await axios.post('/api/home/news', data);
-      console.log(res);
       setNews(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -326,7 +311,6 @@ const AdminHome = () => {
   const handleGetNews = async () => {
     try {
       const res = await axios.get('/api/home/news');
-      console.log(res);
       setNews(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -351,7 +335,6 @@ const AdminHome = () => {
 
     try {
       const res = await axios.patch(`/api/home/news/${idx}`, data);
-      console.log(res);
       setNews(res.data?.result)
     } catch (error) {
       console.log(error);
@@ -364,20 +347,15 @@ const AdminHome = () => {
   const handleDeleteNews = async (idx) => {
     try {
       const res = await axios.delete(`/api/home/news/${idx}`);
-      console.log(res);
       setNews(res.data?.result);
     } catch (error) {
       console.log(error);
     }
   }
 
-  useEffect(() => {
-    console.log("Achievements updated")
-  }, [achievements])
+  useEffect(() => {}, [achievements])
 
-  useEffect(() => {
-    console.log("News updated")
-  }, [news]);
+  useEffect(() => {}, [news]);
 
   const handleAddNewQuote = async (e) => {
     e.preventDefault();
@@ -396,7 +374,6 @@ const AdminHome = () => {
 
     try {
       const res = await axios.post('/api/home/quote', data);
-      console.log(res);
       setQuotations(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -408,7 +385,6 @@ const AdminHome = () => {
   const handleGetQuotation = async () => {
     try {
       const res = await axios.get('/api/home/quote');
-      console.log(res);
       setQuotations(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -418,7 +394,6 @@ const AdminHome = () => {
   const handleDeleteQuotation = async (idx) => {
     try {
       const res = await axios.delete(`/api/home/quote/${idx}`);
-      console.log(res);
       setQuotations(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -443,7 +418,6 @@ const AdminHome = () => {
 
     try {
       const res = await axios.patch(`/api/home/quote/${idx}`, data);
-      console.log(res);
       setQuotations(res.data?.result)
     } catch (error) {
       console.log(error);
@@ -453,9 +427,7 @@ const AdminHome = () => {
     }
   }
 
-  useEffect(() => {
-    console.log("Quotation updated")
-  }, [quotations])
+  useEffect(() => {}, [quotations])
 
   const handleAddNewManagement = async (e) => {
     e.preventDefault();
@@ -484,7 +456,6 @@ const AdminHome = () => {
   const handleGetAllManagement = async () => {
     try {
       const res = await axios.get('/api/home/management');
-      console.log(res);
       setManagement(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -510,9 +481,7 @@ const AdminHome = () => {
     console.log(index);
   }
 
-  useEffect(() => {
-    console.log("Management updated")
-  }, [management])
+  useEffect(() => {}, [management])
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
