@@ -92,7 +92,6 @@ const Home = () => {
       try {
         const res = await axios.get('/api/home/about');
         setAboutUsData(res.data?.result);
-        console.log(res.data?.result?.video);
       } catch (error) {
         console.log(error);
       }

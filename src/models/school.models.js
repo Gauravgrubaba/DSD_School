@@ -101,6 +101,9 @@ const schoolSchema = new mongoose.Schema(
             video: {
                 type: String
             }
+        },
+        eventTagline: {
+            type: String
         }
     }, {
         timestamps: true

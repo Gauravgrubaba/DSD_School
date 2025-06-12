@@ -186,8 +186,6 @@ const handleGetHeroSection = async (req, res) => {
             texts: heroSection.heroImageText
         }
 
-        console.log(dataToSend);
-
         return res.status(200).json({
             response: "success",
             result: dataToSend

@@ -13,7 +13,8 @@ import {
     handleUpdateMapAddress,
     handleContactUsMessage,
     handleGetAllMessage,
-    handleUpdateMessageStatus
+    handleUpdateMessageStatus,
+    handleDeleteMessage
 } from "../controllers/user.controllers.js";
 import upload from "../middlewares/multer.middlewares.js";
 
@@ -34,6 +35,7 @@ router.get('/mapaddress', handleGetMapAddress);
 
 router.post('/message', handleContactUsMessage);
 router.get('/message', handleGetAllMessage);
-router.patch('/message/:id', handleUpdateMessageStatus)
+router.patch('/message/:id', handleUpdateMessageStatus);
+router.delete('/message/:id', handleDeleteMessage);
 
 export default router;

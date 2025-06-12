@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import aspectRatio from '@tailwindcss/aspect-ratio';
 // No need to import tailwindcss here
 
 export default defineConfig({
