@@ -29,10 +29,11 @@ const AdminContact = () => {
     e.preventDefault();
     if (!mapLocation) return alert("Map location cannot be empty");
     try {
-      const res = await axios.patch('/api/user/mapaddress', { mapLocation });
-      console.log(res);
+      await axios.patch('/api/user/mapaddress', { mapLocation });
     } catch (error) {
       console.log(error);
+    } finally {
+      setMapLocation('');
     }
   };
 

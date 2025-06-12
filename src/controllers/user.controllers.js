@@ -360,6 +360,42 @@ const handleUpdateMessageStatus = async (req, res) => {
     }
 }
 
+const handleDeleteMessage = async (req, res) => {
+    const { id } = req.params;
+    
+    if(!id) {
+        return res.status(404).json({
+            response: "error",
+            message: "ID cannot be empty"
+        })
+    }
+
+    try {
+        const messageExist = await MessageSchema.findById({ _id: id });
+        if(!messageExist) {
+            return res.status(404).json({
+                response: "error",
+                response: "Invalid ID"
+            })
+        }
+
+        await MessageSchema.findOneAndDelete({ _id: id });
+        
+        const allMessage = await MessageSchema.find({});
+
+        return res.status(200).json({
+            response: "success",
+            allMessages: allMessage
+        })
+    } catch (error) {
+        console.log(error); 
+        return res.status(500).json({
+            response: "error",
+            message: "Error Deleting message"
+        })
+    }
+}
+
 export {
     handleUserlogin,
     handleAboutUsUpdate,
@@ -374,5 +410,6 @@ export {
     handleGetMapAddress,
     handleContactUsMessage,
     handleGetAllMessage,
-    handleUpdateMessageStatus
+    handleUpdateMessageStatus,
+    handleDeleteMessage
 }

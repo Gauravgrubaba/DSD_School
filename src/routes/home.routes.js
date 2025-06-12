@@ -20,6 +20,7 @@ import {
     handleGetNotices,
     handleHeroSection,
     handleUpdateAchievement,
+    handleUpdateManagement,
     handleUpdateNews,
     handleUpdateNotice,
     handleUpdateQuotation
@@ -63,6 +64,7 @@ router.delete('/quote/:idx', handleDeleteQuotation);
 //Management
 router.post('/management', upload.single("managementImage"), handleAddManagement);
 router.get('/management', handleGetAllManagement);
+router.patch('/management/:id', upload.single("managementImage"), handleUpdateManagement);
 router.delete('/management/:id', handleDeleteManagement);
 
 export default router;
