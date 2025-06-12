@@ -92,11 +92,11 @@ const handleAddAboutUs = async (req, res) => {
 
     // --- 1. Validation ---
     // This size validation is good practice to prevent large uploads before they hit Cloudinary.
-    // The logic correctly rejects files smaller than 5MB or larger/equal to 15MB.
+    // The logic correctly rejects files smaller than 5MB or larger/equal to 25MB.
     if (file && (file.size < 5242880 || file.size >= 26214400)) {
         return res.status(400).json({ // Use 400 for bad request
             response: "error",
-            message: "File size must be between 5MB and 15MB"
+            message: "File size must be between 5MB and 25MB"
         });
     }
 

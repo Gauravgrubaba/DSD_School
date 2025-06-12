@@ -137,8 +137,72 @@ const handleDeleteEvent = async (req, res) => {
     }
 }
 
+const handleAddUpdateTagline = async (req, res) => {
+    const { tagline } = req.body;
+    
+    if(!tagline) {
+        return res.status(404).json({
+            response: "error",
+            message: "Tagline cannot be empty"
+        })
+    }
+
+    try {
+        const school = await SchoolSchema.findOne({ schoolName: "DSD" });
+
+        if(!school) {
+            return res.sta(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        school.eventTagline = tagline;
+        const updatedSchool = await school.save();
+
+        const updatedTagline = updatedSchool.eventTagline;
+        
+        return res.status(200).json({
+            response: "success",
+            result: updatedTagline
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            response: "error",
+            message: "Error adding/updating tagline"
+        })
+    }
+}
+
+const handleGetTagline = async (req, res) => {
+    try {
+        const school = await SchoolSchema.findOne({ schoolName: "DSD" });
+        if(!school) {
+            return res.status(404).json({
+                response: "error",
+                message: "School not found"
+            })
+        }
+
+        const tagline = school.eventTagline;
+
+        return res.status(200).json({
+            response: "success",
+            result: tagline
+        })
+    } catch (error) {
+        return res.status(500).json({
+            response: "error",
+            message: "Error fetching tagline"
+        })
+    }
+}
+
 export {
     handleAddEvent,
     handleGetAllEvents,
-    handleDeleteEvent
+    handleDeleteEvent,
+    handleAddUpdateTagline,
+    handleGetTagline
 }

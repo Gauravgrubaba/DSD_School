@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const EventSection = () => {
-  const [tagline, setTagline] = useState({
-    id: 1,
-    text: "Empowering your vision every day.",
-  });
+  const [tagline, setTagline] = useState("");
+  const [editedTagline, setEditedTagline] = useState("");
 
   const [events, setEvents] = useState([]);
   const [eventTitle, setEventTitle] = useState("");
@@ -13,21 +11,40 @@ const EventSection = () => {
   const [eventImage, setEventImage] = useState(null);
 
   const [isAdding, setIsAdding] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [deletingIdx, setDeletingIdx] = useState(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  const handleDeleteTagline = (id) => {
-    if (tagline && tagline.id === id) {
-      setTagline(null);
+  const handleUpdateTagline = async (e) => {
+    e.preventDefault();
+
+    if(!editedTagline) {
+      return alert("Tagline field cannot be empty");
+    }
+
+    const data = {
+      tagline: editedTagline
+    }
+
+    try {
+      const res = await axios.post('/api/events/tagline', data);
+      setTagline(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setEditedTagline("");
+      setIsEditing(false);
     }
   };
 
-  const handleUpdateTagline = (id, oldText) => {
-    const updatedText = prompt("Update tagline:", oldText);
-    if (updatedText !== null && updatedText.trim() !== "") {
-      setTagline({ id, text: updatedText.trim() });
+  const handleGetTagline = async () => {
+    try {
+      const res = await axios.get('/api/events/tagline');
+      setTagline(res.data?.result);
+    } catch (error) {
+      console.log(error);
     }
-  };
+  }
 
   const handleAddEvent = async () => {
     if (events.length >= 10) {
@@ -96,6 +113,7 @@ const EventSection = () => {
 
   useEffect(() => {
     handleGetAllEvents();
+    handleGetTagline();
   }, []);
 
   return (
@@ -110,30 +128,65 @@ const EventSection = () => {
           <h2 className="text-3xl font-extrabold text-indigo-700 mb-6 border-b-4 border-indigo-300 pb-2 w-full text-center">
             Tagline
           </h2>
-          {!tagline ? (
-            <p className="text-gray-400 italic text-center">No tagline available.</p>
-          ) : (
+
+          {!tagline && !isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+            >
+              Add
+            </button>
+          )}
+
+          {/* If tagline exists and not updating */}
+          {tagline && !isEditing && (
             <div className="bg-indigo-50 rounded-lg p-8 max-w-xl shadow-md w-full flex flex-col items-center">
               <p className="text-xl italic text-indigo-900 mb-6 text-center">
-                “{tagline.text}”
+                “{tagline}”
               </p>
-              <div className="flex space-x-6">
+              <button
+                onClick={() => {
+                  setEditedTagline(tagline);
+                  setIsEditing(true);
+                }}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+              >
+                Update
+              </button>
+            </div>
+          )}
+
+          {/* Edit tagline input form */}
+          {isEditing && (
+            <div className="bg-indigo-50 rounded-lg p-8 max-w-xl shadow-md w-full flex flex-col items-center">
+              <input
+                type="text"
+                value={editedTagline}
+                onChange={(e) => setEditedTagline(e.target.value)}
+                className="w-full p-2 border border-indigo-300 rounded-md mb-4"
+              />
+              <div className="flex space-x-4">
                 <button
-                  onClick={() => handleUpdateTagline(tagline.id, tagline.text)}
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                  type="submit"
+                  onClick={(e) => handleUpdateTagline(e)}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                 >
-                  Update
+                  Save
                 </button>
                 <button
-                  onClick={() => handleDeleteTagline(tagline.id)}
+                  onClick={() => {
+                    setEditedTagline("");
+                    setIsEditing(false);
+                  }}
                   className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                 >
-                  Delete
+                  Cancel
                 </button>
               </div>
             </div>
           )}
         </section>
+
 
         {/* Events Section */}
         <section className="bg-white rounded-lg shadow-lg p-8 w-full md:w-1/2 flex flex-col">
@@ -178,9 +231,8 @@ const EventSection = () => {
             <button
               type="submit"
               disabled={isAdding}
-              className={`${
-                isAdding ? "bg-indigo-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
-              } text-white font-semibold py-3 rounded-lg transition`}
+              className={`${isAdding ? "bg-indigo-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+                } text-white font-semibold py-3 rounded-lg transition`}
             >
               {isAdding ? "Adding..." : "Add Event"}
             </button>
@@ -209,11 +261,10 @@ const EventSection = () => {
                   <button
                     onClick={() => handleDeleteEvent(idx)}
                     disabled={deletingIdx === idx}
-                    className={`ml-6 font-semibold transition-colors ${
-                      deletingIdx === idx
-                        ? "text-red-300 cursor-not-allowed"
-                        : "text-red-500 hover:text-red-700"
-                    }`}
+                    className={`ml-6 font-semibold transition-colors ${deletingIdx === idx
+                      ? "text-red-300 cursor-not-allowed"
+                      : "text-red-500 hover:text-red-700"
+                      }`}
                     aria-label="Delete event"
                   >
                     {deletingIdx === idx ? "Deleting..." : "Delete"}
