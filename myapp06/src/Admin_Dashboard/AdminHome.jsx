@@ -97,7 +97,7 @@ const AdminHome = () => {
       return alert("Need atleast some data to update about us")
     }
 
-    if (aboutUsVideo && (aboutUsVideo.size < 5242880 || aboutUsVideo.size >= 26214400)) {
+    if (aboutUsVideo && (aboutUsVideo.size < 1048576 || aboutUsVideo.size >= 26214400)) {
       return alert("File size must be between 5MB and 15MB")
     }
 
@@ -572,425 +572,477 @@ const AdminHome = () => {
       </div>
 
       {/* About Section */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-blue-600">📘 About Us</h2>
-          <textarea
-            className="border p-2 w-full h-24 mb-4"
-            value={aboutTitle}
-            onChange={(e) => setAboutTitle(e.target.value)}
-            placeholder="Write about the school's vision or mission..."
-          />
-          <textarea
-            className="border p-2 w-full h-24 mb-4"
-            value={aboutDetails}
-            onChange={(e) => setAboutDetails(e.target.value)}
-            placeholder="Write about the school's journey or achievements..."
-          />
-          <input
-            type="file"
-            accept="video/*"
-            id="aboutVideo"
-            name="aboutVideo"
-            onChange={(e) => setAboutUsVideo(e.target.files[0])}
-            ref={fileInputRef}
-          />
-        </div>
-        <div>
-          <button
-            type="submit"
-            onClick={handleAddAboutUs}
-            disabled={isUploading}
-            className="mb-4 mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center justify-center min-w-[110px]"
+      <div className="w-full max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-white p-6 sm:p-8 rounded-3xl shadow-xl mt-6">
+  <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700 mb-6 text-center border-b-4 border-indigo-300 pb-2">
+    📘 About Our School
+  </h2>
+
+  <div className="space-y-4">
+    <textarea
+      className="w-full p-4 border border-indigo-200 rounded-lg shadow-sm text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      value={aboutTitle}
+      onChange={(e) => setAboutTitle(e.target.value)}
+      placeholder="Enter school vision or mission..."
+    />
+    <textarea
+      className="w-full p-4 border border-indigo-200 rounded-lg shadow-sm text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
+      value={aboutDetails}
+      onChange={(e) => setAboutDetails(e.target.value)}
+      placeholder="Describe the school's journey, growth, or achievements..."
+    />
+    <input
+      type="file"
+      accept="video/*"
+      id="aboutVideo"
+      name="aboutVideo"
+      onChange={(e) => setAboutUsVideo(e.target.files[0])}
+      ref={fileInputRef}
+      className="text-sm border border-gray-300 rounded-lg p-2 w-full"
+    />
+  </div>
+
+  <div className="flex justify-center mt-6">
+    <button
+      type="submit"
+      onClick={handleAddAboutUs}
+      disabled={isUploading}
+      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-full shadow-lg flex items-center justify-center gap-2 transition-all duration-300 min-w-[130px]"
+    >
+      {!isUploading ? (
+        <span className="font-medium">Submit</span>
+      ) : (
+        <>
+          <svg
+            className="animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
           >
-            <span className={`${isUploading ? "hidden" : "block"}`}>Submit</span>
-            {isUploading && (
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg>
-            )}
-          </button>
-        </div>
-        {aboutUsData && (
-          <div className="bg-white p-6 rounded-xl shadow-md mt-6">
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            ></path>
+          </svg>
+          <span>Uploading...</span>
+        </>
+      )}
+    </button>
+  </div>
 
-            <p className="text-lg font-medium text-gray-800 mb-2">{aboutUsData.title}</p>
-            <p className="text-gray-600 leading-relaxed mb-4">{aboutUsData.details}</p>
+  {aboutUsData && (
+    <div className="mt-10 bg-white border border-gray-200 rounded-2xl shadow-md p-6">
+      <h3 className="text-lg sm:text-xl font-semibold text-indigo-800 mb-3 text-center">
+        📌 Submitted Information
+      </h3>
+      <p className="text-gray-800 font-medium text-center mb-2">{aboutUsData.title}</p>
+      <p className="text-gray-600 text-sm sm:text-base text-justify mb-4">{aboutUsData.details}</p>
 
-            {aboutUsData.video && (
-              <video
-                controls
-                className="w-full max-h-[400px] rounded-md border"
-              >
-                <source src={aboutUsData.video} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            )}
-          </div>
+      {aboutUsData.video && (
+        <video
+          controls
+          className="w-full max-h-[400px] rounded-md border"
+        >
+          <source src={aboutUsData.video} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      )}
+    </div>
+  )}
+</div>
+
+
+      <div className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-3xl shadow-xl mt-6">
+  <h2 className="text-2xl sm:text-3xl font-bold text-blue-700 mb-6 text-center border-b-4 border-blue-300 pb-2">
+    📌 School Notices
+  </h2>
+
+  {/* Input box to add new notice */}
+  <div className="flex flex-col sm:flex-row gap-2 mb-6">
+    <input
+      type="text"
+      placeholder="Enter a new notice..."
+      className="border border-gray-300 rounded-lg p-3 w-full text-sm focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
+      onChange={(e) => setNewNotice(e.target.value)}
+      value={newNotice}
+    />
+    <button
+      type="submit"
+      onClick={handleAddNotice}
+      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-5 py-2 rounded-lg shadow-md transition-all"
+    >
+      Add
+    </button>
+  </div>
+
+  {/* Render each notice */}
+  <div className="space-y-4">
+    {notices.map((notice, idx) => (
+      <div
+        key={idx}
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gray-50 p-4 border border-gray-200 rounded-xl shadow-sm"
+      >
+        {editingIndex === idx ? (
+          <input
+            type="text"
+            className="w-full border border-blue-300 p-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={editNotice}
+            onChange={(e) => seteditNotice(e.target.value)}
+          />
+        ) : (
+          <span className="text-gray-800 text-sm">{notice}</span>
         )}
 
-
-      </div>
-
-      {/* Notices */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-4 text-blue-600">📌 Notices</h2>
-
-        {/* Input box to add new notice */}
-        <div className="flex items-center space-x-2 mb-4">
-          <input
-            type="text"
-            placeholder="Enter a new notice..."
-            className="border border-gray-300 p-2 rounded w-full"
-            onChange={(e) => setNewNotice(e.target.value)}
-            value={newNotice}
-          />
-          <button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            onClick={handleAddNotice}
-          >
-            Add
-          </button>
-        </div>
-
-        {/* Render each notice */}
-        {notices.map((notice, idx) => (
-          <div key={idx} className="flex items-center justify-between mb-3 p-3 border rounded">
-            {editingIndex === idx ? (
-              <input
-                type="text"
-                className="border border-blue-500 p-2 rounded w-full mr-2"
-                value={editNotice}
-                onChange={(e) => seteditNotice(e.target.value)}
-              />
-            ) : (
-              <span className="text-gray-800">{notice}</span>
-            )}
-
-            <div className="flex items-center space-x-2 ml-2">
-              {editingIndex === idx ? (
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                  onClick={handleSaveEditedNotice}
-                >
-                  Save
-                </button>
-              ) : (
-                <button
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleEditNotice(idx)}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                onClick={() => handleDeleteNotice(idx)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Achievements */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2 text-green-600">🏅 Achievements</h2>
-
-        <div className="flex items-center space-x-2 mb-4">
-          <input
-            type="text"
-            placeholder="Enter a new achievement..."
-            className="border border-gray-300 p-2 rounded w-full"
-            onChange={(e) => setNewAchievement(e.target.value)}
-            value={newAchievement}
-          />
-          <button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            onClick={handleAddNewAchievement}
-          >
-            Add
-          </button>
-        </div>
-
-        {achievements.map((achievement, idx) => (
-          <div key={idx} className="flex items-center justify-between mb-3 p-3 border rounded">
-            {achievementEditIndex === idx ? (
-              <input
-                type="text"
-                className="border border-blue-500 p-2 rounded w-full mr-2"
-                value={editAchievement}
-                onChange={(e) => setEditAchievement(e.target.value)}
-              />
-            ) : (
-              <span className="text-gray-800">{achievement}</span>
-            )}
-
-            <div className="flex items-center space-x-2 ml-2">
-              {achievementEditIndex === idx ? (
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                  onClick={handleSaveEditedAchievement}
-                >
-                  Save
-                </button>
-              ) : (
-                <button
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleUpdateAchievement(idx)}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                onClick={() => handleDeleteAchievement(idx)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* News */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2 text-red-600">📰 News</h2>
-
-        <div className="flex items-center space-x-2 mb-4">
-          <input
-            type="text"
-            placeholder="Enter a new news..."
-            className="border border-gray-300 p-2 rounded w-full"
-            onChange={(e) => setNewNews(e.target.value)}
-            value={newNews}
-          />
-          <button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            onClick={handleAddNewNews}
-          >
-            Add
-          </button>
-        </div>
-
-        {news.map((n, idx) => (
-          <div key={idx} className="flex items-center justify-between mb-3 p-3 border rounded">
-            {newsEditIndex === idx ? (
-              <input
-                type="text"
-                className="border border-blue-500 p-2 rounded w-full mr-2"
-                value={editNews}
-                onChange={(e) => setEditNews(e.target.value)}
-              />
-            ) : (
-              <span className="text-gray-800">{n}</span>
-            )}
-
-            <div className="flex items-center space-x-2 ml-2">
-              {newsEditIndex === idx ? (
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                  onClick={handleSaveEditedNews}
-                >
-                  Save
-                </button>
-              ) : (
-                <button
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleEditNews(idx)}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                onClick={() => handleDeleteNews(idx)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Quotations */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2 text-purple-600">🌟 Quotations</h2>
-
-        <div className="flex items-center space-x-2 mb-4">
-          <input
-            type="text"
-            placeholder="Enter a new quote..."
-            className="border border-gray-300 p-2 rounded w-full"
-            onChange={(e) => setNewQuotation(e.target.value)}
-            value={newQuotation}
-          />
-          <button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            onClick={handleAddNewQuote}
-          >
-            Add
-          </button>
-        </div>
-
-        {quotations.map((quote, idx) => (
-          <div key={idx} className="flex items-center justify-between mb-3 p-3 border rounded">
-            {quoteEditIndex === idx ? (
-              <input
-                type="text"
-                className="border border-blue-500 p-2 rounded w-full mr-2"
-                value={editQuote}
-                onChange={(e) => setEditQuote(e.target.value)}
-              />
-            ) : (
-              <span className="text-gray-800">{quote}</span>
-            )}
-
-            <div className="flex items-center space-x-2 ml-2">
-              {quoteEditIndex === idx ? (
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                  onClick={handleSaveEditedQuotation}
-                >
-                  Save
-                </button>
-              ) : (
-                <button
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleEditQuote(idx)}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                onClick={() => handleDeleteQuotation(idx)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Management */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2 text-yellow-600">👔 Management</h2>
-        <div className="mb-6 border p-4 rounded-md">
-          <input
-            type="text"
-            placeholder="Name"
-            className="border p-2 w-full mb-2"
-            value={newManagementName}
-            onChange={(e) => setNewManagementName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Designation"
-            className="border p-2 w-full mb-2"
-            value={newManagementDesignation}
-            onChange={(e) => setNewManagementDesignation(e.target.value)}
-          />
-          <input
-            type="file"
-            accept="image/*"
-            id="managementImage"
-            name="managementImage"
-            onChange={(e) => setNewManagementImage(e.target.files[0])}
-          />
-          <div>
+        <div className="flex gap-2 self-end sm:self-auto">
+          {editingIndex === idx ? (
             <button
-              onClick={handleAddNewManagement}
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+              type="submit"
+              onClick={handleSaveEditedNotice}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
             >
-              Add
+              Save
+            </button>
+          ) : (
+            <button
+              onClick={() => handleEditNotice(idx)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            onClick={() => handleDeleteNotice(idx)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+      <div className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-3xl shadow-xl mt-6">
+  <h2 className="text-2xl sm:text-3xl font-bold text-green-700 mb-6 text-center border-b-4 border-green-300 pb-2">
+    🏅 School Achievements
+  </h2>
+
+  {/* Input box to add new achievement */}
+  <div className="flex flex-col sm:flex-row gap-2 mb-6">
+    <input
+      type="text"
+      placeholder="Enter a new achievement..."
+      className="border border-gray-300 rounded-lg p-3 w-full text-sm focus:ring-2 focus:ring-green-400 outline-none shadow-sm"
+      onChange={(e) => setNewAchievement(e.target.value)}
+      value={newAchievement}
+    />
+    <button
+      type="submit"
+      onClick={handleAddNewAchievement}
+      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-5 py-2 rounded-lg shadow-md transition-all"
+    >
+      Add
+    </button>
+  </div>
+
+  {/* Render each achievement */}
+  <div className="space-y-4">
+    {achievements.map((achievement, idx) => (
+      <div
+        key={idx}
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gray-50 p-4 border border-gray-200 rounded-xl shadow-sm"
+      >
+        {achievementEditIndex === idx ? (
+          <input
+            type="text"
+            className="w-full border border-blue-300 p-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={editAchievement}
+            onChange={(e) => setEditAchievement(e.target.value)}
+          />
+        ) : (
+          <span className="text-gray-800 text-sm">{achievement}</span>
+        )}
+
+        <div className="flex gap-2 self-end sm:self-auto">
+          {achievementEditIndex === idx ? (
+            <button
+              type="submit"
+              onClick={handleSaveEditedAchievement}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+            >
+              Save
+            </button>
+          ) : (
+            <button
+              onClick={() => handleUpdateAchievement(idx)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            onClick={() => handleDeleteAchievement(idx)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+
+     <div className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-3xl shadow-xl mt-6">
+  <h2 className="text-2xl sm:text-3xl font-bold text-red-600 mb-6 text-center border-b-4 border-red-300 pb-2">
+    📰 Latest News
+  </h2>
+
+  {/* Input for new news */}
+  <div className="flex flex-col sm:flex-row gap-2 mb-6">
+    <input
+      type="text"
+      placeholder="Enter a news headline..."
+      className="border border-gray-300 rounded-lg p-3 w-full text-sm focus:ring-2 focus:ring-red-400 outline-none shadow-sm"
+      onChange={(e) => setNewNews(e.target.value)}
+      value={newNews}
+    />
+    <button
+      type="submit"
+      onClick={handleAddNewNews}
+      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-5 py-2 rounded-lg shadow-md transition-all"
+    >
+      Add
+    </button>
+  </div>
+
+  {/* List of news items */}
+  <div className="space-y-4">
+    {news.map((n, idx) => (
+      <div
+        key={idx}
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gray-50 p-4 border border-gray-200 rounded-xl shadow-sm"
+      >
+        {newsEditIndex === idx ? (
+          <input
+            type="text"
+            className="w-full border border-blue-300 p-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={editNews}
+            onChange={(e) => setEditNews(e.target.value)}
+          />
+        ) : (
+          <span className="text-gray-800 text-sm">{n}</span>
+        )}
+
+        <div className="flex gap-2 self-end sm:self-auto">
+          {newsEditIndex === idx ? (
+            <button
+              type="submit"
+              onClick={handleSaveEditedNews}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+            >
+              Save
+            </button>
+          ) : (
+            <button
+              onClick={() => handleEditNews(idx)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            onClick={() => handleDeleteNews(idx)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+      <div className="w-full max-w-4xl mx-auto bg-white p-6 sm:p-8 rounded-3xl shadow-xl mt-6">
+  <h2 className="text-2xl sm:text-3xl font-bold text-purple-600 mb-6 text-center border-b-4 border-purple-300 pb-2">
+    🌟 Inspiring Quotations
+  </h2>
+
+  {/* Input field to add new quote */}
+  <div className="flex flex-col sm:flex-row gap-2 mb-6">
+    <input
+      type="text"
+      placeholder="Enter a new quote..."
+      className="border border-gray-300 rounded-lg p-3 w-full text-sm focus:ring-2 focus:ring-purple-400 outline-none shadow-sm"
+      onChange={(e) => setNewQuotation(e.target.value)}
+      value={newQuotation}
+    />
+    <button
+      type="submit"
+      onClick={handleAddNewQuote}
+      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-5 py-2 rounded-lg shadow-md transition-all"
+    >
+      Add
+    </button>
+  </div>
+
+  {/* Render list of quotations */}
+  <div className="space-y-4">
+    {quotations.map((quote, idx) => (
+      <div
+        key={idx}
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gray-50 p-4 border border-gray-200 rounded-xl shadow-sm"
+      >
+        {quoteEditIndex === idx ? (
+          <input
+            type="text"
+            className="w-full border border-blue-300 p-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={editQuote}
+            onChange={(e) => setEditQuote(e.target.value)}
+          />
+        ) : (
+          <span className="text-gray-800 italic text-sm">“{quote}”</span>
+        )}
+
+        <div className="flex gap-2 self-end sm:self-auto">
+          {quoteEditIndex === idx ? (
+            <button
+              type="submit"
+              onClick={handleSaveEditedQuotation}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+            >
+              Save
+            </button>
+          ) : (
+            <button
+              onClick={() => handleEditQuote(idx)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            onClick={() => handleDeleteQuotation(idx)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm shadow-md"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+
+      <div className="w-full max-w-6xl mx-auto bg-white p-6 sm:p-10 rounded-3xl shadow-xl mt-6">
+  <h2 className="text-3xl font-bold text-yellow-600 mb-8 text-center border-b-4 border-yellow-300 pb-3">
+    👔 Management Team
+  </h2>
+
+  {/* Form Section */}
+  <div className="bg-gray-50 border border-gray-200 p-6 rounded-xl mb-10 shadow-sm">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input
+        type="text"
+        placeholder="Name"
+        className="border border-gray-300 p-3 rounded-lg w-full text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
+        value={newManagementName}
+        onChange={(e) => setNewManagementName(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Designation"
+        className="border border-gray-300 p-3 rounded-lg w-full text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
+        value={newManagementDesignation}
+        onChange={(e) => setNewManagementDesignation(e.target.value)}
+      />
+    </div>
+
+    <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <input
+        type="file"
+        accept="image/*"
+        id="managementImage"
+        name="managementImage"
+        className="text-sm"
+        onChange={(e) => setNewManagementImage(e.target.files[0])}
+      />
+      <button
+        onClick={handleAddNewManagement}
+        className="mt-4 mb-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+      >
+        Add Member
+      </button>
+    </div>
+  </div>
+
+  {/* Management Cards */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
+    {management.map((manage, index) => (
+      <div
+        key={index}
+        className="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+      >
+        <img
+          src={manage.profileImage}
+          alt={manage.name}
+          className="w-full h-56 object-cover"
+        />
+        <div className="p-5 text-center">
+          <h4 className="text-xl font-semibold text-gray-900">{manage.name}</h4>
+          <p className="text-gray-600 text-sm mt-1">{manage.designation}</p>
+
+          <div className="mt-4 flex justify-center gap-4">
+            <button
+              onClick={() => handleEditManagement(index)}
+              className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => handleDeleteManagement(index)}
+              className="text-red-600 hover:text-red-800 font-medium text-sm"
+            >
+              {deletingIndex === index ? (
+                <svg
+                  className="animate-spin h-5 w-5 text-red-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+              ) : (
+                "Delete"
+              )}
             </button>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {management.map((manage, index) => (
-            <div
-              key={index}
-              className="bg-white shadow-2xl rounded-lg p-6 text-center transform transition-transform hover:scale-105"
-            >
-              <img
-                src={manage.profileImage}
-                alt={manage.name}
-                className="mx-auto w-full h-48 sm:h-56 md:h-64 object-cover rounded-md shadow-2xl"
-              />
-              <h4 className="text-lg sm:text-xl font-semibold mt-5 text-gray-900">
-                {manage.name}
-              </h4>
-              <p className="text-gray-600 text-base sm:text-lg">{manage.designation}</p>
-              <div className="mt-4 flex justify-center gap-6">
-                <button
-                  onClick={() => handleEditManagement(index)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteManagement(index)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  {deletingIndex === index ? (
-                    <svg
-                      className="animate-spin h-5 w-5 text-red-600 mx-auto"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                      ></path>
-                    </svg>
-                  ) : (
-                    "Delete"
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
       </div>
+    ))}
+  </div>
+</div>
+
     </div>
   );
 };
