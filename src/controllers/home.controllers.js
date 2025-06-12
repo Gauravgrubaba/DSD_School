@@ -891,6 +891,66 @@ const handleDeleteManagement = async (req, res) => {
     }
 }
 
+const handleUpdateManagement = async (req, res) => {
+    const { id } = req.params;
+    const { name, designation } = req.body;
+    const file = req.file;
+
+    if(!name && !designation && !file) {
+        return res.status(404).json({
+            response: "error",
+            message: "Require at least one field to update"
+        })
+    }
+
+    try {
+        const managementData = await Management.findById({ _id: id });
+        if(!managementData) {
+            return res.status(404).json({
+                response: "error",
+                message: "Invalid ID"
+            })
+        }
+
+        if(name) {
+            managementData.name = name;
+        }
+
+        if(designation) {
+            managementData.designation = designation;
+        }
+
+        if(file && managementData.profileImage) {
+            const segment = managementData.profileImage.split('/');
+            const fileNameWithExtension = segment[segment.length - 1];
+            const public_id = fileNameWithExtension.split('.')[0];
+            const result = await cloudinary.uploader.destroy(public_id, { invalidate: true });
+            console.log(result);
+
+            let imageUrl = "";
+            const uploadedFile = await uploadOnCloudinary(file.path);
+            imageUrl = uploadedFile.secure_url || "";
+
+            managementData.profileImage = imageUrl;
+        }
+
+        await managementData.save();
+
+        const allManagement = await Management.find({});
+
+        return res.status(200).json({
+            response: "success",
+            result: allManagement
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            response: "error",
+            message: "Error updating management details"
+        })
+    }
+}
+
 export {
     handleHeroSection,
     handleGetHomeHeroSection,
@@ -914,5 +974,6 @@ export {
     handleGetAllManagement,
     handleDeleteManagement,
     handleAddAboutUs,
-    handleGetAboutUs
+    handleGetAboutUs,
+    handleUpdateManagement
 }
