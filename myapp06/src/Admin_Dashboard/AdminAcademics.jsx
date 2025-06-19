@@ -199,7 +199,7 @@ export default function AdminAcademics() {
           className="border p-2 w-full"
         />
         <button onClick={handleAddHeroSection} className="bg-blue-600 text-white px-4 py-2 rounded">
-          Add Hero Section
+          Add
         </button>
 
         {isLoadingHero && <div className="text-blue-600 font-medium animate-pulse">Uploading image, please wait...</div>}
