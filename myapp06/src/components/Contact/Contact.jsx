@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios.jsx";
 
 const Contact = () => {
 
@@ -24,7 +24,7 @@ const Contact = () => {
 
   const handleGetAddress = async () => {
     try {
-      const res = await axios.get('/api/user/address');
+      const res = await api.get('/user/address');
       setAddress(res.data.address);
     } catch (error) {
       console.log(error);
@@ -33,7 +33,7 @@ const Contact = () => {
 
   const handleGetMapAddress = async () => {
     try {
-      const res = await axios.get('/api/user/mapaddress');
+      const res = await api.get('/user/mapaddress');
       setMapAddress(res?.data?.mapAddress);
     } catch (error) {
       console.log("Error: ", error)
@@ -72,7 +72,7 @@ const Contact = () => {
     }
 
     try {
-      const res = await axios.post('/api/user/message', formData);
+      const res = await api.post('/user/message', formData);
       console.log(res);
       setSuccessMessage(res?.data?.message);
     } catch (error) {

@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import axios from "axios";
+import api from "../../api/axios.jsx";
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -11,18 +11,27 @@ const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleGetAllEvents = async () => {
+    try {
+      const res = await api.get('/events/event');
+      setEvents(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleGetTagline = async () => {
+    try {
+      const res = await api.get('/events/tagline');
+      setTagline(res.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await axios.get("/api/events/event");
-        setEvents(res.data?.result || []);
-        const taglineRes = await axios.get("/api/events/tagline");
-        setTagline(taglineRes.data?.result || "");
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
+    handleGetAllEvents();
+    handleGetTagline();
   }, []);
 
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from "axios";
+import api from "../api/axios.jsx";
 
 const AdminContact = () => {
   const [mapLocation, setMapLocation] = useState('');
@@ -29,7 +29,7 @@ const AdminContact = () => {
     e.preventDefault();
     if (!mapLocation) return alert("Map location cannot be empty");
     try {
-      await axios.patch('/api/user/mapaddress', { mapLocation });
+      await api.patch('/user/mapaddress', { mapLocation });
     } catch (error) {
       console.log(error);
     } finally {
@@ -45,7 +45,7 @@ const AdminContact = () => {
     if (!state) return alert("State is required");
 
     try {
-      const res = await axios.patch('/api/user/address', { addressLine1, addressLine2, city, pin, state });
+      const res = await api.patch('/user/address', { addressLine1, addressLine2, city, pin, state });
       console.log(res);
     } catch (error) {
       console.log(error);
@@ -60,8 +60,8 @@ const AdminContact = () => {
 
   const handleGetMessages = async () => {
     try {
-      const receivedMessages = await axios.get('/api/user/message');
-      setMessages(receivedMessages?.data?.messages);
+      const receivedMessages = await api.get('/user/message');
+      setMessages(receivedMessages?.data?.messages || []);
     } catch (error) {
       console.log(error);
     }
@@ -74,7 +74,7 @@ const AdminContact = () => {
   const handleChangeStatus = async (id) => {
     setChangingStatusIndex(id);
     try {
-      const res = await axios.patch(`/api/user/message/${id}`);
+      const res = await api.patch(`/user/message/${id}`);
       setMessages(res?.data?.allMessage);
     } catch (error) {
       console.log(error);
@@ -87,7 +87,7 @@ const AdminContact = () => {
   const handleDeleteMessage = async (id) => {
     if (!window.confirm("Are you sure you want to delete this message?")) return;
     try {
-      const res = await axios.delete(`/api/user/message/${id}`);
+      const res = await api.delete(`/user/message/${id}`);
       // Assuming API returns updated message list or you can refetch
       setMessages(res?.data?.allMessage || messages.filter(m => m._id !== id));
     } catch (error) {

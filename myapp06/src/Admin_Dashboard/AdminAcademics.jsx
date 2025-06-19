@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios.jsx";
 
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -32,7 +32,7 @@ export default function AdminAcademics() {
 
     try {
       setIsLoadingHero(true);
-      const res = await axios.post("/api/academic/herosection", data, {
+      const res = await api.post("/academic/herosection", data, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       setHeroSections(res?.data?.result);
@@ -47,7 +47,7 @@ export default function AdminAcademics() {
 
   const handleGetHeroSection = async () => {
     try {
-      const res = await axios.get("/api/academic/herosection");
+      const res = await api.get("/academic/herosection");
       setHeroSections(res?.data?.result);
     } catch (error) {
       console.error("Error getting hero section images", error);
@@ -60,7 +60,7 @@ export default function AdminAcademics() {
 
   const handleDeleteHero = async (index) => {
     try {
-      const res = await axios.delete(`/api/academic/herosection/${index}`);
+      const res = await api.delete(`/academic/herosection/${index}`);
       setHeroSections(res?.data?.result);
     } catch (error) {
       console.log(error);
@@ -71,7 +71,7 @@ export default function AdminAcademics() {
     const id = classes[index]?.id;
     setDeletingClassIndex(index); // ✅ Set loading state
     try {
-      const res = await axios.delete(`/api/academic/class/${id}`);
+      const res = await api.delete(`/academic/class/${id}`);
       const result = res?.data?.result;
       const grouped = result.map(cls => ({
         className: cls.className,
@@ -99,7 +99,7 @@ export default function AdminAcademics() {
     };
 
     try {
-      const res = await axios.patch(`/api/academic/class/${id}`, data);
+      const res = await api.patch(`/academic/class/${id}`, data);
       const updatedTimeTable = res?.data?.result?.timeTable;
       setClasses(prev =>
         prev.map((cls, idx) =>
@@ -120,7 +120,7 @@ export default function AdminAcademics() {
   const handleDeleteTimetableEntry = async (day, index) => {
     const id = classes[selectedClassIndex]?.id;
     try {
-      const res = await axios.delete(`/api/academic/class/${id}/${day}/${index}`);
+      const res = await api.delete(`/academic/class/${id}/${day}/${index}`);
       const grouped = {
         className: res?.data?.result?.className,
         timeTable: res?.data?.result?.timeTable,
@@ -144,7 +144,7 @@ export default function AdminAcademics() {
     const dataToSend = { className: trimmedName.toUpperCase() };
     try {
       setIsLoadingClass(true);
-      const res = await axios.post("/api/academic/class", dataToSend);
+      const res = await api.post("/academic/class", dataToSend);
       const classData = res?.data?.classData;
       setClasses(prev => [
         ...prev,
@@ -161,7 +161,7 @@ export default function AdminAcademics() {
 
   const handleGetClassTimeTable = async () => {
     try {
-      const res = await axios.get("/api/academic/class");
+      const res = await api.get("/academic/class");
       const result = res?.data?.result || [];
       const grouped = result.map(cls => ({
         className: cls.className,

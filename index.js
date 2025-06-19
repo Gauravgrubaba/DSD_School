@@ -8,14 +8,15 @@ import homeRouter from "./src/routes/home.routes.js";
 import eventsRouter from "./src/routes/events.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import cookieParser from "cookie-parser";
 
 dotenv.config({
-    path: "./.env"
+  path: "./.env"
 });
 
 const app = express();
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8080;
 
 // --- Database Connection ---
 connectDB(`${process.env.MONGODB_URI}${DB_NAME}`);
@@ -23,6 +24,7 @@ connectDB(`${process.env.MONGODB_URI}${DB_NAME}`);
 // --- Middlewares ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Use extended: true as a good practice
+app.use(cookieParser());
 
 // --- API Routes ---
 // These should come BEFORE the frontend serving logic

@@ -10,6 +10,8 @@ import {
   Navigate,
 } from 'react-router-dom';
 
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+
 // Layout and Pages
 import Layout from './Layout.jsx';
 import Home from './components/Home/Home.jsx';
@@ -34,13 +36,23 @@ import AdminContact from './Admin_Dashboard/AdminContact.jsx';
 
 // ✅ Protected Route Logic Inline
 function ProtectedRoute({ children }) {
-  const isAuthenticated = localStorage.getItem('user');
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if(isLoading) {
+    return <div>Loading...</div>
+  }
+
   return isAuthenticated ? children : <Navigate to="/" />;
 }
 
 // ✅ Optional: Redirect /login if already logged in
 function PublicRoute({ children }) {
-  const isAuthenticated = localStorage.getItem('user');
+  const {isAuthenticated, isLoading} = useAuth();
+
+  if(isLoading) {
+    return <div>Loading...</div>
+  }
+
   return isAuthenticated ? <Navigate to="/dashboard" /> : children;
 }
 
@@ -88,6 +100,8 @@ const router = createBrowserRouter(
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>
 );
