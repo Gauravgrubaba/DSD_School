@@ -26,44 +26,48 @@ import {
     handleUpdateQuotation
 } from "../controllers/home.controllers.js";
 import upload from "../middlewares/multer.middlewares.js";
+import verifyJWT from "../middlewares/verifyJWT.middleware.js";
 
 const router = express.Router();
 
+router.get('/herosection', handleGetHomeHeroSection);
+router.get('/about', handleGetAboutUs);
+router.get('/notice', handleGetNotices);
+router.get('/achievement', handleGetAllAchievements);
+router.get('/news', handleGetAllNews);
+router.get('/quote', handleGetAllQuotation);
+router.get('/management', handleGetAllManagement);
+
+router.use(verifyJWT);
+
 //Hero-section
 router.post('/herosection', upload.single("homeHeroImage"), handleHeroSection);
-router.get('/herosection', handleGetHomeHeroSection);
 
 //About
 router.post('/about', upload.single("aboutVideo"), handleAddAboutUs);
-router.get('/about', handleGetAboutUs);
 
 //Notices
 router.post('/notice', handleAddNotice);
-router.get('/notice', handleGetNotices);
 router.patch('/notice/:idx', handleUpdateNotice);
 router.delete('/notice/:idx', handleDeleteNotice);
 
 //Achievements
 router.post('/achievement', handleAddNewAchievement);
-router.get('/achievement', handleGetAllAchievements);
 router.patch('/achievement/:idx', handleUpdateAchievement);
 router.delete('/achievement/:idx', handleDeleteAchievement);
 
 //News
 router.post('/news', handleAddNews);
-router.get('/news', handleGetAllNews);
 router.patch('/news/:idx', handleUpdateNews);
 router.delete('/news/:idx', handleDeleteNews);
 
 //Quotation
 router.post('/quote', handleAddNewQuotation);
-router.get('/quote', handleGetAllQuotation);
 router.patch('/quote/:idx', handleUpdateQuotation);
 router.delete('/quote/:idx', handleDeleteQuotation);
 
 //Management
 router.post('/management', upload.single("managementImage"), handleAddManagement);
-router.get('/management', handleGetAllManagement);
 router.patch('/management/:id', upload.single("managementImage"), handleUpdateManagement);
 router.delete('/management/:id', handleDeleteManagement);
 

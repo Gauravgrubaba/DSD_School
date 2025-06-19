@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios.jsx";
 
 const AdminAbout = () => {
   const [teachers, setTeachers] = useState([]);
@@ -45,7 +45,7 @@ const AdminAbout = () => {
     }
 
     try {
-      const res = await axios.patch("/api/user/about", data, {
+      const res = await api.patch("/user/about", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -65,7 +65,7 @@ const AdminAbout = () => {
 
   const handleGetAboutUs = async () => {
     try {
-      const receivedData = await axios.get("/api/user/about");
+      const receivedData = await api.get("/user/about");
       setUpdatedAboutUs(receivedData.data.aboutUs);
     } catch (error) {
       console.log(`Error: ${error}`);
@@ -93,12 +93,11 @@ const AdminAbout = () => {
     setIsLoading(true);
 
     try {
-      const teacher = await axios.post("/api/user/teachers", data, {
+      const teacher = await api.post("/user/teachers", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(teacher);
       setNewTeacher({
         name: "",
         designation: "",
@@ -114,7 +113,7 @@ const AdminAbout = () => {
 
   const handleGetAllTeachers = async () => {
     try {
-      const allTeacher = await axios.get("/api/user/teachers");
+      const allTeacher = await api.get("/user/teachers");
       setTeachers(allTeacher.data.allTeachers);
     } catch (error) {
       console.log(error);
@@ -149,7 +148,7 @@ const AdminAbout = () => {
     setIsLoading(true);
 
     try {
-      const res = await axios.patch(`/api/user/teachers/${id}`, data, {
+      const res = await api.patch(`/user/teachers/${id}`, data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -177,7 +176,7 @@ const AdminAbout = () => {
 
     setIsLoading(true);
     try {
-      const res = await axios.delete(`/api/user/teachers/${id}`);
+      const res = await api.delete(`/user/teachers/${id}`);
       console.log(res);
       setTeachers(res.data.allTeachers);
     } catch (error) {

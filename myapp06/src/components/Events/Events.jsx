@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import axios from "axios";
+import api from "../../api/axios.jsx";
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -11,7 +11,7 @@ const Events = () => {
 
   const handleGetAllEvents = async () => {
     try {
-      const res = await axios.get('/api/events/event');
+      const res = await api.get('/events/event');
       setEvents(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -20,7 +20,7 @@ const Events = () => {
 
   const handleGetTagline = async () => {
     try {
-      const res = await axios.get('/api/events/tagline');
+      const res = await api.get('/events/tagline');
       setTagline(res.data?.result);
     } catch (error) {
       console.log(error);

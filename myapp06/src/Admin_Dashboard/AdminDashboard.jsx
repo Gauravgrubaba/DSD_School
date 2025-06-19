@@ -10,14 +10,20 @@ import {
   FaBars,
   FaSignOutAlt,
 } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const navItems = [

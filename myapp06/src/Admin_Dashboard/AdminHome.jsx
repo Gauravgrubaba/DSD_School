@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/axios.jsx";
 import { useEffect, useRef } from "react";
 
 const AdminHome = () => {
@@ -63,7 +63,7 @@ const AdminHome = () => {
     data.append("title", heroTitle);
 
     try {
-      const res = await axios.post('/api/home/herosection', data, {
+      const res = await api.post('/home/herosection', data, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -80,7 +80,7 @@ const AdminHome = () => {
 
   const handleGetHeroSection = async () => {
     try {
-      const res = await axios.get('/api/home/herosection');
+      const res = await api.get('/home/herosection');
       setHeroSectionData(res?.data?.result);
     } catch (error) {
       console.log(error);
@@ -108,7 +108,7 @@ const AdminHome = () => {
     data.append("aboutVideo", aboutUsVideo);
 
     try {
-      const res = await axios.post("/api/home/about", data);
+      const res = await api.post("/home/about", data);
       setAboutUsData(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -124,7 +124,7 @@ const AdminHome = () => {
 
   const handleGetAboutUsData = async () => {
     try {
-      const res = await axios.get('/api/home/about');
+      const res = await api.get('/home/about');
       setAboutUsData(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -147,7 +147,7 @@ const AdminHome = () => {
     }
 
     try {
-      const res = await axios.post('/api/home/notice', data);
+      const res = await api.post('/home/notice', data);
       setNotices(res?.data?.result);
     } catch (error) {
       console.log(error);
@@ -158,7 +158,7 @@ const AdminHome = () => {
 
   const handleGetAllNotices = async () => {
     try {
-      const res = await axios.get('/api/home/notice');
+      const res = await api.get('/home/notice');
       setNotices(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -167,7 +167,7 @@ const AdminHome = () => {
 
   const handleDeleteNotice = async (idx) => {
     try {
-      const res = await axios.delete(`/api/home/notice/${idx}`);
+      const res = await api.delete(`/home/notice/${idx}`);
       setNotices(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -193,7 +193,7 @@ const AdminHome = () => {
     const idx = editingIndex;
 
     try {
-      const res = await axios.patch(`/api/home/notice/${idx}`, data);
+      const res = await api.patch(`/home/notice/${idx}`, data);
       setNotices(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -231,7 +231,7 @@ const AdminHome = () => {
     }
 
     try {
-      const res = await axios.post('/api/home/achievement', data);
+      const res = await api.post('/home/achievement', data);
       setAchievements(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -242,7 +242,7 @@ const AdminHome = () => {
 
   const handleGetAllAchievements = async () => {
     try {
-      const res = await axios.get('/api/home/achievement');
+      const res = await api.get('/home/achievement');
       setAchievements(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -266,7 +266,7 @@ const AdminHome = () => {
     }
 
     try {
-      const res = await axios.patch(`/api/home/achievement/${idx}`, data);
+      const res = await api.patch(`/home/achievement/${idx}`, data);
       setAchievements(res.data?.result)
     } catch (error) {
       console.log(error);
@@ -278,7 +278,7 @@ const AdminHome = () => {
 
   const handleDeleteAchievement = async (idx) => {
     try {
-      const res = await axios.delete(`/api/home/achievement/${idx}`);
+      const res = await api.delete(`/home/achievement/${idx}`);
       setAchievements(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -301,7 +301,7 @@ const AdminHome = () => {
     }
 
     try {
-      const res = await axios.post('/api/home/news', data);
+      const res = await api.post('/home/news', data);
       setNews(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -312,7 +312,7 @@ const AdminHome = () => {
 
   const handleGetNews = async () => {
     try {
-      const res = await axios.get('/api/home/news');
+      const res = await api.get('/home/news');
       setNews(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -336,7 +336,7 @@ const AdminHome = () => {
     }
 
     try {
-      const res = await axios.patch(`/api/home/news/${idx}`, data);
+      const res = await api.patch(`/home/news/${idx}`, data);
       setNews(res.data?.result)
     } catch (error) {
       console.log(error);
@@ -348,7 +348,7 @@ const AdminHome = () => {
 
   const handleDeleteNews = async (idx) => {
     try {
-      const res = await axios.delete(`/api/home/news/${idx}`);
+      const res = await api.delete(`/home/news/${idx}`);
       setNews(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -375,7 +375,7 @@ const AdminHome = () => {
     }
 
     try {
-      const res = await axios.post('/api/home/quote', data);
+      const res = await api.post('/home/quote', data);
       setQuotations(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -386,7 +386,7 @@ const AdminHome = () => {
 
   const handleGetQuotation = async () => {
     try {
-      const res = await axios.get('/api/home/quote');
+      const res = await api.get('/home/quote');
       setQuotations(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -395,7 +395,7 @@ const AdminHome = () => {
 
   const handleDeleteQuotation = async (idx) => {
     try {
-      const res = await axios.delete(`/api/home/quote/${idx}`);
+      const res = await api.delete(`/home/quote/${idx}`);
       setQuotations(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -419,7 +419,7 @@ const AdminHome = () => {
     }
 
     try {
-      const res = await axios.patch(`/api/home/quote/${idx}`, data);
+      const res = await api.patch(`/home/quote/${idx}`, data);
       setQuotations(res.data?.result)
     } catch (error) {
       console.log(error);
@@ -440,7 +440,7 @@ const AdminHome = () => {
     data.append("managementImage", newManagementImage);
 
     try {
-      const res = await axios.post('/api/home/management', data, {
+      const res = await api.post('/home/management', data, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -457,7 +457,7 @@ const AdminHome = () => {
 
   const handleGetAllManagement = async () => {
     try {
-      const res = await axios.get('/api/home/management');
+      const res = await api.get('/home/management');
       setManagement(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -470,7 +470,7 @@ const AdminHome = () => {
     setDeletingIndex(index);
 
     try {
-      const res = await axios.delete(`/api/home/management/${id}`);
+      const res = await api.delete(`/home/management/${id}`);
       setManagement(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -492,7 +492,7 @@ const AdminHome = () => {
     data.append("managementImage", newManagementImage);
 
     try {
-      const res = await axios.patch(`/api/home/management/${id}`, data, {
+      const res = await api.patch(`/home/management/${id}`, data, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
