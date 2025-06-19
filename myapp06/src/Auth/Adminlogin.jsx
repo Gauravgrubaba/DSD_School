@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const Adminlogin = () => {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setAdmin({ ...admin, [e.target.name]: e.target.value });
@@ -14,22 +15,9 @@ const Adminlogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const data = {
-      school_id: admin.username,
-      password: admin.password
-    }
-
     try {
-      const res = await axios.post('/api/user/login', data);
-      console.log(res);
-      if(res.data.response === "error") {
-        setError(res.data.message);
-        console.log(error);
-      }
-      if(res.data.response === "success") {
-        localStorage.setItem("user", JSON.stringify(res.data.data.id));
-        navigate('/dashboard');
-      }
+      await login(admin.username, admin.password);
+      navigate('/dashboard');
     } catch (err) {
       console.log(err)
     }

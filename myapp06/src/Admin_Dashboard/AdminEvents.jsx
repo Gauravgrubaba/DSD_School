@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios.jsx";
 
 const EventSection = () => {
   const [tagline, setTagline] = useState("");
@@ -27,7 +27,7 @@ const EventSection = () => {
     }
 
     try {
-      const res = await axios.post('/api/events/tagline', data);
+      const res = await api.post('/events/tagline', data);
       setTagline(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -39,7 +39,7 @@ const EventSection = () => {
 
   const handleGetTagline = async () => {
     try {
-      const res = await axios.get('/api/events/tagline');
+      const res = await api.get('/events/tagline');
       setTagline(res.data?.result);
     } catch (error) {
       console.log(error);
@@ -66,7 +66,7 @@ const EventSection = () => {
 
     try {
       setIsAdding(true);
-      const res = await axios.post("/api/events/event", data, {
+      const res = await api.post("/events/event", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -84,7 +84,7 @@ const EventSection = () => {
 
   const handleGetAllEvents = async () => {
     try {
-      const res = await axios.get("/api/events/event");
+      const res = await api.get("/events/event");
       setEvents(res.data?.result);
     } catch (error) {
       console.error(error);
@@ -94,7 +94,7 @@ const EventSection = () => {
   const handleDeleteEvent = async (idx) => {
     try {
       setDeletingIdx(idx);
-      const res = await axios.delete(`/api/events/event/${idx}`);
+      const res = await api.delete(`/events/event/${idx}`);
       setEvents(res.data?.result);
     } catch (error) {
       console.error(error);

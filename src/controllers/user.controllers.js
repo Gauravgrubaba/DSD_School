@@ -4,9 +4,17 @@ import TeachersSchema from "../models/teachers.models.js";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import { v2 as cloudinary } from "cloudinary";
 import MessageSchema from "../models/message.models.js";
+import jwt from "jsonwebtoken";
 
 const handleUserlogin = async (req, res) => {
     const { school_id, password } = req.body;
+
+    if(!school_id || !password) {
+        return res.status(404).json({
+            response: "error",
+            message: "Credentials are required to login"
+        })
+    }
 
     try {
         const userExist = await User.findOne({ school_id: school_id });
@@ -16,6 +24,7 @@ const handleUserlogin = async (req, res) => {
                 message: "User not found"
             })
         }
+        console.log(userExist);
 
         const isPasswordValid = userExist.password === password;
         if (!isPasswordValid) {
@@ -25,10 +34,33 @@ const handleUserlogin = async (req, res) => {
             })
         }
 
+        const accessToken = jwt.sign(
+            {"id": userExist._id},
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+        );
+
+        const refreshToken = jwt.sign(
+            {"id": userExist._id},
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+        );
+
+        userExist.refreshToken = refreshToken;
+        await userExist.save();
+
+        res.cookie('jwt', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+
         return res.status(200).json({
             response: "success",
             data: {
-                id: userExist.school_id
+                id: userExist.school_id,
+                accessToken: accessToken
             }
         })
     } catch (error) {
@@ -396,6 +428,79 @@ const handleDeleteMessage = async (req, res) => {
     }
 }
 
+const handleLogout = async (req, res) => {
+    const refreshToken = req.cookies.jwt;
+    if(!refreshToken) {
+        return res.status(204);
+    }
+
+    try {
+        await User.findOneAndUpdate({ refreshToken: refreshToken }, {
+            refreshToken: null
+        });
+    
+        res.clearCookie('jwt', {
+            httpOnly: true,
+            secure: true,
+            sameSite: "Strict"
+        })
+    
+        return res.status(200).json({
+            response: "success",
+            message: "Logout successful"
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            response: "error",
+            message: "Internal server error"
+        })
+    }
+}
+
+const handleRefreshToken = async (req, res) => {
+    const refreshToken = req.cookies.jwt;
+    if (!refreshToken) {
+        // No cookie, so the user is not logged in. This is not an error.
+        return res.status(401).json({ message: 'No token provided' });
+    }
+
+    try {
+        // 2. Find the user in the DB who owns this token
+        const user = await User.findOne({ refreshToken: refreshToken }).exec();
+        if (!user) {
+            // The token is not in our database (it's either stolen or old/logged out)
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+
+        // 3. Verify the token is not expired and is legitimate
+        jwt.verify(
+            refreshToken,
+            process.env.REFRESH_TOKEN_SECRET,
+            (err, decoded) => {
+                if (err || user._id.toString() !== decoded.id) {
+                    // The token is expired or doesn't belong to this user
+                    return res.status(403).json({ message: 'Forbidden' });
+                }
+
+                // 4. Token is valid, generate a NEW access token
+                const accessToken = jwt.sign(
+                    { "id": user._id },
+                    process.env.ACCESS_TOKEN_SECRET,
+                    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+                );
+
+                // 5. Send the new access token back to the client
+                res.status(200).json({ accessToken });
+            }
+        );
+
+    } catch (error) {
+        console.error("Refresh Token Controller Error:", error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
 export {
     handleUserlogin,
     handleAboutUsUpdate,
@@ -411,5 +516,7 @@ export {
     handleContactUsMessage,
     handleGetAllMessage,
     handleUpdateMessageStatus,
-    handleDeleteMessage
+    handleDeleteMessage,
+    handleLogout,
+    handleRefreshToken
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios.jsx"
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules"; // ✅ Correct Swiper Modules
 import "swiper/css";
@@ -11,7 +11,7 @@ const About = () => {
 
   const retrieveAboutUsData = async () => {
     try {
-      const response = await axios.get("/api/user/about");
+      const response = await api.get("/user/about");
       setAboutUs(response.data.aboutUs);
     } catch (error) {
       console.error("Error fetching about us data:", error);
@@ -20,7 +20,7 @@ const About = () => {
 
   const getAllTeachers = async () => {
     try {
-      const response = await axios.get("/api/user/teachers");
+      const response = await api.get("/user/teachers");
       setTeachers(response.data.allTeachers);
     } catch (error) {
       console.error("Error fetching teachers:", error);

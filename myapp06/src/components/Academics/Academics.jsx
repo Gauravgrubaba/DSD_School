@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import axios from "axios";
+import api from "../../api/axios.jsx";
 
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -18,7 +18,7 @@ const Academics = () => {
 
   const handleGetHeroSection = async () => {
     try {
-      const res = await axios.get('/api/academic/herosection');
+      const res = await api.get('/academic/herosection');
       setHeroSections(res?.data?.result);
     } catch (error) {
       console.log("Error getting hero section images", error);
@@ -27,7 +27,7 @@ const Academics = () => {
 
   const handleGetTimeTable = async () => {
     try {
-      const res = await axios.get('/api/academic/class');
+      const res = await api.get('/academic/class');
       setAllClassTimeTable(res?.data?.result || []);
     } catch (error) {
       console.log(error);
@@ -62,14 +62,14 @@ const Academics = () => {
             {heroSections.images.map((img, i) => (
               <SwiperSlide key={i}>
                 <div className="relative w-full h-full">
-                
-                 <div className="relative w-full h-[500px] overflow-hidden">
-  <img
-    src={img}
-    alt={`Slide ${i + 1}`}
-    className="absolute inset-0 w-full h-full object-cover object-center"
-  />
-</div>
+
+                  <div className="relative w-full h-[500px] overflow-hidden">
+                    <img
+                      src={img}
+                      alt={`Slide ${i + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover object-center"
+                    />
+                  </div>
 
                   <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-center px-4">
                     <h2 className="text-4xl sm:text-5xl font-bold text-white drop-shadow-lg">
@@ -100,11 +100,10 @@ const Academics = () => {
                     setSelectedClass(cls);
                     setSelectedDay(null);
                   }}
-                  className={`w-full py-2 px-4 rounded-lg font-medium transition duration-300 ${
-                    selectedClass === cls
+                  className={`w-full py-2 px-4 rounded-lg font-medium transition duration-300 ${selectedClass === cls
                       ? "bg-slate-800 text-white"
                       : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                  }`}
+                    }`}
                 >
                   {cls}
                 </button>
@@ -120,11 +119,10 @@ const Academics = () => {
                   <li key={day}>
                     <button
                       onClick={() => setSelectedDay(day)}
-                      className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition duration-300 ${
-                        selectedDay === day
+                      className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition duration-300 ${selectedDay === day
                           ? "bg-teal-600 text-white"
                           : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                      }`}
+                        }`}
                     >
                       {day}
                     </button>
