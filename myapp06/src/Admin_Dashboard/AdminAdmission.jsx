@@ -1,368 +1,291 @@
-import React, { useRef, useState } from "react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+import React, { useState } from 'react';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
-const formsPerPage = 1;
+const nationalities = ['Indian', 'Other'];
+const religions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Other'];
+const cities = ['Mumbai', 'Delhi', 'Bangalore'];
+const states = ['Maharashtra', 'Delhi', 'Karnataka'];
 
-const initialForms = [
-  {
-    id: 1,
-    fullName: "Ravi Sharma",
-    fatherName: "Suresh Sharma",
-    motherName: "Anita Sharma",
-    gender: "Male",
-    dob: "2010-05-15",
-    email: "ravi@example.com",
-    phone: "9876543210",
-    currentAddress: "123, Main Street, Gonda",
-    permanentAddress: "123, Main Street, Gonda",
-    city: "Gonda",
-    state: "Uttar Pradesh",
-    pincode: "271001",
-    classApplied: "6th",
-    status: "Old",
-  },
-  {
-    id: 2,
-    fullName: "Anjali Verma",
-    fatherName: "Rajeev Verma",
-    motherName: "Seema Verma",
-    gender: "Female",
-    dob: "2011-08-20",
-    email: "anjali@example.com",
-    phone: "8765432109",
-    currentAddress: "456, Green Colony, Lucknow",
-    permanentAddress: "456, Green Colony, Lucknow",
-    city: "Lucknow",
-    state: "Uttar Pradesh",
-    pincode: "226001",
-    classApplied: "7th",
-    status: "New",
-  },
-];
+const AdminAdmission = () => {
+  const [forms, setForms] = useState([
+    {
+      id: 1,
+      firstName: 'John',
+      middleName: 'A.',
+      lastName: 'Doe',
+      admissionClass: 'Nursery',
+      gender: 'Male',
+      dob: '2018-05-12',
+      email: 'john@example.com',
+      mobileNumber: '9876543210',
+      address: '123 Main St',
+      placeOfBirth: '',
+      nationality: '',
+      caste: '',
+      bloodGroup: '',
+      motherTongue: '',
+      religion: '',
+      aadharChild: '',
+      city: '',
+      state: '',
+      pinCode: '',
+      permanentAddress: '',
+      photos: {
+        father: '',
+        mother: '',
+        child: '',
+      },
+    },
+  ]);
 
-const initialBoxes = [
-  { id: 1, text: "Admission" },
-  { id: 2, text: "Opinion" },
-  { id: 3, text: "Notes" },
-];
-
-const AdminAdmissionDashboard = () => {
-  const [forms, setForms] = useState(initialForms);
   const [editingId, setEditingId] = useState(null);
-  const [editedForm, setEditedForm] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [boxes, setBoxes] = useState(initialBoxes);
-  const [editingBoxId, setEditingBoxId] = useState(null);
-  const [editingBoxText, setEditingBoxText] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("All");
 
-  const formRefs = useRef({});
+  const handleEdit = (id) => setEditingId(id);
+  const handleSave = () => setEditingId(null);
+  const handleDelete = (id) => setForms(forms.filter((form) => form.id !== id));
 
-  const totalPages = Math.ceil(forms.length / formsPerPage);
-  const startIndex = (currentPage - 1) * formsPerPage;
-
-  // Filter forms by search and status filter
-  const filteredForms = forms.filter((form) => {
-    const matchName = form.fullName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchFilter = filter === "All" || form.status === filter;
-    return matchName && matchFilter;
-  });
-
-  // Pagination of filtered forms
-  const paginatedForms = filteredForms.slice(startIndex, startIndex + formsPerPage);
-
-  // Edit form handlers
-  const handleEditClick = (form) => {
-    setEditingId(form.id);
-    setEditedForm(form);
-  };
-
-  const handleSaveClick = (id) => {
-    // Validate phone length
-    if (editedForm.phone && editedForm.phone.length !== 10) {
-      alert("Phone number must be exactly 10 digits");
-      return;
-    }
-    setForms((prev) => prev.map((f) => (f.id === id ? editedForm : f)));
-    setEditingId(null);
-  };
-
-  const handleInputChange = (e) => {
+  const handleChange = (e, id) => {
     const { name, value } = e.target;
-    setEditedForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Download PDF
-  const handleDownload = async (id) => {
-    const element = formRefs.current[id];
-    const buttons = element.querySelector(".no-print");
-    if (buttons) buttons.style.display = "none";
-
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-    const imgData = canvas.toDataURL("image/png");
-
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Admission_Form_${id}.pdf`);
-
-    if (buttons) buttons.style.display = "flex";
-  };
-
-  // Delete form
-  const handleDeleteForm = (id) => {
-    if (window.confirm("Are you sure you want to delete this form?")) {
-      setForms((prev) => prev.filter((f) => f.id !== id));
-      // Reset page if no forms on current page
-      if ((filteredForms.length - 1) % formsPerPage === 0 && currentPage > 1) {
-        setCurrentPage(currentPage - 1);
-      }
-    }
-  };
-
-  // Boxes edit handlers
-  const handleAddBox = () => {
-    const newId = boxes.length ? boxes[boxes.length - 1].id + 1 : 1;
-    setBoxes((prev) => [...prev, { id: newId, text: "New Box" }]);
-  };
-
-  const handleEditBox = (id, text) => {
-    setEditingBoxId(id);
-    setEditingBoxText(text);
-  };
-
-  const handleBoxTextChange = (e) => {
-    setEditingBoxText(e.target.value);
-  };
-
-  const handleSaveBox = (id) => {
-    setBoxes((prev) =>
-      prev.map((box) => (box.id === id ? { ...box, text: editingBoxText } : box))
+    setForms((prevForms) =>
+      prevForms.map((form) =>
+        form.id === id ? { ...form, [name]: value } : form
+      )
     );
-    setEditingBoxId(null);
   };
 
-  const handleDeleteBox = (id) => {
-    setBoxes((prev) => prev.filter((box) => box.id !== id));
-    if (editingBoxId === id) setEditingBoxId(null);
+  const handleImageChange = (e, id, role) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForms((prevForms) =>
+        prevForms.map((form) =>
+          form.id === id
+            ? { ...form, photos: { ...form.photos, [role]: reader.result } }
+            : form
+        )
+      );
+    };
+    if (file) reader.readAsDataURL(file);
   };
 
-  // Pagination controls (adjust currentPage if filter/search changes)
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filter, forms.length]);
+  const downloadPDF = async (id) => {
+    const element = document.getElementById(`form-${id}`);
+    const canvas = await html2canvas(element);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF();
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`form-${id}.pdf`);
+  };
 
   return (
-    <div className="pt-24 px-4 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold text-center mb-6">
-        Admin Admission Dashboard
-      </h1>
+    <div className="p-6 max-w-6xl mx-auto bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-center">Admin Panel - Admission Forms</h1>
 
-      {/* Boxes Section */}
-      <div className="max-w-4xl mx-auto mb-8 bg-white p-4 rounded shadow">
-        <h2 className="text-lg font-semibold mb-2">Manage Boxes (Admission, Opinion, etc.)</h2>
-        <div className="flex flex-wrap gap-3">
-          {boxes.map((box) => (
-            <div
-              key={box.id}
-              className="flex items-center border rounded px-3 py-1 bg-gray-50"
-            >
-              {editingBoxId === box.id ? (
-                <>
-                  <input
-                    type="text"
-                    value={editingBoxText}
-                    onChange={handleBoxTextChange}
-                    className="border rounded px-2 py-1"
-                  />
-                  <button
-                    onClick={() => handleSaveBox(box.id)}
-                    className="ml-2 bg-green-600 text-white px-2 rounded hover:bg-green-700"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingBoxId(null)}
-                    className="ml-1 px-2 text-gray-600 hover:text-gray-900"
-                    title="Cancel"
-                  >
-                    ✕
-                  </button>
-                </>
-              ) : (
-                <>
-                  <span>{box.text}</span>
-                  <button
-                    onClick={() => handleEditBox(box.id, box.text)}
-                    className="ml-2 px-2 text-blue-600 hover:text-blue-900"
-                    title="Edit"
-                  >
-                    ✎
-                  </button>
-                  <button
-                    onClick={() => handleDeleteBox(box.id)}
-                    className="ml-1 px-2 text-red-600 hover:text-red-900"
-                    title="Delete"
-                  >
-                    🗑
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
-
-          <button
-            onClick={handleAddBox}
-            className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            + Add Box
-          </button>
-        </div>
-      </div>
-
-      {/* Search and Filter */}
-      <div className="max-w-4xl mx-auto mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <input
-          type="text"
-          placeholder="Search by student name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full md:w-1/2 border rounded px-3 py-2"
-        />
-
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="border rounded px-3 py-2"
-        >
-          <option value="All">All Students</option>
-          <option value="Old">Old Students</option>
-          <option value="New">New Students</option>
-        </select>
-      </div>
-
-      {/* Admission Forms */}
-      {paginatedForms.length === 0 ? (
-        <p className="text-center text-gray-600">No admission forms found.</p>
-      ) : (
-        paginatedForms.map((form) => (
-          <div
-            key={form.id}
-            ref={(el) => (formRefs.current[form.id] = el)}
-            className="bg-white shadow-lg rounded-lg p-6 mb-8 max-w-4xl mx-auto"
-          >
-            <div className="bg-blue-900 text-white py-4 px-6 rounded-t-lg mb-6">
-              <h2 className="text-xl font-semibold">DSD SCHOOL</h2>
-              <p className="text-sm">Educational & Literary Academy</p>
-            </div>
-
-            <h3 className="text-lg font-bold mb-4 text-center">Admission Form</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              {Object.entries(form).map(([key, value]) => {
-                if (key === "id") return null;
-
-                const label = key
-                  .replace(/([A-Z])/g, " $1")
-                  .replace(/^./, (str) => str.toUpperCase());
-
-                return (
-                  <p
-                    key={key}
-                    className={
-                      key === "currentAddress" || key === "permanentAddress"
-                        ? "md:col-span-2"
-                        : ""
-                    }
-                  >
-                    <strong>{label}:</strong>{" "}
-                    {editingId === form.id ? (
-                      <input
-                        type="text"
-                        name={key}
-                        value={editedForm[key]}
-                        onChange={handleInputChange}
-                        className="border p-1 rounded w-full"
+      {forms.map((form) => (
+        <div key={form.id} id={`form-${form.id}`} className="bg-white p-6 rounded-xl shadow mb-10">
+          {/* Image Upload */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-center">
+            {['father', 'mother', 'child'].map((role) => (
+              <div key={role}>
+                <label className="block mb-2 font-medium">{role}'s Photo</label>
+                {editingId === form.id ? (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageChange(e, form.id, role)}
+                    />
+                    {form.photos[role] && (
+                      <img
+                        src={form.photos[role]}
+                        alt={`${role} preview`}
+                        className="mt-2 w-24 h-28 object-cover mx-auto border"
                       />
-                    ) : (
-                      value
                     )}
-                  </p>
-                );
-              })}
-            </div>
-
-            {/* Buttons */}
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center text-center no-print">
-  {editingId === form.id ? (
-    <>
-      <button
-        onClick={() => handleSaveClick(form.id)}
-        className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition"
-      >
-        Save
-      </button>
-      <button
-        onClick={() => setEditingId(null)}
-        className="w-full sm:w-auto bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700 transition"
-      >
-        Cancel
-      </button>
-    </>
-  ) : (
-    <>
-      <button
-        onClick={() => handleEditClick(form)}
-        className="w-full sm:w-auto bg-yellow-600 text-white px-4 py-2 rounded shadow hover:bg-yellow-700 transition"
-      >
-        Edit
-      </button>
-      <button
-        onClick={() => handleDownload(form.id)}
-        className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"
-      >
-        Download PDF
-      </button>
-      <button
-        onClick={() => handleDeleteForm(form.id)}
-        className="w-full sm:w-auto bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700 transition"
-      >
-        Delete
-      </button>
-    </>
-  )}
-</div>
-
+                  </>
+                ) : (
+                  form.photos[role] && (
+                    <img
+                      src={form.photos[role]}
+                      alt={`${role} preview`}
+                      className="mt-2 w-24 h-28 object-cover mx-auto border"
+                    />
+                  )
+                )}
+              </div>
+            ))}
           </div>
-        ))
-      )}
 
-      {/* Pagination */}
-      {filteredForms.length > formsPerPage && (
-        <div className="flex justify-center mt-6">
-          <label className="mr-2 font-medium">Select Page:</label>
-          <select
-            value={currentPage}
-            onChange={(e) => setCurrentPage(Number(e.target.value))}
-            className="border rounded px-3 py-1"
-          >
-            {Array.from(
-              { length: Math.ceil(filteredForms.length / formsPerPage) },
-              (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  Page {i + 1}
-                </option>
-              )
+          {/* Admission Class */}
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Admission Class</label>
+            {['Nursery', 'LKG', 'UKG', 'Grade I-VI'].map((cls) => (
+              <label key={cls} className="mr-4">
+                <input
+                  type="radio"
+                  name="admissionClass"
+                  value={cls}
+                  checked={form.admissionClass === cls}
+                  onChange={(e) => handleChange(e, form.id)}
+                  disabled={editingId !== form.id}
+                  className="mr-1"
+                />
+                {cls}
+              </label>
+            ))}
+          </div>
+
+          {/* Student Details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            {['firstName', 'middleName', 'lastName', 'placeOfBirth', 'bloodGroup', 'motherTongue', 'aadharChild', 'pinCode', 'permanentAddress'].map((field) => (
+              <input
+                key={field}
+                type="text"
+                name={field}
+                placeholder={field.replace(/([A-Z])/g, ' $1')}
+                value={form[field]}
+                onChange={(e) => handleChange(e, form.id)}
+                disabled={editingId !== form.id}
+                className="border p-2 rounded-md"
+              />
+            ))}
+            <input
+              type="date"
+              name="dob"
+              value={form.dob}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            />
+            <input
+              type="text"
+              name="mobileNumber"
+              placeholder="Mobile Number"
+              value={form.mobileNumber}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <select
+              name="gender"
+              value={form.gender}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            >
+              <option value="">Gender</option>
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+            <select
+              name="nationality"
+              value={form.nationality}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            >
+              <option value="">Nationality</option>
+              {nationalities.map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+            <select
+              name="religion"
+              value={form.religion}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            >
+              <option value="">Religion</option>
+              {religions.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block font-medium mb-2">Caste (with certificate):</label>
+            {['SC', 'ST', 'OBC', 'GENERAL'].map((cat) => (
+              <label key={cat} className="mr-4">
+                <input
+                  type="radio"
+                  name="caste"
+                  value={cat}
+                  checked={form.caste === cat}
+                  onChange={(e) => handleChange(e, form.id)}
+                  disabled={editingId !== form.id}
+                  className="mr-1"
+                />
+                {cat}
+              </label>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <select
+              name="city"
+              value={form.city}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            >
+              <option value="">City</option>
+              {cities.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <select
+              name="state"
+              value={form.state}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            >
+              <option value="">State</option>
+              {states.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={form.address}
+              onChange={(e) => handleChange(e, form.id)}
+              disabled={editingId !== form.id}
+              className="border p-2 rounded-md"
+            />
+          </div>
+
+          <div className="flex justify-end gap-4 mt-4">
+            {editingId === form.id ? (
+              <button onClick={handleSave} className="bg-green-600 text-white px-4 py-2 rounded">Save</button>
+            ) : (
+              <button onClick={() => handleEdit(form.id)} className="bg-blue-600 text-white px-4 py-2 rounded">Edit</button>
             )}
-          </select>
+            <button onClick={() => handleDelete(form.id)} className="bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+            <button onClick={() => downloadPDF(form.id)} className="bg-gray-700 text-white px-4 py-2 rounded">Download PDF</button>
+          </div>
         </div>
-      )}
+      ))}
     </div>
   );
 };
 
-export default AdminAdmissionDashboard;
+export default AdminAdmission;
