@@ -120,103 +120,132 @@ const formatDate = (date) => {
 
 
   {step === 1 && (
-    <>
-      <h2 className="text-xl sm:text-3xl font-semibold text-center underline decoration-black underline-offset-4 mb-8 text-gray-900">REGISTRATION FORM</h2>
+  <>
+    <h2 className="text-xl sm:text-3xl font-semibold text-center underline decoration-black underline-offset-4 mb-8 text-gray-900">REGISTRATION FORM</h2>
 
-      {/* Image Upload Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10 text-center">
-        {['father', 'mother', 'child'].map((role) => (
-          <div key={role} className="bg-gray-100 p-4 rounded-xl shadow-inner">
-            <label className="block font-medium mb-2 capitalize">{role}'s Passport Size Photo</label>
-            <input type="file" name={role} accept="image/*" onChange={handleImageChange} className="mx-auto" />
-            {photos[role] && (
-              <img src={photos[role]} alt={`${role} preview`} className="w-24 h-28 object-cover mt-2 mx-auto border border-gray-300" />
-            )}
-          </div>
-        ))}
-      </div>
+    {/* Image Upload Section */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10 text-center">
+      {['father', 'mother', 'child'].map((role) => (
+        <div key={role} className="bg-gray-100 p-4 rounded-xl shadow-inner">
+          <label className="block font-medium mb-2 capitalize">
+            {role}'s Passport Size Photo <span className="text-red-600">*</span>
+          </label>
+          <input type="file" name={role} accept="image/*" required onChange={handleImageChange} className="mx-auto" />
+          {photos[role] && (
+            <img src={photos[role]} alt={`${role} preview`} className="w-24 h-28 object-cover mt-2 mx-auto border border-gray-300" />
+          )}
+        </div>
+      ))}
+    </div>
 
-      {/* Class Selection */}
-      <h3 className="text-lg sm:text-xl font-bold mb-4 text-black">Seeking Admission To</h3>
-      <div className="flex flex-wrap gap-4 sm:gap-6 mb-10">
-        {['Nursery', 'LKG', 'UKG', 'Grade I-VI'].map((cls) => (
-          <label key={cls} className="flex items-center gap-2 font-medium">
-            <input type="radio" name="admissionClass" value={cls} onChange={handleChange} /> {cls}
+    {/* Class Selection */}
+    <h3 className="text-lg sm:text-xl font-bold mb-4 text-black">Seeking Admission To <span className="text-red-600">*</span></h3>
+    <div className="mb-6">
+  <label className="block text-sm font-semibold text-gray-700 mb-1">
+    Admission Class
+  </label>
+  <select
+    name="admissionClass"
+    required
+    onChange={handleChange}
+    className="w-48 px-3 py-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+  >
+    <option value="">-- Select Class --</option>
+    {[
+      'Nursery',
+      'LKG',
+      'UKG',
+      'Class I',
+      'Class II',
+      'Class III',
+      'Class IV',
+      'Class V',
+      'Class VI',
+      'Class VII',
+      'Class VIII',
+      'Class IX',
+      'Class X',
+    ].map((cls) => (
+      <option key={cls} value={cls}>
+        {cls}
+      </option>
+    ))}
+  </select>
+</div>
+
+
+    {/* Student Details */}
+    <h3 className="text-lg sm:text-xl font-bold mb-4 text-black">Student Details</h3>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+      <input type="text" name="firstName" placeholder="First Name *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
+      <input type="text" name="middleName" placeholder="Middle Name *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
+      <input type="text" name="lastName" placeholder="Last Name *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+      <input type="date" name="dob" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
+      <input type="text" name="placeOfBirth" placeholder="Place of Birth *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
+      <select name="gender" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm">
+        <option value="">Gender *</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
+
+    <select name="nationality" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4">
+      <option value="">Select Nationality *</option>
+      {nationalities.map((n) => <option key={n} value={n}>{n}</option>)}
+    </select>
+
+    {/* Caste Section */}
+    <div className="mb-6">
+      <label className="block font-medium text-black mb-2">Caste (with certificate) <span className="text-red-600">*</span></label>
+      <div className="flex flex-wrap gap-4 sm:gap-6">
+        {['SC', 'ST', 'OBC', 'GENERAL'].map((cat) => (
+          <label key={cat} className="flex items-center gap-2 font-medium">
+            <input type="radio" name="caste" value={cat} required onChange={handleChange} /> {cat}
           </label>
         ))}
       </div>
+    </div>
 
-      {/* Student Details */}
-      <h3 className="text-lg sm:text-xl font-bold mb-4 text-black">Student Details</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <input type="text" name="firstName" placeholder="First Name" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
-        <input type="text" name="middleName" placeholder="Middle Name" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
-        <input type="text" name="lastName" placeholder="Last Name" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <input type="text" name="bloodGroup" placeholder="Blood Group *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
+      <input type="text" name="motherTongue" placeholder="Mother Tongue *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
+    </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <input type="date" name="dob" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
-        <input type="text" name="placeOfBirth" placeholder="Place of Birth" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
-        <select name="gender" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm">
-          <option value="">Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-      </div>
+    <select name="religion" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4">
+      <option value="">Select Religion *</option>
+      {religions.map((r) => <option key={r} value={r}>{r}</option>)}
+    </select>
 
-      <select name="nationality" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4">
-        <option value="">Select Nationality</option>
-        {nationalities.map((n) => <option key={n} value={n}>{n}</option>)}
+    <input type="number" name="aadharChild" placeholder="Aadhar ID of the Child (12 digits) *" required maxLength="12" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4" />
+    <input type="text" name="address" placeholder="Address for Communication *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4" />
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+      <select name="city" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm">
+        <option value="">Select City *</option>
+        {cities.map((c) => <option key={c} value={c}>{c}</option>)}
       </select>
-
-      {/* Caste Section */}
-      <div className="mb-6">
-        <label className="block font-medium text-black mb-2">Caste (with certificate):</label>
-        <div className="flex flex-wrap gap-4 sm:gap-6">
-          {['SC', 'ST', 'OBC', 'GENERAL'].map((cat) => (
-            <label key={cat} className="flex items-center gap-2 font-medium">
-              <input type="radio" name="caste" value={cat} onChange={handleChange} /> {cat}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <input type="text" name="bloodGroup" placeholder="Blood Group" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
-        <input type="text" name="motherTongue" placeholder="Mother Tongue" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
-      </div>
-
-      <select name="religion" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4">
-        <option value="">Select Religion</option>
-        {religions.map((r) => <option key={r} value={r}>{r}</option>)}
+      <select name="state" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm">
+        <option value="">Select State *</option>
+        {states.map((s) => <option key={s} value={s}>{s}</option>)}
       </select>
+      <input type="text" name="pinCode" placeholder="Pin Code *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
+    </div>
 
-      <input type="number" name="aadharChild" placeholder="Aadhar ID of the Child (12 digits)" onChange={handleChange} maxLength="12" className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4" />
-      <input type="text" name="address" placeholder="Address for Communication" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4" />
+    <input type="text" name="permanentAddress" placeholder="Permanent Address (if different) *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4" />
+    <input type="tel" name="mobileNumber" placeholder="Mobile Number (10 digits) *" required pattern="\d{10}" maxLength="10" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4" />
+    <input type="email" name="email" placeholder="Email ID *" required onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-8" />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <select name="city" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm">
-          <option value="">Select City</option>
-          {cities.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
-        <select name="state" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm">
-          <option value="">Select State</option>
-          {states.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <input type="text" name="pinCode" placeholder="Pin Code" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm" />
-      </div>
+    <div className="flex justify-end">
+      <button type="submit" className="bg-gradient-to-r from-black to-gray-700 hover:from-gray-800 hover:to-black text-white font-semibold py-3 px-10 rounded-xl shadow-lg">
+        Next
+      </button>
+    </div>
+  </>
+)}
 
-      <input type="text" name="permanentAddress" placeholder="Permanent Address (if different)" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4" />
-      <input type="tel" name="mobileNumber" placeholder="Mobile Number (10 digits)" pattern="\d{10}" maxLength="10" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-4" />
-      <input type="email" name="email" placeholder="Email ID" onChange={handleChange} className="w-full border border-gray-400 p-3 rounded-xl shadow-sm mb-8" />
-
-      <div className="flex justify-end">
-        <button type="submit" className="bg-gradient-to-r from-black to-gray-700 hover:from-gray-800 hover:to-black text-white font-semibold py-3 px-10 rounded-xl shadow-lg">
-          Next
-        </button>
-      </div>
-    </>
-  )}
         {step === 2 && (
   <div className="space-y-6">
 

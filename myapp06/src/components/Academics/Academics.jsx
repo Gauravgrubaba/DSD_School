@@ -48,7 +48,7 @@ const Academics = () => {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
       {/* Hero Section */}
-      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[450px] rounded-xl overflow-hidden shadow-md mb-10">
+      <div className="relative w-full h-full sm:h-[500px] md:h-[450px] rounded-xl overflow-hidden shadow-md mb-10">
         {heroSections.images.length > 0 ? (
           <Swiper
             modules={[Autoplay, Pagination]}
@@ -63,10 +63,12 @@ const Academics = () => {
               <SwiperSlide key={i}>
                 <div className="relative w-full h-full">
 
-                  <div className="relative w-full h-[500px] overflow-hidden">
+                  <div className="relative w-full h-full overflow-hidden">
                     <img
                       src={img}
                       alt={`Slide ${i + 1}`}
+                       
+                      
                       className="absolute inset-0 w-full h-full object-cover object-center"
                     />
                   </div>
