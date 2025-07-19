@@ -47,11 +47,12 @@ export const AuthProvider = ({ children }) => {
                 school_id,
                 password
             });
-            console.log(response);
 
             const newAccessToken = response?.data?.data?.accessToken;
-            setAccessToken(newAccessToken);
-            setIsAuthenticated(true);
+            if(response?.data?.response === 'success') {
+                setAccessToken(newAccessToken);
+                setIsAuthenticated(true);
+            }
             
             return response; // Return the full response so the component can use it
 

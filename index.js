@@ -9,6 +9,7 @@ import eventsRouter from "./src/routes/events.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
+import admissionRouter from "./src/routes/admission.routes.js";
 
 dotenv.config({
   path: "./.env"
@@ -32,6 +33,7 @@ app.use('/api/user', userRouter);
 app.use('/api/academic', academicRoute);
 app.use('/api/home', homeRouter);
 app.use('/api/events', eventsRouter);
+app.use('/api/admission', admissionRouter);
 
 // --- Static Frontend Serving ---
 const __filename = fileURLToPath(import.meta.url);

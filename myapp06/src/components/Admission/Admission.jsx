@@ -3,6 +3,7 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { useRef } from "react";
 import FinalFormPreview from './FinalFormPreview';
+import api from '../../api/axios';
 
 const Admission = () => {
   const [formData, setFormData] = useState({});
@@ -47,9 +48,14 @@ const Admission = () => {
     if (files[0]) reader.readAsDataURL(files[0]);
   };
 
-  const handleNext = (e) => {
+  const handleNext = async (e) => {
     e.preventDefault();
     setStep(step + 1);
+    const data = {
+      name: "Rajnish"
+    }
+
+    const res = await api.post('/admission/abc', data);
   };
 
   const handleBack = () => {
