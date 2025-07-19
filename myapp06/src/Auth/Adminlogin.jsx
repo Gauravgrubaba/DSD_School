@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -6,7 +6,7 @@ const Adminlogin = () => {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
 
   const handleChange = (e) => {
     setAdmin({ ...admin, [e.target.name]: e.target.value });
@@ -14,14 +14,19 @@ const Adminlogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
     try {
       await login(admin.username, admin.password);
-      navigate('/dashboard');
+      if(isAuthenticated) {
+        navigate('/dashboard');
+      } else {
+        throw new Error('Login Failed');
+      }
     } catch (err) {
-      console.log(err)
+      console.log(err);
+      setError('Invalid credentials. Please try again.');
     }
-    
   };
 
   return (
@@ -59,8 +64,9 @@ const Adminlogin = () => {
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md"
+            disabled={isLoading}
           >
-            Login
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>

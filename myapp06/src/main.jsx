@@ -38,7 +38,7 @@ import AdminContact from './Admin_Dashboard/AdminContact.jsx';
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if(isLoading) {
+  if (isLoading) {
     return <div>Loading...</div>
   }
 
@@ -47,9 +47,9 @@ function ProtectedRoute({ children }) {
 
 // ✅ Optional: Redirect /login if already logged in
 function PublicRoute({ children }) {
-  const {isAuthenticated, isLoading} = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  if(isLoading) {
+  if (isLoading) {
     return <div>Loading...</div>
   }
 
@@ -82,13 +82,13 @@ const router = createBrowserRouter(
         </ProtectedRoute>
 
       } >
-      <Route path="AdminHome" element={<AdminHome />} />
+        <Route path="AdminHome" element={<AdminHome />} />
         <Route path="AdminAbout" element={<AdminAbout />} />
         <Route path="AdminAcademics" element={<AdminAcademics />} />
         <Route path="AdminEvents" element={<AdminEvents />} />
         <Route path="AdminAdmission" element={<AdminAdmission />} />
         <Route path="AdminContacts" element={<AdminContact />} />
-</Route>
+      </Route>
       <Route path="/admin" element={
         <ProtectedRoute>
           <Admin />
