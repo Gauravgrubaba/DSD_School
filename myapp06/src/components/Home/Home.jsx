@@ -272,8 +272,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* 🔹 Events Carousel */}
-      <section className="bg-gray-100 py-10">
+       <section className="bg-gray-100 py-10">
         <div className="max-w-7xl mx-auto px-4 md:px-10">
           {/* Heading */}
           <h2 className="text-3xl sm:text-4xl font-extrabold text-blue-700 text-center uppercase tracking-wide mb-10">
@@ -301,10 +300,14 @@ const Home = () => {
 
                   {/* Image */}
                   <img
-                    src={manage.profileImage}
-                    alt={manage.name}
-                    className="w-full h-72 object-cover"
-                  />
+                src={manage.profileImage}
+                alt={manage.name}
+                width={289}
+                height={361}
+                className="w-[289px] h-[361px] object-cover object-center rounded-t-xl"
+              />
+
+
 
                   {/* Text */}
                   <div className="py-4 px-4 text-center">
@@ -321,6 +324,7 @@ const Home = () => {
           </Swiper>
         </div>
       </section>
+
 
 
 

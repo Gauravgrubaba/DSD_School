@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import api from "../../api/axios.jsx"
+import api from "../../api/axios.jsx";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules"; // ✅ Correct Swiper Modules
+import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -33,27 +33,24 @@ const About = () => {
   }, []);
 
   return (
-    <section className="bg-gray-100 py-20 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* About Us Heading */}
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-700 text-center uppercase tracking-wide pt-16 sm:pt-24 pb-16">
-          About Us
-        </h2>
+    <section className="bg-gradient-to-b from-blue-50 to-gray-100 pt-36 pb-20 px-4 sm:px-6 lg:px-10">
+      <div className="max-w-7xl mx-auto space-y-24">
 
-        {/* School Info Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mb-20">
-          {/* School Image */}
-          <div className="sm:w-1/3 flex justify-center sm:justify-start mb-10 sm:mb-0">
+        {/* About Us Section */}
+        <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-12 flex flex-col lg:flex-row gap-10 items-center">
+          
+          {/* Image */}
+          <div className="w-full lg:w-1/2 flex justify-center">
             <img
               src={aboutUs?.image}
               alt="School"
-              className="rounded-lg shadow-2xl w-full sm:w-[450px] sm:h-[400px] object-cover border-4 border-blue-500"
+              className="rounded-xl w-full max-w-md sm:max-w-full h-auto object-cover border-4 border-blue-500 shadow-md"
             />
           </div>
 
-          {/* School Description */}
-          <div className="sm:w-2/3 sm:pl-16 text-center sm:text-left">
-            <h2 className="text-2xl sm:text-4xl font-bold text-blue-900 mb-6 sm:mb-8">
+          {/* Text */}
+          <div className="w-full lg:w-1/2 text-center lg:text-left">
+            <h2 className="text-3xl sm:text-4xl font-bold text-blue-800 mb-4">
               {aboutUs?.title || "Loading..."}
             </h2>
             <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
@@ -62,45 +59,51 @@ const About = () => {
           </div>
         </div>
 
-        {/* Faculty Section */}
-<section className="text-center py-10 bg-gray-100">
+        {/* Meet Our Faculty Section */}
+        <div className="bg-white rounded-3xl shadow-2xl px-6 py-14 sm:px-12">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-blue-700 text-center uppercase tracking-wide mb-12">
+            Meet Our Faculty
+          </h2>
 
-  <h3 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-blue-800 text-center mb-8 sm:mb-12">
-    Meet Our Faculty
-  </h3>
-
-  <Swiper
-    modules={[Pagination, Autoplay]}
-    slidesPerView={1}
-    spaceBetween={16}
-    loop={true}
-    autoplay={{ delay: 2500, disableOnInteraction: false }}
-    pagination={{ clickable: true }}
-    breakpoints={{
-      640: { slidesPerView: 1 },
-      768: { slidesPerView: 2 },
-      1024: { slidesPerView: 3 },
-    }}
-    className="mt-4 sm:mt-10"
-  >
-    {teachers.map((teacher, index) => (
-      <SwiperSlide key={index}>
-        <div className="mb-12 bg-white shadow-lg rounded-lg p-4 sm:p-6 text-center transform transition-transform hover:scale-[1.03]">
-          <img
-            src={teacher.profileImage}
-            alt={teacher.name}
-            className="mx-auto w-full h-48 sm:h-64 object-cover rounded-md shadow-md"
-          />
-          <h4 className="text-lg sm:text-xl font-semibold mt-4 text-gray-900">
-            {teacher.name}
-          </h4>
-          <p className="text-sm sm:text-base text-gray-600">{teacher.designation}</p>
+          <Swiper
+            modules={[Pagination, Autoplay]}
+            slidesPerView={1}
+            spaceBetween={24}
+            loop={true}
+            autoplay={{ delay: 2500, disableOnInteraction: false }}
+            pagination={{ clickable: true }}
+            breakpoints={{
+              640: { slidesPerView: 1 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+            className="pb-4"
+          >
+            {teachers.map((teacher, index) => (
+              <SwiperSlide key={index} className="!flex justify-center">
+                <div className="bg-white rounded-2xl shadow-md overflow-hidden w-full max-w-[260px] transition-transform transform hover:scale-105">
+                  <div className="w-full h-[260px] overflow-hidden">
+                    <img
+                      src={teacher.profileImage}
+                      alt={teacher.name}
+                      width={289}
+  height={361}
+  className="w-[289px] h-[361px] object-cover object-center rounded-t-xl"
+                    />
+                  </div>
+                  <div className="py-4 px-4 text-center">
+                    <h3 className="text-lg sm:text-xl font-semibold text-blue-900 capitalize">
+                      {teacher.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm sm:text-base mt-1">
+                      {teacher.designation}
+                    </p>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
-      </SwiperSlide>
-    ))}
-  </Swiper>
-</section>
-
       </div>
     </section>
   );
