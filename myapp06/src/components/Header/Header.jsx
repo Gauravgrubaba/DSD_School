@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Phone, Mail, Youtube, Facebook, Linkedin } from "lucide-react";// 👈 Add to your imports
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,31 +22,31 @@ const Header = () => {
       <div className="bg-indigo-700 text-gray-200 py-2 px-5 justify-between items-center fixed top-0 left-0 right-0 w-full z-50 md:flex hidden transition-all duration-300">
         <div className="flex gap-4">
           <small className="flex items-center gap-2 text-sm">
-            +91 12345 67890
+            <Phone size={16} className="text-yellow-400" /> +91 9136753346
           </small>
           <small className="flex items-center gap-2 text-sm">
-            info@example.com
+            <Mail size={16} className="text-yellow-400" /> dsdschool@sspmmumbai.in
           </small>
         </div>
         <div className="flex ">
-          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition "></a>
-          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition "></a>
-          <a href="#" className="w-10 h-10 flex items-center justify-center  text-blue-700 rounded-full transition "></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center text-blue-700 rounded-full transition"></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center text-blue-700 rounded-full transition"></a>
+          <a href="#" className="w-10 h-10 flex items-center justify-center text-blue-700 rounded-full transition"></a>
         </div>
       </div>
 
       {/* 🔹 Topbar for Mobile View (Visible & Fixed) */}
       <div className="md:hidden bg-indigo-700 text-gray-200 py-2 px-5 fixed top-0 left-0 right-0 w-full z-50 flex justify-between items-center">
         <small className="flex items-center gap-2 text-xs">
-          +91 12345 67890
+          <Phone size={14} className="text-yellow-400" /> +91 9136753346
         </small>
         <div className="flex gap-2">
-          <a href="#" className="w-7 h-7 flex items-center justify-center  text-blue-700  transition  "></a>
-          <a href="#" className="w-7 h-7 flex items-center justify-center  text-blue-700  transition "></a>
-          <a href="#" className="w-7 h-7 flex items-center justify-center text-blue-700  transition "></a>
-        </div>
-      </div>
+  <a href="#" className="w-7 h-7 flex items-center justify-center text-blue-700 transition"></a>
+  <a href="#" className="w-7 h-7 flex items-center justify-center text-blue-700 transition"></a>
+  <a href="#" className="w-7 h-7 flex items-center justify-center text-blue-700 transition"></a>
+</div>
 
+      </div>
       {/* 🔹 Navbar (No Gap Between Topbar & Navbar) */}
       <nav className="bg-gray-100 shadow-md py-2 fixed left-0 right-0 w-full z-50 transition-all duration-300 top-[40px] md:top-[50px]">
         <div className="flex justify-between items-center px-4 md:px-8 w-full flex-wrap">
