@@ -4,7 +4,6 @@ import {
   Phone,
   MapPin,
   Facebook,
-  Twitter,
   Instagram,
   Linkedin,
 } from "lucide-react";
@@ -51,10 +50,7 @@ const Footer = () => {
             <h3 className="text-2xl font-semibold mb-3">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a
-                  href="#about"
-                  className="text-gray-300 hover:text-blue-400"
-                >
+                <a href="#about" className="text-gray-300 hover:text-blue-400">
                   About
                 </a>
               </li>
@@ -67,10 +63,7 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a
-                  href="#events"
-                  className="text-gray-300 hover:text-blue-400"
-                >
+                <a href="#events" className="text-gray-300 hover:text-blue-400">
                   Events
                 </a>
               </li>
@@ -98,18 +91,31 @@ const Footer = () => {
             <h3 className="text-2xl font-semibold mb-3">Follow Us</h3>
             <div className="flex justify-center md:justify-start gap-4 mt-2">
               <a
-                href="#"
+                href="https://www.facebook.com/people/DSD-School/100057499567428/"
                 aria-label="Facebook"
                 className="text-gray-300 hover:text-blue-500 transition"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Facebook size={24} />
               </a>
               <a
-                href="#"
-                aria-label="Twitter"
-                className="text-gray-300 hover:text-sky-400 transition"
+                href="https://www.youtube.com/@dsdschool2019" // replace with actual channel link
+                aria-label="YouTube"
+                className="text-gray-300 hover:text-red-600 transition"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Twitter size={24} />
+                {/* Inline YouTube SVG icon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                >
+                  <path d="M23.498 6.186a2.994 2.994 0 0 0-2.108-2.114C19.444 3.5 12 3.5 12 3.5s-7.444 0-9.39.572A2.994 2.994 0 0 0 .502 6.186C0 8.147 0 12 0 12s0 3.853.502 5.814a2.994 2.994 0 0 0 2.108 2.114C4.556 20.5 12 20.5 12 20.5s7.444 0 9.39-.572a2.994 2.994 0 0 0 2.108-2.114C24 15.853 24 12 24 12s0-3.853-.502-5.814zM9.75 15.568V8.432L15.818 12 9.75 15.568z" />
+                </svg>
               </a>
               <a
                 href="#"
@@ -130,9 +136,18 @@ const Footer = () => {
         </div>
 
         {/* 🔹 Copyright */}
-        <p className="text-gray-500 text-sm text-center mt-8">
-          © {new Date().getFullYear()} DSD School. All rights reserved.
-        </p>
+     <p className="text-gray-500 text-sm text-center mt-8">
+  © {new Date().toLocaleString('en-IN', {
+    weekday: 'long',     // e.g., Saturday
+    day: '2-digit',      // e.g., 19
+    month: 'long',       // e.g., July
+    year: 'numeric',     // e.g., 2025
+    hour: '2-digit',     // e.g., 02
+    minute: '2-digit',   // e.g., 40
+    hour12: true         // AM/PM format
+  })} DSD School. All rights reserved.
+</p>
+
       </div>
     </footer>
   );
