@@ -139,7 +139,7 @@ const Admission = () => {
                     <img src={photos[role]} alt={`${role} preview`} className="w-24 h-28 object-cover mt-2 mx-auto border border-gray-300" />
                   )}
                 </div>
-=======
+
   <div className="text-center mb-10 bg-black text-white py-5 px-4 sm:px-6 rounded-t-3xl">
   <h2 className="text-lg sm:text-2xl font-bold uppercase">S.S.P.M. Mumbai's</h2>
   <h1 className="text-xl sm:text-4xl font-extrabold tracking-wide leading-tight">D.S.D. School, Kalyan (W)</h1>
